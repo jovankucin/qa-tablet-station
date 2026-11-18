@@ -1,0 +1,103 @@
+{
+  "area": "HARNESS",
+  "author": "claude",
+  "covered_paths": [
+    "apps/src/components/application/AppNavbar/**"
+  ],
+  "created": "2026-10-26T13:14:45.610Z",
+  "differential": {
+    "values": [
+      "path_after_flights"
+    ]
+  },
+  "expected_differences": [],
+  "fixtures": [
+    {
+      "delivery": "engine: act.py deliver copies it to /sdcard/Download/WingtraQA/ on the tablets and ~/qa-fixtures/ on webpc044 when it is missing, and checks its sha256 there",
+      "name": "qa-deliver-selftest.txt",
+      "path": "qa/cases/fixtures/SELFTEST-001/qa-deliver-selftest.txt",
+      "sha256": "99212212e9008ae8337602bd1caba4a41370a7cbfd7c85bf4cab0f17b7a1d5c6"
+    }
+  ],
+  "harness": true,
+  "id": "SELFTEST-001",
+  "kind": "case",
+  "needs": {
+    "account_lock": false,
+    "drone_hw": null,
+    "flags": [],
+    "link": "none",
+    "usb_port": false
+  },
+  "preconditions": [
+    {
+      "applies_to": "both",
+      "check": "act.py {target} probe",
+      "id": "P1",
+      "text": "app (tablet) or QA Chrome tab (web) logged in on the engine environment"
+    }
+  ],
+  "requirement": {
+    "sha256": "b91064ef648076a34fc2aa3a8b1703cdef65d8075043b11569530fa48b3ce098",
+    "source": {
+      "fetched": "2026-10-21T10:28:07.899Z",
+      "locator": "line 47 (done-check 4)",
+      "ref": "qa-engine-prompt.md",
+      "requester": "user",
+      "type": "spec_doc"
+    },
+    "text": "4. One \"both\" case runs in parallel on two tablets and webpc044: every action passed its identity check, each target has its own clock offset and evidence folder, the prediction hash precedes the first action, evidence hashes verify."
+  },
+  "routing": [
+    {
+      "line": 43,
+      "path": "apps/src/components/application/AppNavbar/AppNavbar.tsx",
+      "ref": "84d3721b33ee195738a2a002313c55becb2643bc",
+      "repo": "WingtraCloud",
+      "symbol": "NavbarLink Flights (no platform gate)",
+      "t": "git"
+    }
+  ],
+  "schema": 1,
+  "status": "active",
+  "steps": [
+    {
+      "gates": [],
+      "helper": "act.py {target} tap testid:btn-flights --expect path:/flights",
+      "n": 1,
+      "text": "Open Flights from the top bar"
+    },
+    {
+      "assert": {
+        "expr": "v['path_after_flights'] == '/flights'",
+        "kind": "scripted"
+      },
+      "gates": [],
+      "helper": "act.py {target} read location.pathname",
+      "n": 2,
+      "save_as": "path_after_flights",
+      "text": "Read the page path"
+    },
+    {
+      "gates": [],
+      "helper": "act.py {target} shot {shots}/{run}_flights.png",
+      "n": 3,
+      "text": "Screenshot of Flights"
+    },
+    {
+      "gates": [],
+      "helper": "act.py {target} tap testid:btn-sites --expect path:/sites",
+      "n": 4,
+      "text": "Back to Sites"
+    }
+  ],
+  "steps_note": "Harness case: proves the runner, not the app. Not counted as a product verdict. c1 (2026-10-26): the run first delivers a small text file (engine piece 2); the steps are unchanged.",
+  "supersedes": {
+    "file": "qa/runner/tests/cases/SELFTEST-001.json",
+    "file_sha256": "7a21ca4acfa429facea4f03988a9ad806bc7a0bc44e0f65fa8f002288bf9b636",
+    "id": "SELFTEST-001",
+    "why": "engine piece 2: the runner self-test also proves that act.py deliver copies a test file to every target"
+  },
+  "targets": "both",
+  "title": "Runner self-test: navigate Flights and back on every target, read the build"
+}

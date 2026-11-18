@@ -1,0 +1,3 @@
+WingtraApp QA engine self-test file (engine piece 2: act.py deliver).
+SELFTEST-001 copies it to /sdcard/Download/WingtraQA/ on the tablets and ~/qa-fixtures/ on webpc044.
+It is not app data. Deleting it is harmless; the next self-test copies it again.

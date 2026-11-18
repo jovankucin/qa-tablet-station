@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="qa-token" content="{{QA_TOKEN}}">
+<title>Hover</title>
+<link rel="stylesheet" href="/static/app.css">
+<link rel="stylesheet" href="/static/results.css">
+<link rel="stylesheet" href="/static/history.css">
+<script src="/static/results.js" defer></script>
+<script src="/static/history.js" defer></script>
+<script src="/static/app.js" defer></script>
+</head>
+<body>
+<header class="shell">
+  <div class="shell-inner">
+    <a class="brand" href="#/new" title="Hover: WingtraApp QA"><svg class="brand-mark" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false"><path d="M12 7 23 14.5 21.5 16 17 14 14.5 15.5 12 14 9.5 15.5 7 14 2.5 16 1 14.5Z" fill="currentColor"/></svg>Hover</a>
+    <nav class="tabs" aria-label="Views">
+      <a href="#/new" data-route="new">New test</a>
+      <a href="#/results" data-route="results">Results</a>
+      <a href="#/history" data-route="history">History</a>
+    </nav>
+    <span class="env-chip" id="env-chip" title="environment and engine account">loading</span>
+  </div>
+</header>
+<main id="view" class="workspace" tabindex="-1">
+  <noscript><p class="msg msg-error">This page needs JavaScript.</p></noscript>
+</main>
+<footer class="footer">Engine account only · results first · nothing reaches ClickUp without your Touch ID</footer>
+</body>
+</html>

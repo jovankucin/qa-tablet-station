@@ -1,0 +1,30 @@
+{
+  "account": "qa-stag",
+  "api_base": "https://api.staging.company.example/api",
+  "decided": {
+    "at": null,
+    "by": "station owner",
+    "words": "set when the station is set up"
+  },
+  "env": "staging",
+  "updater_latest": "https://updater.staging.company.example/android/latest",
+  "web_origin": "web.staging.company.example",
+  "test_data": {
+    "site": {
+      "name": null,
+      "id": "a0000001-0000-4000-8000-000000000001",
+      "env": "staging",
+      "url": "https://web.staging.company.example/sites/a0000001-0000-4000-8000-000000000001",
+      "name_why": "the QA_ site your engine account may write in"
+    },
+    "mock_drone": {
+      "vehicle_id": 99900,
+      "hw": "V5",
+      "why": "a MockLink drone code your account's fleet already has"
+    },
+    "name_prefix": "QA_",
+    "status": "set",
+    "decided": [],
+    "why": "G3: test_data.site is the only place the engine creates cloud data (names start with QA_), and MockLink runs use mock_drone. Cases that write cloud data or use MockLink declare test_data.site_id / test_data.vehicle_id."
+  }
+}

@@ -1,0 +1,107 @@
+{
+  "area": "UPG",
+  "author": "claude",
+  "covered_paths": [
+    "apps/src/common/environment.ts",
+    "apps/src/App.tsx",
+    "apps/src/contexts/OfflineModeProvider.tsx",
+    "apps/src/hooks/connection/**",
+    "apps/src/hooks/offlineMode/**",
+    "apps/src/hooks/auth/**",
+    "apps/src/pages/FlightPlanning/**",
+    "apps/src/pages/Sites/**",
+    "apps/src/components/application/**",
+    "apps/src/database/**",
+    "apps/src/store/**",
+    "apps/package.json",
+    "packages/local-api/**",
+    "packages/shared/**"
+  ],
+  "created": "2026-10-20T15:40:25.076Z",
+  "expected_differences": [],
+  "fixtures": [],
+  "id": "UPG-007",
+  "kind": "case",
+  "needs": {
+    "account_lock": false,
+    "drone_hw": null,
+    "flags": [],
+    "link": "none",
+    "usb_port": false
+  },
+  "preconditions": [],
+  "requirement": {
+    "sha256": "7654830e2217ae6e0a6e39df30d8a220bdc1def339f7ba0790064839be680c50",
+    "source": {
+      "cache": "qa/cache/clickup/0000fake002.json",
+      "locator": "description bullet 7",
+      "ref": "0000fake002",
+      "requester": "Requester Colleague",
+      "type": "clickup_task"
+    },
+    "text": "*   Offline edits, persistence and synchronization"
+  },
+  "routing": [
+    {
+      "line": 7,
+      "path": "apps/src/common/environment.ts",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "isAndroid",
+      "t": "git",
+      "why": "Platform constant used by all offline edit/sync gates."
+    },
+    {
+      "line": 122,
+      "path": "apps/src/hooks/connection/useLocalApi.ts",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "shouldInitializeOfflineSync",
+      "t": "git",
+      "why": "Local API / offline sync session (packages/local-api) that stores offline edits and uploads them is only initialised on Android."
+    },
+    {
+      "line": 41,
+      "path": "apps/src/hooks/offlineMode/hooks/useOfflineSync.ts",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "isAndroidOnly: true",
+      "t": "git",
+      "why": "Server-to-device flight sync (syncFlights) runs only on Android via useOfflineCompatibleEffect (gate at apps/src/hooks/connection/useOfflineCompatibleEffect.ts:35)."
+    },
+    {
+      "line": 75,
+      "path": "apps/src/pages/FlightPlanning/components/FlightPlanEditDone/FlightPlanEditDone.tsx",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "isAndroid && !isLocalApiEnabled",
+      "t": "git",
+      "why": "Planner save path: on Android without the OfflineSync flag it also writes the local flight store (updateLocalFlights)."
+    },
+    {
+      "line": 79,
+      "path": "apps/src/pages/FlightPlanning/components/FlightPlanMenuSidebar/components/FlightOverviewModal.tsx",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "isAndroidOrFlyingMode",
+      "t": "git",
+      "why": "Save/overview dialog shows the 'Make available offline' toggle and triggers the offline download only on Android; this is the dialog that showed the stale title."
+    },
+    {
+      "line": 16,
+      "path": "apps/src/hooks/connection/useLocalApiSyncStatus.ts",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "subscribe = isAndroid ? subscribeThrottled : subscribeNoop",
+      "t": "git",
+      "why": "Upload/download sync status is only tracked on Android."
+    }
+  ],
+  "schema": 1,
+  "status": "active",
+  "steps": [],
+  "steps_note": "back-test case: steps are authored for live runs in Step 3",
+  "supersedes": null,
+  "targets": "tablet",
+  "title": "Offline edits, persistence and synchronization"
+}

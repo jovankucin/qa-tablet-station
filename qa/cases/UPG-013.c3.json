@@ -1,0 +1,300 @@
+{
+  "area": "UPG",
+  "author": "claude",
+  "covered_paths": [
+    "apps/android/app/src/main/java/com/wingtra/cloud/app/MainActivity.java",
+    "apps/android/app/src/main/java/com/wingtra/cloud/app/LogcatCommand.java",
+    "apps/android/app/src/main/java/com/wingtra/cloud/app/helpers/LogDirectory.kt",
+    "apps/android/app/src/main/java/com/wingtra/cloud/app/helpers/LogcatDumpHelper.java",
+    "apps/android/app/src/main/java/com/wingtra/cloud/app/plugins/WiPPlugin/FileCleanupUtils.kt",
+    "apps/android/app/src/main/java/com/wingtra/cloud/app/plugins/WiPPlugin/WiPPluginImpl.java",
+    "apps/android/app/src/main/AndroidManifest.xml",
+    "apps/android/variables.gradle",
+    "apps/cpp/wipapp/src/QGCApplication.cc",
+    "apps/cpp/wipapp/src/LogFileWriter.*",
+    "apps/cpp/wipapp/src/Vehicle/VehicleCommunication.cc",
+    "apps/cpp/wipapp/src/Vehicle/TelemetryUtils.cc",
+    "apps/src/pages/Dev/components/ReportingModal.tsx",
+    "apps/capacitor.config.ts",
+    "apps/package.json"
+  ],
+  "created": "2026-11-12T15:15:43.700Z",
+  "expected": "On TA5 and ET65 on a staging build that contains 48a6d6e3a (source first read at 1.75.0-staging-261b2d9) the app lists Documents/WingtraCloud/Logs through its own Filesystem plugin; a logcat file there was written today and reads back non-empty with logcat lines; logcat files of earlier sessions are kept, including each tablet's anchor (TA5: the oldest file listed on 2026-10-15 before a real uninstall and reinstall; ET65: the rotated part 20250912_115356_logcat_wingtracloud.txt.01, listed on 2026-10-21 and 2026-10-28); a file named before each tablet's real reinstall (TA5 2026-10-15, ET65 2026-10-19) reads back non-empty with logcat lines; the old Logcat folder is gone (the 1.75.0 migration finished; checked last, on its own).",
+  "expected_differences": [],
+  "fixtures": [],
+  "flags_watch": [
+    "AndroidLogging",
+    "DevReporting",
+    "HelpPageLogDumpButton"
+  ],
+  "forbidden": [
+    "any Capacitor Filesystem write (writeFile, appendFile, deleteFile, mkdir, rmdir, rename, copy): the runner's JS_WRITE check does not catch these",
+    "WiPPlugin.dumpFullLogcat (writes a <ts>_full_logcat.txt into Logs), WiPPlugin.log, WiPPlugin.dumpPlaneLogs",
+    "FileServicePlugin.uploadFiles and removeFile",
+    "the Swiss Army Knife Report bug flow (creates a ClickUp task and attaches logs)",
+    "Help > Dump full tablet logs (HelpPageLogDumpButton)",
+    "adb uninstall or install: the reinstall half is a hand step with the user's OK"
+  ],
+  "id": "UPG-013",
+  "kind": "case",
+  "needs": {
+    "account_lock": false,
+    "drone_hw": null,
+    "flags": [],
+    "link": "none",
+    "usb_port": false
+  },
+  "preconditions": [
+    {
+      "applies_to": "tablet",
+      "check": "run.py --check-account",
+      "id": "P1",
+      "text": "The engine account (account in qa/runner/engine.json) is logged in on the tablet"
+    },
+    {
+      "applies_to": "tablet",
+      "check": "act.py {target} probe",
+      "id": "P2",
+      "text": "WingtraApp has all-files access; without it MainActivity.load() stops at the storage dialog (MainActivity.java:72-76 at 261b2d9), the page never loads and act.py ready blocks the run (BLOCKED, not FAIL)"
+    },
+    {
+      "applies_to": "tablet",
+      "check": "run.py build read (git hash in the entry chunk) contains 48a6d6e3a",
+      "id": "P3",
+      "text": "staging web bundle whose commit contains 48a6d6e3a (git merge-base --is-ancestor 48a6d6e3a with the build hash; 1.75.0-staging-261b2d9 or later on sky-staging). The single Logs folder also needs a native build with 48a6d6e3a. The native versionCode is recorded by the run and not pinned (versionCodes are not ordered: the 1.73 installs were 532-536; it was 143 on 2026-10-28 and 145 on 2026-11-12). An old native shows in the record: step 3 records whether today's newest logcat file is in Logs or Logcat, and step 7 asserts that the Logcat folder is gone. The runner pins the web bundle from the entry chunk"
+    }
+  ],
+  "requirement": {
+    "sha256": "65dea3b40fe2f6fb5fec3389c659f0a50f92e16069e6c6ebfa42e6d271a28d36",
+    "source": {
+      "cache": "qa/cache/clickup/0000fake002.json",
+      "locator": "description bullet 13",
+      "ref": "0000fake002",
+      "requester": "Requester Colleague",
+      "type": "clickup_task"
+    },
+    "text": "*   Make sure app log files are still accessible and persist across reinstalls"
+  },
+  "routing": [
+    {
+      "line": 297,
+      "path": "apps/android/app/src/main/java/com/wingtra/cloud/app/MainActivity.java",
+      "ref": "261b2d99de082d947c18f8f0888ea7b65992366f",
+      "repo": "WingtraCloud",
+      "symbol": "MainActivity.redirectLogs()",
+      "t": "git",
+      "why": "Writes the app logcat to Documents/WingtraCloud/Logs/<yyyyMMdd_HHmmss>_logcat_wingtracloud.txt (line 299, device local time), rotated by logcat at 10 MB, at most 50 segments per session (lines 303-306). Called from load() at line 86 on every Activity start."
+    },
+    {
+      "line": 72,
+      "path": "apps/android/app/src/main/java/com/wingtra/cloud/app/MainActivity.java",
+      "ref": "261b2d99de082d947c18f8f0888ea7b65992366f",
+      "repo": "WingtraCloud",
+      "symbol": "load(): Environment.isExternalStorageManager() gate",
+      "t": "git",
+      "why": "Without all-files access load() shows the storage dialog and returns (lines 72-76): no WebView, no log file. If the engine reaches the page, the gate passed."
+    },
+    {
+      "line": 58,
+      "path": "apps/android/app/src/main/java/com/wingtra/cloud/app/LogcatCommand.java",
+      "ref": "261b2d99de082d947c18f8f0888ea7b65992366f",
+      "repo": "WingtraCloud",
+      "symbol": "LogcatCommand.redirectLogsToFile()",
+      "t": "git",
+      "why": "logcat -f <file> with the tag whitelist (lines 22-46: WingtraCloud:V line 23, MainActivity:D line 28, '*:S' line 45) and -r/-n (lines 64-67)."
+    },
+    {
+      "line": 37,
+      "path": "apps/android/app/src/main/java/com/wingtra/cloud/app/helpers/LogDirectory.kt",
+      "ref": "261b2d99de082d947c18f8f0888ea7b65992366f",
+      "repo": "WingtraCloud",
+      "symbol": "LogDirectory.migrateLegacyDirectory()",
+      "t": "git",
+      "why": "Since 48a6d6e3a (in 1.75.0, not in 1.74.0): every getDirectory() call (line 16) moves each file of the old Documents/WingtraCloud/Logcat into Logs without replacing (a clash becomes migrated_<n>_<name>, line 58) and then deletes the Logcat folder (line 46)."
+    },
+    {
+      "line": 114,
+      "path": "apps/cpp/wipapp/src/QGCApplication.cc",
+      "ref": "261b2d99de082d947c18f8f0888ea7b65992366f",
+      "repo": "WingtraCloud",
+      "symbol": "QGCApplication::logFilesPath()",
+      "t": "git",
+      "why": "Native log folder = Documents/WingtraCloud/Logs, the same folder as the logcat file. AppMessages, which wrote the native Qt text log '<yyyyMMdd_hhmmss>.txt' there at fd8b1ca, was deleted in 48a6d6e3a."
+    },
+    {
+      "line": 26,
+      "path": "apps/cpp/wipapp/src/Vehicle/VehicleCommunication.cc",
+      "ref": "261b2d99de082d947c18f8f0888ea7b65992366f",
+      "repo": "WingtraCloud",
+      "symbol": "LogFileWriter(\"msgs\", \"msg\")",
+      "t": "git",
+      "why": "msgs_*.msg in Logs, created only once a vehicle object exists (not with link none)."
+    },
+    {
+      "line": 25,
+      "path": "apps/cpp/wipapp/src/Vehicle/TelemetryUtils.cc",
+      "ref": "261b2d99de082d947c18f8f0888ea7b65992366f",
+      "repo": "WingtraCloud",
+      "symbol": "LogFileWriter(\"TelemStats\", \"telemetry\")",
+      "t": "git",
+      "why": "TelemStats_*.telemetry in Logs, created only once a vehicle object exists (not with link none)."
+    },
+    {
+      "line": 94,
+      "path": "apps/cpp/wipapp/src/LogFileWriter.cc",
+      "ref": "261b2d99de082d947c18f8f0888ea7b65992366f",
+      "repo": "WingtraCloud",
+      "symbol": "LogFileWriter::_deleteOldLogs()",
+      "t": "git",
+      "why": "Each native writer prunes only its own folder and extension on every new file (lines 238-247, 279-283); defaults at most 50 files, at least 10 kept (LogFileWriter.h lines 167, 171)."
+    },
+    {
+      "line": 254,
+      "path": "apps/android/app/src/main/java/com/wingtra/cloud/app/plugins/WiPPlugin/FileCleanupUtils.kt",
+      "ref": "261b2d99de082d947c18f8f0888ea7b65992366f",
+      "repo": "WingtraCloud",
+      "symbol": "getTargetFilesSortedByAge()",
+      "t": "git",
+      "why": "The cleanup touches only files ending in the writer's extension (lines 257-262), oldest first by lastModified. No app code deletes the logcat .txt files; logcat's own -n 50 applies within one session only."
+    },
+    {
+      "line": 373,
+      "path": "apps/src/pages/Dev/components/ReportingModal.tsx",
+      "ref": "261b2d99de082d947c18f8f0888ea7b65992366f",
+      "repo": "WingtraCloud",
+      "symbol": "Filesystem.readdir({path: 'WingtraCloud/Logs', directory: Directory.Documents})",
+      "t": "git",
+      "why": "The app's own read path: the bug reporter lists Logs, picks the newest files by mtime with the .txt.<n> rotation suffix folded (findLatestLogFiles, lines 306-319) and reads each by its uri as UTF-8 (lines 322-325). The case uses the same plugin calls."
+    },
+    {
+      "line": 155,
+      "path": "apps/package.json",
+      "ref": "261b2d99de082d947c18f8f0888ea7b65992366f",
+      "repo": "WingtraCloud",
+      "symbol": "\"@capacitor/filesystem\": \"8.1.4\"",
+      "t": "git",
+      "why": "The Filesystem plugin the steps call through window.Capacitor.Plugins.Filesystem (imported at ReportingModal.tsx line 26; no feature flag)."
+    },
+    {
+      "line": 5,
+      "path": "apps/android/app/src/main/AndroidManifest.xml",
+      "ref": "261b2d99de082d947c18f8f0888ea7b65992366f",
+      "repo": "WingtraCloud",
+      "symbol": "uses-permission MANAGE_EXTERNAL_STORAGE",
+      "t": "git",
+      "why": "All-files access lets a reinstalled app (new UID) list and read files a removed install wrote. allowBackup=false (line 42), hasFragileUserData=true (line 45)."
+    },
+    {
+      "line": 21,
+      "path": "apps/src/common/enums/appRoutes.enum.ts",
+      "ref": "261b2d99de082d947c18f8f0888ea7b65992366f",
+      "repo": "WingtraCloud",
+      "symbol": "AUTHENTICATED_DEFAULT_ROUTE = AppRoutesEnum.Sites",
+      "t": "git",
+      "why": "The start page is /sites (top-bar testid btn-sites, AppNavbar.tsx line 41)."
+    },
+    {
+      "line": 198,
+      "path": "apps/src/plugins/wipplugin/definitions.ts",
+      "ref": "261b2d99de082d947c18f8f0888ea7b65992366f",
+      "repo": "WingtraCloud",
+      "symbol": "dumpFullLogcat",
+      "t": "git",
+      "why": "Writes a new <ts>_full_logcat.txt into Logs (LogcatDumpHelper.java lines 22-27): forbidden in this case, like dumpPlaneLogs (line 202)."
+    },
+    {
+      "line": 249,
+      "path": "apps/src/hooks/metadata/useMetadataUpload.ts",
+      "ref": "261b2d99de082d947c18f8f0888ea7b65992366f",
+      "repo": "WingtraCloud",
+      "symbol": "deleteAfterUpload: true",
+      "t": "git",
+      "why": "Metadata CSVs are uploaded and then deleted by design, so Metadata is not a persistence target of this case."
+    }
+  ],
+  "schema": 1,
+  "status": "active",
+  "steps": [
+    {
+      "gates": [],
+      "helper": "act.py {target} shot {shots}/{run}_start.png",
+      "n": 1,
+      "text": "Screenshot of the page the reads run on (no navigation: the app stays on the page it shows)"
+    },
+    {
+      "assert": {
+        "expr": "v['clock']['platform'] == 'android'",
+        "kind": "scripted"
+      },
+      "gates": [],
+      "n": 2,
+      "read_js": "(() => { const d = new Date(); const m = new Date(d.getTime()); m.setHours(0, 0, 0, 0); return {platform: window.Capacitor && window.Capacitor.getPlatform ? window.Capacitor.getPlatform() : null, now_ms: d.getTime(), day_start_ms: m.getTime(), page_loaded_ms: Math.round(performance.timeOrigin), tz: Intl.DateTimeFormat().resolvedOptions().timeZone}; })()",
+      "save_as": "clock",
+      "text": "Read the tablet's clock in the page: now, local midnight, time zone (the run window and 'today' for the later steps)"
+    },
+    {
+      "assert": {
+        "expr": "v['logs']['ok'] is True and v['logs']['newest_logcat'] is not None and v['logs']['newest_logcat']['mtime'] is not None and v['logs']['newest_logcat']['mtime'] >= v['logs']['day_start_ms']",
+        "kind": "scripted"
+      },
+      "gates": [],
+      "n": 3,
+      "read_js": "(async () => { const F = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Filesystem; if (!F) throw new Error('no Filesystem plugin on window.Capacitor.Plugins'); const LC = /^(?:migrated_\\d+_)?(\\d{8}_\\d{6})_logcat_wingtracloud\\.txt(?:\\.\\d+)?$/; const sz = f => (typeof f.size === 'number' ? f.size : null); const mt = f => (typeof f.mtime === 'number' ? f.mtime : null); const em = e => String((e && e.message) || e).slice(0, 200); const brief = f => (f ? {name: f.name, mtime: mt(f), size: sz(f)} : null); const newest = a => a.reduce((m, f) => (!m || (mt(f) || 0) > (mt(m) || 0) ? f : m), null); const now = Date.now(); const ds = new Date(now); ds.setHours(0, 0, 0, 0); const day = ds.getTime(); let r, top, old = []; try { r = await F.readdir({path: 'WingtraCloud/Logs', directory: 'DOCUMENTS'}); } catch (e) { return {ok: false, error: 'readdir WingtraCloud/Logs: ' + em(e)}; } try { top = await F.readdir({path: 'WingtraCloud', directory: 'DOCUMENTS'}); } catch (e) { return {ok: false, error: 'readdir WingtraCloud: ' + em(e)}; } const legacyEntry = (top.files || []).find(f => f.name === 'Logcat' && f.type === 'directory') || null; if (legacyEntry) { try { old = ((await F.readdir({path: 'WingtraCloud/Logcat', directory: 'DOCUMENTS'})).files || []).filter(f => f.type === 'file'); } catch (e) { return {ok: false, logcat_dir_present: true, error: 'readdir WingtraCloud/Logcat: ' + em(e)}; } } const files = (r.files || []).filter(f => f.type === 'file'); const lc = files.filter(f => LC.test(f.name)); const nl = newest(lc); const stamps = [...new Set(lc.map(f => f.name.match(LC)[1]))].sort(); const full = files.filter(f => /_full_logcat\\.txt(?:\\.\\d+)?$/.test(f.name)); const msg = files.filter(f => f.name.endsWith('.msg')); const tel = files.filter(f => f.name.endsWith('.telemetry')); const pick = files.filter(f => /(_logcat_wingtracloud|_full_logcat)\\.txt$/.test(f.name.replace(/\\.txt\\.\\d+$/, '.txt'))).sort((a, b) => (mt(b) || 0) - (mt(a) || 0)).slice(0, 2).map(f => f.name); const oldLc = old.filter(f => LC.test(f.name)); const nOld = newest(old); const nLogsToday = nl && (mt(nl) || 0) >= day ? nl : null; const nOldLc = newest(oldLc); const nOldToday = nOldLc && (mt(nOldLc) || 0) >= day ? nOldLc : null; const todayIn = nLogsToday && nOldToday ? ((mt(nOldToday) || 0) > (mt(nLogsToday) || 0) ? 'Logcat' : 'Logs') : (nLogsToday ? 'Logs' : (nOldToday ? 'Logcat' : null)); return {ok: true, now_ms: now, day_start_ms: day, files: files.length, bytes: files.reduce((t, f) => t + (sz(f) || 0), 0), logcat_files: lc.length, sessions: stamps.length, current_session: stamps.length ? stamps[stamps.length - 1] : null, newest_logcat: brief(nl), newest_logcat_age_s: nl && mt(nl) !== null ? Math.round((now - mt(nl)) / 1000) : null, newest_logcat_today_in: todayIn, newest_logcat_today: todayIn === 'Logcat' ? brief(nOldToday) : brief(nLogsToday), full_dumps: full.length, msg: msg.length, newest_msg: brief(newest(msg)), telemetry: tel.length, newest_telemetry: brief(newest(tel)), qt_legacy: files.filter(f => /^\\d{8}_\\d{6}\\.txt$/.test(f.name)).length, migrated: files.filter(f => f.name.startsWith('migrated_')).length, sak_pick_no_full_logcat: pick, logcat_dir_present: legacyEntry !== null, logcat_dir_files: old.length, logcat_dir_logcat_files: oldLc.length, logcat_dir_bytes: old.reduce((t, f) => t + (sz(f) || 0), 0), logcat_dir_newest: brief(nOld)}; })()",
+      "save_as": "logs",
+      "text": "List Documents/WingtraCloud/Logs the way the app does (Filesystem.readdir, Directory.Documents; names, sizes, mtimes): a logcat file there was written today (device local time). Recorded only: whether the old Logcat folder is still there (found by listing WingtraCloud for an entry 'Logcat' of type directory; its file count and newest file; asserted in step 7), whether today's newest logcat file is in Logs or Logcat, native .msg/.telemetry files, and the bug reporter's pick without the full logcat. Any readdir error fails the read"
+    },
+    {
+      "assert": {
+        "expr": "v['kept']['ok'] is True and v['kept']['earlier_sessions'] >= 1 and v['kept']['anchors_lost'] == []",
+        "kind": "scripted"
+      },
+      "gates": [],
+      "n": 4,
+      "read_js": "(async () => { const F = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Filesystem; if (!F) throw new Error('no Filesystem plugin on window.Capacitor.Plugins'); const LC = /^(?:migrated_\\d+_)?(\\d{8}_\\d{6})_logcat_wingtracloud\\.txt(?:\\.\\d+)?$/; const em = e => String((e && e.message) || e).slice(0, 200); const anchors = ({TA5: ['20260922_140842_logcat_wingtracloud.txt'], ET65: ['20250912_115356_logcat_wingtracloud.txt.01']})['{target}'] || []; let r, top, old = []; try { r = await F.readdir({path: 'WingtraCloud/Logs', directory: 'DOCUMENTS'}); } catch (e) { return {ok: false, error: 'readdir WingtraCloud/Logs: ' + em(e)}; } try { top = await F.readdir({path: 'WingtraCloud', directory: 'DOCUMENTS'}); } catch (e) { return {ok: false, error: 'readdir WingtraCloud: ' + em(e)}; } const legacyEntry = (top.files || []).find(f => f.name === 'Logcat' && f.type === 'directory') || null; if (legacyEntry) { try { old = ((await F.readdir({path: 'WingtraCloud/Logcat', directory: 'DOCUMENTS'})).files || []).filter(f => f.type === 'file'); } catch (e) { return {ok: false, logcat_dir_present: true, error: 'readdir WingtraCloud/Logcat: ' + em(e)}; } } const files = (r.files || []).filter(f => f.type === 'file'); const names = files.map(f => f.name); const oldNames = old.map(f => f.name); const stamps = [...new Set(names.concat(oldNames).filter(n => LC.test(n)).map(n => n.match(LC)[1]))].sort(); const inLogs = a => (names.includes(a) ? a : (names.find(n => /^migrated_\\d+_/.test(n) && n.replace(/^migrated_\\d+_/, '') === a) || null)); const found = anchors.map(a => ({name: a, listed_as: inLogs(a), in_logcat_dir: oldNames.includes(a)})); return {ok: true, logcat_dir_present: legacyEntry !== null, anchors_checked: anchors.length, sessions: stamps.length, earlier_sessions: Math.max(0, stamps.length - 1), oldest_session: stamps.length ? stamps[0] : null, current_session: stamps.length ? stamps[stamps.length - 1] : null, anchors: found, anchors_not_moved: found.filter(x => !x.listed_as && x.in_logcat_dir).map(x => x.name), anchors_lost: found.filter(x => !x.listed_as && !x.in_logcat_dir).map(x => x.name)}; })()",
+      "save_as": "kept",
+      "text": "Older logcat files are kept: files of at least one earlier session are listed, and so is this tablet's anchor (TA5: the oldest file listed on 10-15 before a real reinstall; ET65: the rotated part 20250912_115356_logcat_wingtracloud.txt.01, listed on 10-21 and 10-28), in Logs under its own name or migrated_<n>_<name>, or still in the old Logcat folder (recorded as not moved, which step 7 judges). Only an anchor found in neither folder is lost"
+    },
+    {
+      "assert": {
+        "expr": "v['fresh_read']['ok'] is True and v['fresh_read']['picked'] is not None and v['fresh_read']['chars'] > 0 and v['fresh_read']['logcat_lines'] >= 1",
+        "kind": "scripted"
+      },
+      "gates": [],
+      "n": 5,
+      "read_js": "(async () => { const F = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Filesystem; if (!F) throw new Error('no Filesystem plugin on window.Capacitor.Plugins'); const LC = /^(?:migrated_\\d+_)?(\\d{8}_\\d{6})_logcat_wingtracloud\\.txt(?:\\.\\d+)?$/; const sz = f => (typeof f.size === 'number' ? f.size : null); const mt = f => (typeof f.mtime === 'number' ? f.mtime : null); const ds = new Date(); ds.setHours(0, 0, 0, 0); const day = ds.getTime(); let r; try { r = await F.readdir({path: 'WingtraCloud/Logs', directory: 'DOCUMENTS'}); } catch (e) { return {ok: false, error: String((e && e.message) || e).slice(0, 200)}; } const files = (r.files || []).filter(f => f.type === 'file'); const cand = files.filter(f => LC.test(f.name) && (mt(f) || 0) >= day && sz(f) !== 0); const inRange = cand.filter(f => sz(f) !== null && sz(f) >= 1024 && sz(f) <= 2097152); const pool = (inRange.length ? inRange : cand).slice().sort((a, b) => (sz(a) === null ? 1e15 : sz(a)) - (sz(b) === null ? 1e15 : sz(b))); const f = pool[0]; if (!f) return {ok: true, picked: null, candidates: 0, candidates_in_range: 0}; let d; try { d = await F.readFile({path: f.uri, encoding: 'utf8'}); } catch (e) { return {ok: false, picked: f.name, error: String((e && e.message) || e).slice(0, 200)}; } const s = typeof d.data === 'string' ? d.data : ''; return {ok: true, picked: f.name, picked_in_range: inRange.length > 0, candidates: cand.length, candidates_in_range: inRange.length, size: sz(f), mtime: mt(f), chars: s.length, lines: s.split('\\n').length, logcat_lines: (s.match(/^\\d\\d-\\d\\d \\d\\d:\\d\\d:\\d\\d\\.\\d{3}\\s+\\d+\\s+\\d+ [VDIWEF] /gm) || []).length, native_lines: (s.match(/^\\d\\d-\\d\\d \\d\\d:\\d\\d:\\d\\d\\.\\d{3}\\s+\\d+\\s+\\d+ [VDIWEF] WingtraCloud: /gm) || []).length, lifecycle_lines: (s.match(/App lifecycle: MainActivity\\.on[A-Z]\\w+/g) || []).length}; })()",
+      "save_as": "fresh_read",
+      "text": "Read today's logcat file through the app (Filesystem.readFile by its uri, UTF-8, as the bug reporter does): the smallest one written today between 1 KB and 2 MB, or the smallest non-empty one if none is in that range. It reads back non-empty with at least one logcat line. Only counts are recorded, never the content"
+    },
+    {
+      "assert": {
+        "expr": "v['old_read']['ok'] is True and v['old_read']['picked'] is not None and v['old_read']['chars'] > 0 and v['old_read']['logcat_lines'] >= 1",
+        "kind": "scripted"
+      },
+      "gates": [],
+      "n": 6,
+      "read_js": "(async () => { const F = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Filesystem; if (!F) throw new Error('no Filesystem plugin on window.Capacitor.Plugins'); const LC = /^(?:migrated_\\d+_)?(\\d{8}_\\d{6})_logcat_wingtracloud\\.txt(?:\\.\\d+)?$/; const sz = f => (typeof f.size === 'number' ? f.size : null); const mt = f => (typeof f.mtime === 'number' ? f.mtime : null); const cut = ({TA5: '20261015_181640', ET65: '20261019_144854'})['{target}'] || null; let r; try { r = await F.readdir({path: 'WingtraCloud/Logs', directory: 'DOCUMENTS'}); } catch (e) { return {ok: false, error: String((e && e.message) || e).slice(0, 200)}; } const files = (r.files || []).filter(f => f.type === 'file'); const lc = files.filter(f => LC.test(f.name)); const stamps = [...new Set(lc.map(f => f.name.match(LC)[1]))].sort(); const before = cut || (stamps.length ? stamps[stamps.length - 1] : ''); const cand = lc.filter(f => f.name.match(LC)[1] < before && sz(f) !== 0); const inRange = cand.filter(f => sz(f) !== null && sz(f) >= 1024 && sz(f) <= 2097152); const pool = (inRange.length ? inRange : cand).slice().sort((a, b) => (sz(a) === null ? 1e15 : sz(a)) - (sz(b) === null ? 1e15 : sz(b))); const f = pool[0]; if (!f) return {ok: true, picked: null, cutoff: cut, candidates: 0, candidates_in_range: 0}; let d; try { d = await F.readFile({path: f.uri, encoding: 'utf8'}); } catch (e) { return {ok: false, picked: f.name, error: String((e && e.message) || e).slice(0, 200)}; } const s = typeof d.data === 'string' ? d.data : ''; return {ok: true, picked: f.name, cutoff: cut, picked_in_range: inRange.length > 0, candidates: cand.length, candidates_in_range: inRange.length, size: sz(f), mtime: mt(f), chars: s.length, lines: s.split('\\n').length, logcat_lines: (s.match(/^\\d\\d-\\d\\d \\d\\d:\\d\\d:\\d\\d\\.\\d{3}\\s+\\d+\\s+\\d+ [VDIWEF] /gm) || []).length, native_lines: (s.match(/^\\d\\d-\\d\\d \\d\\d:\\d\\d:\\d\\d\\.\\d{3}\\s+\\d+\\s+\\d+ [VDIWEF] WingtraCloud: /gm) || []).length, lifecycle_lines: (s.match(/App lifecycle: MainActivity\\.on[A-Z]\\w+/g) || []).length}; })()",
+      "save_as": "old_read",
+      "text": "Read an older logcat file through the app: named before this tablet's reinstall recorded in the back-tests (TA5 2026-10-15 18:16:40, ET65 2026-10-19 14:48:54, local time), so a file a removed install wrote; the smallest such file between 1 KB and 2 MB, or the smallest non-empty one if none is in that range. It reads back non-empty with at least one logcat line"
+    },
+    {
+      "assert": {
+        "expr": "v['logs']['logcat_dir_present'] is False",
+        "kind": "scripted"
+      },
+      "gates": [],
+      "n": 7,
+      "read_js": "(async () => { const F = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Filesystem; if (!F) throw new Error('no Filesystem plugin on window.Capacitor.Plugins'); const em = e => String((e && e.message) || e).slice(0, 200); let top; try { top = await F.readdir({path: 'WingtraCloud', directory: 'DOCUMENTS'}); } catch (e) { return {ok: false, error: 'readdir WingtraCloud: ' + em(e)}; } const entry = (top.files || []).find(f => f.name === 'Logcat') || null; if (!entry || entry.type !== 'directory') return {ok: true, logcat_dir_present: false, logcat_entry_type: entry ? entry.type : null}; let left; try { left = ((await F.readdir({path: 'WingtraCloud/Logcat', directory: 'DOCUMENTS'})).files || []); } catch (e) { return {ok: false, logcat_dir_present: true, error: 'readdir WingtraCloud/Logcat: ' + em(e)}; } return {ok: true, logcat_dir_present: true, entries: left.length, files: left.filter(f => f.type === 'file').length, first_names: left.map(f => f.name).sort().slice(0, 20)}; })()",
+      "save_as": "legacy_dir",
+      "text": "The 1.75.0 migration finished: the old Documents/WingtraCloud/Logcat folder is gone (asserted on step 3's record, found by listing WingtraCloud). This step also lists what is left in that folder, if anything, for the record. A migration problem fails only this step"
+    }
+  ],
+  "steps_note": "c3 (2026-11-12): text only, steps unchanged. P1 names the engine account instead of the CT account (the engine account is qa-stag since 2026-11-04). P3 keeps the commit condition and no longer pins native versionCode 143; the expected text drops it too. Reason: c2's steps passed on 1.77.1-staging-14a5167, native 145, account qa-stag (R-20261112-TA5-UPG-013-01..03 and R-20261112-ET65-UPG-013-01..03), outside c2's written conditions. c2 (2026-10-28): moves ET65's step-4 anchor. c1's ET65 anchor 20240814_051852 was deleted on 2026-10-20, before 1.75.0 ran there: develop 539 (468a173, with 48a6d6e3a) moved the Logcat files into Logs, then the older dev build 529 ran, and its Qt-log writer keeps only the newest 50 files ending in .txt in Logs (48a6d6e3a^:AppMessages.cc:81, LogFileWriter.h:167, FileCleanupUtils.kt:259-263). The 2026-10-21 safety copy already lacks the file (tests/2026-10-28-upg013-logs/README.md). Rotated .txt.NN parts never match that cleanup, so ET65's anchor is now 20250912_115356_logcat_wingtracloud.txt.01 (in the 10-21 copy and listed by the app on 10-28, ledger seq 6766). On ET65, survival of the 2026-10-19 reinstall now rests on step 6 (a file named before it reads back) and on the back-test R-20261019-ET65-UPG-013-01. c1 (2026-10-28): the first engine version. The earlier UPG-013 results are hand back-tests at 1.73.0 (R-20261015-TA5, R-20261016-TA5, R-20261019-ET65; TA3 NOT_TESTED). All steps are reads or a screenshot: no navigation, no gates, nothing written on the tablet or in the cloud. What changed in the app since those runs: commit 48a6d6e3a (in 1.75.0, not in 1.74.0) writes the logcat file into Logs, moves the old Logcat folder's files into Logs and deletes that folder, and removed the native Qt text log (AppMessages). So at 261b2d9 the native log folder and the logcat folder are one folder, Logs. That needs the native build too, so P3 pinned native versionCode 143 exactly up to c2 (from c3 on the run records it instead); step 3 records whether today's newest logcat file is in Logs or Logcat, so an old native shows in the record. Native Qt messages now reach the logcat file under the tag WingtraCloud (seen in the file pulled on 2026-10-28, tests/2026-10-28-connection-check/ET65/logs/R-20261028-ET65-SELFTEST-001-01_qt_20261028_130439_logcat_wingtracloud.txt). The only native files of their own, msgs_*.msg and TelemStats_*.telemetry, are created only once a vehicle exists, so with link none step 3 lists them (count, newest) without an assertion. Migration: steps 3 and 4 find the old Logcat folder by listing WingtraCloud for an entry 'Logcat' of type directory; a readdir error is recorded and fails the read, never counts as 'absent'. Step 4 also looks for the anchors in WingtraCloud/Logcat, so a lost file (in neither folder) differs from one not moved (still in Logcat). Only step 7, the last step, asserts that the folder is gone, so a migration problem (LogDirectory.kt keeps leftover files and retries on the next start) fails only that step and steps 3-6 still run. Reinstall: TA5's anchor was listed before a real uninstall and reinstall (listed 2026-10-15 17:00 UTC, uninstall 18:18 UTC), so on TA5 step 4 checks that logs survived one real reinstall; on both tablets step 6 reads a file named before the tablet's reinstall (ET65: listed 2026-10-19 12:58 UTC, uninstall 13:53 UTC), so a file a removed install wrote. NOT COVERED: a reinstall during the run. It needs an APK install (gate install), which is never hands-off. How a person tests it, with the user's OK: (1) sync all flights and pull Documents/WingtraCloud to the test folder, because adb uninstall deletes the app's local data including unsynced flights; (2) run this case and save 'adb shell ls -l /storage/emulated/0/Documents/WingtraCloud/Logs' next to the notes; (3) adb uninstall com.wingtra.cloud.app (not install -r, which is an update, not a reinstall); (4) install the same APK, grant all-files access, log in with the engine account; (5) run this case again and compare the file names one by one with the saved listing (the back-tests compared only counts). JS cannot read firstInstallTime, so the case cannot show which install is current. Also not covered: an adb pull of the folder (the runner's end-of-run evidence pulls the newest Logs/*.txt and labels it qt_log; at 261b2d9 that file is the logcat file); a new session file after an app restart; .msg/.telemetry creation and their 50-file pruning (needs a drone link); Metadata (uploaded and then deleted by design, useMetadataUpload.ts:249); the bug reporter's attach (a ClickUp write; step 3 only repeats its pick without the full logcat, the 2 newest logcat files; with the full logcat it dumps one more file and picks 3, ReportingModal.tsx:377); low-storage cleanup; the Logcat-to-Logs move itself (it ran when 1.75 first started; steps 3, 4 and 7 check only its result); TA3 (not set up: 2 of 3 devices). Anchors (step 4): TA5 20260922_140842_logcat_wingtracloud.txt (the oldest listed in R-20261015-TA5-UPG-013-01) and ET65 20250912_115356_logcat_wingtracloud.txt.01 (see c2 above). 1.75.0 deletes no logcat file and the move keeps them, but any build without 48a6d6e3a that runs after a build with it keeps only the newest 50 *.txt in Logs, logcat base files included. So before a lost anchor counts as FAIL, check by hand which builds ran since the anchor was listed (the 'APK version code' lines in the logcat files in Logs): an older build in between makes it ERROR (case precondition broken), not FAIL; a deletion by hand does too. On TA3 the anchor list is empty, so step 4's anchor check passes vacuously (anchors_checked records 0) and step 6 falls back to a cutoff at the current session. TA5's Qt log 20260924_150155.txt is not an anchor: the pre-1.75 AppMessages cleanup could delete it legitimately. Observation, not an assertion: nothing caps the logcat files, so Logs grows without limit (ET65 Logcat was 6.6 GB on 2026-10-19); step 3 records the total bytes. Before the first live run, check: FileInfo.size and mtime on @capacitor/filesystem 8.1.4 (the app's own code reads only name, type, mtime and uri; a missing size is null, and steps 5-6 then cannot rank by size and read the first listed candidate, which may be a large live file); 'DOCUMENTS' and 'utf8' as Directory.Documents and Encoding.UTF8 (the 1.73 hand runs used 'DOCUMENTS'); each read must end within act.py's 20 s CDP timeout (steps 5-6 read the smallest candidate between 1 KB and 2 MB, so not a live 10 MB session file; a timeout is ERROR, not FAIL). FAILs stay 'suspected: case not validated' until this version has passed once on a tablet.",
+  "supersedes": {
+    "file": "qa/cases/UPG-013.c2.json",
+    "file_sha256": "9ee86a69c7e583505e449d30f879c977239cc9dc06dd34685ffd0cb4abaf7a5b",
+    "id": "UPG-013",
+    "why": "text only, steps unchanged: c2's P1 named the CT account and its P3 pinned native versionCode 143; the engine account is qa-stag since 2026-11-04 and c2's steps passed on native 145 (R-20261112-TA5-UPG-013-01..03 and R-20261112-ET65-UPG-013-01..03), outside those written conditions. c3 names the engine account and records the native versionCode instead of pinning it."
+  },
+  "targets": "tablet",
+  "title": "App log files stay readable by the app; recent and older ones are kept"
+}

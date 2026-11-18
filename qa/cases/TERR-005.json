@@ -1,0 +1,99 @@
+{
+  "area": "TERR",
+  "author": "claude",
+  "covered_paths": [],
+  "created": "2026-10-22T11:45:05.000Z",
+  "expected": "Processing fails with a specific, actionable error saying rotated rasters are unsupported, not the generic 'Processing failed'. Record the exact text; the ticket says the UX wording is still being agreed, so a generic message is reported as FAIL against criterion 3 with that note.",
+  "expected_differences": [],
+  "fixtures": [],
+  "id": "TERR-005",
+  "kind": "case",
+  "needs": {
+    "account_lock": false,
+    "drone_hw": null,
+    "flags": [],
+    "link": "none",
+    "usb_port": false
+  },
+  "preconditions": [
+    {
+      "applies_to": "both",
+      "check": "shasum -a 256 + geotiff_reader.py",
+      "id": "P1",
+      "text": "fixture present; sha256 recorded; its geotransform rotation/shear terms read and recorded before upload"
+    },
+    {
+      "applies_to": "both",
+      "check": "run.py --check-account",
+      "id": "P2",
+      "text": "CT account logged in on every target"
+    },
+    {
+      "applies_to": "both",
+      "check": "API GET /sites/:id",
+      "id": "P3",
+      "text": "test-data site a0000001 exists in the CT org on staging"
+    }
+  ],
+  "requirement": {
+    "sha256": "802d05b29a8715487f33b1a90348657ee9cac0ce9538ad7797f88d9a734ed48a",
+    "source": {
+      "cache": "qa/cache/clickup/0000fake001.json",
+      "custom_id": "CL-80003",
+      "fetched": "2026-10-22T11:45:00Z",
+      "locator": "Acceptance criteria, item 3",
+      "ref": "0000fake001",
+      "requester": "Requester Colleague",
+      "type": "clickup_task"
+    },
+    "text": "A genuinely rotated GeoTIFF fails with an actionable error  - sync with UX about the new error taxonomy and getting a proper error message to the user."
+  },
+  "routing": [],
+  "schema": 1,
+  "status": "draft",
+  "steps": [
+    {
+      "gates": [],
+      "helper": null,
+      "n": 1,
+      "text": "Deliver the fixture to the target: tablets via adb -s <serial> push into a test folder under Download; W044 via scp to webpc044"
+    },
+    {
+      "gates": [],
+      "helper": null,
+      "n": 2,
+      "text": "Open the authorized test site 'QA engine' (site a0000001, staging)"
+    },
+    {
+      "gates": [],
+      "helper": null,
+      "n": 3,
+      "text": "Maps page import flow (as tests/2026-10-09-terrain-resolution/tools/maps_import.py): pick the file, name it QA_<deviceTag>_CL80003_ROTATED, choose the site, Next (cloud write: one new dataset)"
+    },
+    {
+      "gates": [],
+      "helper": null,
+      "n": 4,
+      "text": "Wait for the server-side DSM processing: poll the dataset's status in the app and with a read-only API GET, up to a time limit set from source"
+    },
+    {
+      "gates": [],
+      "helper": null,
+      "n": 5,
+      "text": "Read the final status in the app (status label, any error text) and from the API; screenshot"
+    },
+    {
+      "gates": [],
+      "helper": null,
+      "n": 6,
+      "text": "Leave the app where it started (always)"
+    }
+  ],
+  "steps_note": "Run for test task 0000fake004 at the user's request (2026-10-22: 'do both'). Fixture: a clearly rotated GeoTIFF (rotation term well above 1e-12, e.g. 5 degrees) generated with the existing tests/2026-10-09-terrain-resolution/tools/geotiff_writer.py into the campaign folder; sha256 and generator parameters added when the case is completed.",
+  "supersedes": null,
+  "targets": "both",
+  "test_data": {
+    "site_id": "a0000001-0000-4000-8000-000000000001"
+  },
+  "title": "Genuinely rotated GeoTIFF fails with a specific error (CL-80003)"
+}

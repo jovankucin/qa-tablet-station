@@ -1,0 +1,318 @@
+{
+  "area": "OFFL",
+  "author": "claude",
+  "cloud_writes": [
+    {
+      "object": "new site QA_OFFL-001_<run> in the CT account",
+      "step": 10,
+      "what": "creates the site (stays in the CT account; the engine does not delete) and its offline map download to the tablet"
+    },
+    {
+      "object": "that site",
+      "step": 19,
+      "what": "creates the flight QA_OFFL-001_<run> offline; it syncs when the tablet is back online (stays there)"
+    }
+  ],
+  "covered_paths": [
+    "apps/src/pages/Sites/screens/SiteCreate/**",
+    "apps/src/pages/Sites/components/SiteOfflineUseToggle*",
+    "apps/src/pages/Sites/components/FlightSetup/**",
+    "apps/src/services/mapsManager/**"
+  ],
+  "created": "2026-11-03T12:10:41.800Z",
+  "expected": "With OfflineSites on, a new site QA_OFFL-001_<run> created with 'Enable offline use' on downloads and shows 'Site available offline'. With the tablet's Wi-Fi off and the app offline, Create flight in that site creates the flight QA_OFFL-001_<run> ('Flight successfully created') and opens its planner, with no error. Nothing in the planner is saved.",
+  "expected_differences": [],
+  "fixtures": [],
+  "flags_watch": [
+    "OfflineSites",
+    "OfflineSync"
+  ],
+  "forbidden": [
+    "Save or Save & exit in the planner",
+    "Delete or archive (the QA_ site and flight stay)",
+    "Save site on any site",
+    "any site other than the one this case creates"
+  ],
+  "id": "OFFL-001",
+  "kind": "case",
+  "needs": {
+    "account_lock": false,
+    "drone_hw": null,
+    "flags": [
+      "OfflineSites"
+    ],
+    "link": "none",
+    "usb_port": false
+  },
+  "preconditions": [
+    {
+      "applies_to": "tablet",
+      "check": "run.py --check-account",
+      "id": "P1",
+      "text": "CT account logged in on the tablet"
+    },
+    {
+      "applies_to": "tablet",
+      "check": "localStorage.unleashFlags",
+      "id": "P2",
+      "text": "OfflineSites on for the CT account"
+    },
+    {
+      "applies_to": "tablet",
+      "check": "act.py ready (offline false)",
+      "id": "P3",
+      "text": "the tablet online at start (the case switches Wi-Fi off itself)"
+    }
+  ],
+  "requirement": {
+    "sha256": "cd237ce4801bf40bd2deacdfa4d2c7f57c52fc8db5f1f804a585116f904ff7e9",
+    "source": {
+      "custom_id": null,
+      "locator": "New test description, W-20261103-004",
+      "ref": "0000fake008",
+      "requester": "Owner",
+      "type": "user_chat"
+    },
+    "text": "Test cases:\n-Happy path during site creation ( create a new site ) - Enable offline use through site creation \n than go  offline, you can create a flight in this site, and check if its available."
+  },
+  "routing": [
+    {
+      "line": 109,
+      "path": "apps/src/pages/Sites/screens/SitesList.page.tsx",
+      "ref": "82e23ff4a21a358460de108fc3ba9c621ac3960f",
+      "repo": "WingtraCloud",
+      "symbol": "btn-new-site",
+      "t": "git"
+    },
+    {
+      "line": 140,
+      "path": "apps/src/pages/Sites/screens/SiteCreate/SiteCreateSteps/SiteDetails.tsx",
+      "ref": "82e23ff4a21a358460de108fc3ba9c621ac3960f",
+      "repo": "WingtraCloud",
+      "symbol": "input-site-name; offline toggle behind OFFLINE_SITES on android",
+      "t": "git"
+    },
+    {
+      "line": 95,
+      "path": "apps/src/components/map/LocationSearch/LocationAutocomplete.tsx",
+      "ref": "82e23ff4a21a358460de108fc3ba9c621ac3960f",
+      "repo": "WingtraCloud",
+      "symbol": "lat/long option: map.setCenter + zoom 14",
+      "t": "git"
+    },
+    {
+      "line": 105,
+      "path": "apps/src/pages/Sites/components/SiteShapeEditorOverlay/components/UneditableOverlay.tsx",
+      "ref": "82e23ff4a21a358460de108fc3ba9c621ac3960f",
+      "repo": "WingtraCloud",
+      "symbol": "moveend at zoom > 10 sets the default site polygon",
+      "t": "git"
+    },
+    {
+      "line": 242,
+      "path": "apps/src/pages/Sites/screens/SiteCreate/SiteCreateSidebar.tsx",
+      "ref": "82e23ff4a21a358460de108fc3ba9c621ac3960f",
+      "repo": "WingtraCloud",
+      "symbol": "btn-sitecreation-next / Save new site",
+      "t": "git"
+    },
+    {
+      "line": 29,
+      "path": "apps/src/pages/Sites/components/NoFlightsYet.tsx",
+      "ref": "82e23ff4a21a358460de108fc3ba9c621ac3960f",
+      "repo": "WingtraCloud",
+      "symbol": "create-new-flight-button",
+      "t": "git"
+    },
+    {
+      "line": 230,
+      "path": "apps/src/pages/Sites/components/FlightSetup/NewFlightForm.tsx",
+      "ref": "82e23ff4a21a358460de108fc3ba9c621ac3960f",
+      "repo": "WingtraCloud",
+      "symbol": "Create, disabled while the site's map data is missing",
+      "t": "git"
+    }
+  ],
+  "schema": 1,
+  "status": "active",
+  "steps": [
+    {
+      "gates": [],
+      "helper": "act.py {target} tap testid:btn-sites --expect \"js:location.pathname === '/sites'\" --timeout 20",
+      "n": 1,
+      "text": "Top bar: Sites"
+    },
+    {
+      "gates": [],
+      "helper": "act.py {target} tap testid:btn-new-site --expect sel:testid:input-site-name --timeout 20",
+      "n": 2,
+      "text": "New site (opens site creation with the name field)"
+    },
+    {
+      "gates": [],
+      "helper": "act.py {target} type testid:input-site-name --text \"QA_OFFL-001_{run}\"",
+      "n": 3,
+      "text": "Site name: QA_OFFL-001_{run}"
+    },
+    {
+      "gates": [],
+      "helper": "act.py {target} type testid:input-location --text \"47.352000, 8.491000\"",
+      "n": 4,
+      "text": "Location: type the lat/long 47.352000, 8.491000"
+    },
+    {
+      "gates": [],
+      "helper": "act.py {target} wait --expect \"text:47.352000, 8.491000\" --timeout 20",
+      "n": 5,
+      "text": "Wait for the lat/long suggestion"
+    },
+    {
+      "gates": [],
+      "helper": "act.py {target} tap \"text:47.352000, 8.491000\" --expect \"js:!document.querySelector('[data-testid=location-option]')\" --timeout 15",
+      "n": 6,
+      "pause_s": 1,
+      "text": "Pick the lat/long suggestion: the map centres there at zoom 14 and the default site area is set"
+    },
+    {
+      "gates": [],
+      "helper": "act.py {target} tap \"text:Enable offline use\" --expect \"js:[...document.querySelectorAll('[role=checkbox]')].some(e => { let p = e; for (let i = 0; i < 4 && p; i++) { if (/Enable offline use/.test(p.innerText || '')) return e.getAttribute('aria-checked') === 'true'; p = p.parentElement; } return false; })\" --timeout 15",
+      "n": 7,
+      "pause_s": 3,
+      "text": "Turn on Enable offline use"
+    },
+    {
+      "gates": [],
+      "helper": "act.py {target} tap testid:btn-sitecreation-next --expect \"text:Save new site\" --timeout 30",
+      "n": 8,
+      "text": "Next (storage check; goes to the coordinate system step)"
+    },
+    {
+      "gates": [],
+      "helper": "act.py {target} wait --expect \"js:[...document.querySelectorAll('button')].some(b => b.innerText.trim() === 'Save new site' && !b.disabled)\" --timeout 60",
+      "n": 9,
+      "text": "Wait until Save new site is enabled (coordinate system ready)"
+    },
+    {
+      "gates": [
+        "cloud_write"
+      ],
+      "helper": "act.py {target} tap \"text:Save new site\" --expect \"js:/^\\/sites\\/[0-9a-f-]{36}/.test(location.pathname)\" --timeout 60",
+      "n": 10,
+      "text": "Save new site: creates the QA_ site (cloud write) and starts its offline download"
+    },
+    {
+      "gates": [],
+      "helper": "act.py {target} wait --expect \"js:/Site available offline|Failed to make|Cannot make site available offline|Not enough storage/.test(document.body.innerText)\" --timeout 300",
+      "n": 11,
+      "text": "Wait for 'Site available offline' (up to 5 min)"
+    },
+    {
+      "gates": [],
+      "helper": "act.py {target} shot {shots}/{run}_downloaded.png",
+      "n": 12,
+      "text": "Screenshot: the site after the download"
+    },
+    {
+      "assert": {
+        "expr": "v['download']['site_path'] is True and v['download']['available'] is True and v['download']['failed'] is False",
+        "kind": "scripted"
+      },
+      "gates": [],
+      "n": 13,
+      "read_js": "({site_path: /^\\/sites\\/[0-9a-f-]{36}/.test(location.pathname), available: /Site available offline/.test(document.body.innerText), failed: /Failed to make|Cannot make site available offline|Not enough storage/.test(document.body.innerText), site_id: (location.pathname.split('/')[2] || null)})",
+      "save_as": "download",
+      "text": "Check the site is available offline"
+    },
+    {
+      "gates": [],
+      "helper": "act.py {target} wifi off --until-offline",
+      "n": 14,
+      "text": "Wi-Fi off on the tablet; wait until the app shows it is offline"
+    },
+    {
+      "gates": [],
+      "helper": "act.py {target} wait --expect sel:testid:create-new-flight-button --timeout 30",
+      "n": 15,
+      "text": "Wait for Create flight in the empty site"
+    },
+    {
+      "gates": [],
+      "helper": "act.py {target} tap testid:create-new-flight-button --expect sel:testid:new-flight-name-input --timeout 20",
+      "n": 16,
+      "text": "Create flight (opens the New flight form)"
+    },
+    {
+      "gates": [],
+      "helper": "act.py {target} type testid:new-flight-name-input --text \"QA_OFFL-001_{run}\"",
+      "n": 17,
+      "text": "Flight name: QA_OFFL-001_{run}"
+    },
+    {
+      "gates": [],
+      "helper": "act.py {target} wait --expect \"js:[...document.querySelectorAll('[role=dialog] button')].some(b => b.innerText.trim() === 'Create' && !b.disabled)\" --timeout 30",
+      "n": 18,
+      "text": "Wait until Create is enabled (disabled while the site's map data is missing)"
+    },
+    {
+      "gates": [
+        "cloud_write"
+      ],
+      "helper": "act.py {target} tap text:Create --expect \"js:/\\/planning\\/[0-9a-f-]{36}$/.test(location.pathname) || (window.__qaToasts || []).some(x => /Flight successfully created|went wrong|error/i.test(x))\" --timeout 30",
+      "n": 19,
+      "text": "Create: creates the QA_ flight in the new site offline (synced later; cloud write)"
+    },
+    {
+      "gates": [],
+      "helper": "act.py {target} wait --expect \"js:/\\/planning\\/[0-9a-f-]{36}$/.test(location.pathname) || (window.__qaToasts || []).some(x => /went wrong|error/i.test(x))\" --timeout 30",
+      "n": 20,
+      "text": "Wait for the planner of the new flight"
+    },
+    {
+      "gates": [],
+      "helper": "act.py {target} shot {shots}/{run}_result.png",
+      "n": 21,
+      "text": "Screenshot: the new flight, created offline"
+    },
+    {
+      "assert": {
+        "expr": "v['flight']['planner'] is True and v['flight']['error_toast'] is False and (v['flight']['created_toast'] is True or v['flight']['name_shown'] is True)",
+        "kind": "scripted"
+      },
+      "gates": [],
+      "n": 22,
+      "read_js": "({planner: /\\/planning\\/[0-9a-f-]{36}$/.test(location.pathname), same_site: location.pathname.split('/')[1] === 'sites', created_toast: (window.__qaToasts || []).some(x => /Flight successfully created/.test(x)), error_toast: (window.__qaToasts || []).some(x => /went wrong|error/i.test(x)), offline: !navigator.onLine, name_shown: document.body.innerText.includes('QA_OFFL-001_{run}')})",
+      "save_as": "flight",
+      "text": "Check the flight was created offline in the new site and is open"
+    },
+    {
+      "always": true,
+      "gates": [],
+      "helper": "act.py {target} tap testid:btn-sites --expect \"js:/Exit without saving/.test(document.body.innerText) || location.pathname === '/sites'\" --timeout 20",
+      "n": 23,
+      "text": "Clean-up: leave the planner (always)"
+    },
+    {
+      "always": true,
+      "gates": [],
+      "helper": "act.py {target} tap \"text:Exit without saving\" --expect \"js:location.pathname === '/sites'\" --timeout 20",
+      "n": 24,
+      "text": "Exit without saving when asked (always; writes nothing)",
+      "when_js": "/Exit without saving/.test(document.body.innerText)"
+    },
+    {
+      "always": true,
+      "gates": [],
+      "helper": "act.py {target} wifi on",
+      "n": 25,
+      "text": "Clean-up: Wi-Fi back on (always)"
+    }
+  ],
+  "steps_note": "Written 2026-11-03 from New test W-20261103-004 (no example case for offline sites). Online first: new QA_ site, Enable offline use, Save new site, wait for 'Site available offline'; then Wi-Fi off and a QA_ flight created offline. The site area is the app's default box at zoom 14 around 47.352000, 8.491000; if it is over the offline size limit, step 13 fails on 'Cannot make site available offline' (a test-data problem, not an app bug). Wi-Fi comes back on in step 25 (always) and the runner turns it on after any run that switched it off.",
+  "supersedes": null,
+  "targets": "tablet",
+  "test_data": {
+    "new_site": "QA_OFFL-001_<run> in the CT account (stays there)",
+    "site_id": null
+  },
+  "title": "Offline sites: new QA_ site with offline use, then a flight created offline"
+}

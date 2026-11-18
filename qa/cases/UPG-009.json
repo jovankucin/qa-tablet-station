@@ -1,0 +1,113 @@
+{
+  "area": "UPG",
+  "author": "claude",
+  "covered_paths": [
+    "apps/android/app/src/main/java/com/wingtra/cloud/app/plugins/EmlidPlugin/**",
+    "apps/android/app/src/main/java/com/wingtra/cloud/app/plugins/AndroidServicesPlugin/**",
+    "apps/android/app/src/main/java/com/wingtra/cloud/app/plugins/WifiPlugin/**",
+    "apps/android/app/src/main/AndroidManifest.xml",
+    "apps/android/app/build.gradle",
+    "apps/android/variables.gradle",
+    "apps/src/plugins/emlid-plugin/**",
+    "apps/src/plugins/android-services/**",
+    "apps/src/plugins/wifi/**",
+    "apps/src/hooks/emlid/**",
+    "apps/src/helpers/emlid/**",
+    "apps/src/helpers/android/**",
+    "apps/src/components/emlid/**",
+    "apps/src/components/Devices/**",
+    "apps/src/contexts/EmlidConnectionContext.tsx",
+    "apps/src/configuration/emlid.ts",
+    "apps/src/pages/Surveying/**",
+    "apps/src/hooks/settings/*WingtraGround*",
+    "apps/src/common/environment.ts",
+    "apps/package.json"
+  ],
+  "created": "2026-10-20T15:40:26.964Z",
+  "expected_differences": [],
+  "fixtures": [],
+  "id": "UPG-009",
+  "kind": "case",
+  "needs": {
+    "account_lock": false,
+    "drone_hw": null,
+    "flags": [],
+    "link": "none",
+    "usb_port": true
+  },
+  "preconditions": [],
+  "requirement": {
+    "sha256": "80e99e67866082f05a938a7a44141396d7dcbfb955535416bf36a6fb325a4e37",
+    "source": {
+      "cache": "qa/cache/clickup/0000fake002.json",
+      "locator": "description bullet 9",
+      "ref": "0000fake002",
+      "requester": "Requester Colleague",
+      "type": "clickup_task"
+    },
+    "text": "*   Emlid flow: connecting, reconnecting and collecting data (field testing)\n    *   The full WingtraGROUND flow"
+  },
+  "routing": [
+    {
+      "line": 20,
+      "path": "apps/android/app/src/main/java/com/wingtra/cloud/app/plugins/EmlidPlugin/EmlidPlugin.kt",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "@CapacitorPlugin(name = \"EmlidPlugin\", permissions = BLUETOOTH_SCAN/BLUETOOTH_CONNECT alias \"ble\")",
+      "t": "git",
+      "why": "The Emlid receiver transport (BLE scan, connect, websocket/http over BLE, log download) is a native Android Capacitor plugin. startBleScan (line 49) asks for the Android 12+ BLE runtime permissions. Nothing on web or Electron does this."
+    },
+    {
+      "line": 4,
+      "path": "apps/src/plugins/emlid-plugin/index.ts",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "EmlidPlugin = registerPlugin('EmlidPlugin', { web: EmlidWeb })",
+      "t": "git",
+      "why": "Outside Android the plugin resolves to EmlidWeb (web.ts), whose methods are no-ops (sendBleRequest returns success:false). The WingtraGROUND flow can only run against the Android native plugin."
+    },
+    {
+      "line": 23,
+      "path": "apps/src/hooks/emlid/useBleScanListener.tsx",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "useCapacitorListener(..., isAndroid)",
+      "t": "git",
+      "why": "The bleScanUpdate listener that fills the Emlid device list is only attached when isAndroid is true."
+    },
+    {
+      "line": 7,
+      "path": "apps/src/common/environment.ts",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "isAndroid",
+      "t": "git",
+      "why": "Platform gate (Capacitor.getPlatform() === 'android') used by the Emlid scan listener."
+    },
+    {
+      "line": 127,
+      "path": "apps/src/pages/Surveying/screens/GroundControl.tsx",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "requestBluetoothPermissions() (after requestGeolocationPermissions() at line 121)",
+      "t": "git",
+      "why": "Starting WingtraGROUND base setup goes through AndroidServicesPlugin.ensureLocationServicesEnabled and ensureBluetoothServicesEnabled. This is the Android location and Bluetooth permission/enable path that targetSdk 36 changes."
+    },
+    {
+      "line": 5,
+      "path": "apps/src/plugins/android-services/index.ts",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "AndroidServicesPlugin = registerPlugin('AndroidServicesPlugin') (no web implementation)",
+      "t": "git",
+      "why": "The location and Bluetooth enable prompts that gate base setup exist only in the Android native plugin."
+    }
+  ],
+  "schema": 1,
+  "status": "active",
+  "steps": [],
+  "steps_note": "back-test case: steps are authored for live runs in Step 3",
+  "supersedes": null,
+  "targets": "tablet",
+  "title": "Emlid flow: connecting, reconnecting and collecting data (field testing)"
+}

@@ -1,0 +1,404 @@
+{
+  "area": "OFFL",
+  "author": "claude",
+  "cloud_writes": [
+    {
+      "object": "new site QA_{target} Boundary offline {time}",
+      "step": 12,
+      "what": "creates the site (stays in the account) and its offline map download to the tablet"
+    },
+    {
+      "object": "that site",
+      "step": 17,
+      "what": "creates the flight QA_{target} Partly outside offline offline; synced when back online (stays there; its plan is never saved)"
+    },
+    {
+      "object": "that flight",
+      "step": 26,
+      "what": "the planner's Save only opens Flight overview; the case closes it with X, nothing is saved"
+    }
+  ],
+  "covered_paths": [
+    "apps/src/pages/FlightPlanning/components/FlightPlanMenuSidebar/components/FlightOverviewModal.tsx",
+    "apps/src/pages/FlightPlanning/hooks/useHasPointsOutsideBBox.ts",
+    "apps/src/helpers/map/hasFeaturesOutsideSite.ts"
+  ],
+  "created": "2026-11-11T14:03:07.000Z",
+  "expected": "Offline, a QA_ flight created in its downloaded QA_ site with its area partly outside the site: Flight overview shows 'Flight elements outside of site boundaries' and Save & exit is disabled.",
+  "expected_differences": [],
+  "fixtures": [],
+  "flags_watch": [
+    "OfflineSites",
+    "OfflineSync"
+  ],
+  "forbidden": [
+    "Save & exit or any other save",
+    "Confirm",
+    "Delete or archive (the QA_ site and flight stay)",
+    "any site other than the one this case creates"
+  ],
+  "id": "OFFL-006",
+  "kind": "case",
+  "needs": {
+    "account_lock": false,
+    "drone_hw": null,
+    "flags": [
+      "OfflineSites: on"
+    ],
+    "link": "none",
+    "usb_port": false
+  },
+  "parts": [
+    {
+      "check": false,
+      "n": 1,
+      "quote": "Enable offline use through site creation",
+      "text": "Stand-in: my own QA_ site with Enable offline use, downloaded"
+    },
+    {
+      "check": false,
+      "n": 2,
+      "quote": "Than turn off the internet",
+      "text": "Turn off the internet (Wi-Fi off)"
+    },
+    {
+      "check": false,
+      "n": 3,
+      "quote": "Create a flight plan with flight area which is partially inside the site area and partially outside",
+      "text": "Offline: create a flight, area partly outside the site, take-off inside"
+    },
+    {
+      "check": true,
+      "n": 4,
+      "quote": "It’s only possible to save flights that are inside the site’s boundary",
+      "text": "Offline: Save & exit disabled, outside-site warning shown"
+    }
+  ],
+  "preconditions": [
+    {
+      "applies_to": "tablet",
+      "check": "run.py --check-account",
+      "id": "P1",
+      "text": "engine account (qa-stag) logged in"
+    },
+    {
+      "applies_to": "tablet",
+      "check": "localStorage.unleashFlags",
+      "id": "P2",
+      "text": "OfflineSites on"
+    },
+    {
+      "applies_to": "tablet",
+      "check": "act.py ready (offline false)",
+      "id": "P3",
+      "text": "tablet online at start (the case switches Wi-Fi off itself)"
+    }
+  ],
+  "requirement": {
+    "sha256": "7dc805d11def95e015707e9b918d88126c39aea98b01de4c17199927fc56718a",
+    "source": {
+      "custom_id": null,
+      "locator": "New test description, W-20261111-004",
+      "ref": "0000fake008",
+      "requester": "Owner",
+      "type": "user_chat"
+    },
+    "text": "For testing this use Hedingen_Network_Correction site, the site is already downloaded. Than turn off the internet and proceed with thesting. \n\nFlights crossing the site boundary\nCreate a flight plan with flight area which is partially inside the site area and partially outside\n It’s only possible to save flights that are inside the site’s boundary\nCreate a flight which the flight area is fully outside the site area\n Same as above\nFor an existing site with downloaded tiles, create a flight plan with a flight area outside the site. Then modify the site area so it covers the flight with its flight area. \nV: These are separate operations: creating a flight plan with flight area outside of the site boundary is possible offline, modifying a site triggers its map to update. \nCreate a flight plan with flight area which is inside the site area. Then save, edit and move the flight outside the site area."
+  },
+  "routing": [
+    {
+      "line": 211,
+      "path": "apps/src/pages/FlightPlanning/components/FlightPlanMenuSidebar/components/FlightOverviewModal.tsx",
+      "ref": "ab7c6f0ecc9364b99850faf30b80de6d7cac21c1",
+      "repo": "WingtraCloud",
+      "symbol": "btn-save-and-exit disabled when isItemsOutsideSite && isOffline",
+      "t": "git"
+    },
+    {
+      "line": 3,
+      "path": "apps/src/pages/Sites/constants.tsx",
+      "ref": "ab7c6f0ecc9364b99850faf30b80de6d7cac21c1",
+      "repo": "WingtraCloud",
+      "symbol": "default site box 395x240 px at SITE_LOCATION_ZOOM 14",
+      "t": "git"
+    },
+    {
+      "line": 25,
+      "path": "apps/src/configuration/map.ts",
+      "ref": "ab7c6f0ecc9364b99850faf30b80de6d7cac21c1",
+      "repo": "WingtraCloud",
+      "symbol": "tabletZoom 15: the planner opens centred on the site",
+      "t": "git"
+    }
+  ],
+  "schema": 1,
+  "status": "active",
+  "steps": [
+    {
+      "gates": [],
+      "helper": "act.py {target} tap text:Exit --expect \"js:!/Do you really want to exit\\?/.test(document.body.innerText)\" --timeout 20",
+      "n": 1,
+      "part": 1,
+      "text": "Leave a flight setup's 'Do you want to exit?' dialog when one is open (Exit; writes nothing)",
+      "when_js": "/Do you really want to exit\\?/.test(document.body.innerText)"
+    },
+    {
+      "gates": [],
+      "helper": "act.py {target} wait --expect \"js:(((document.querySelector('[data-testid=flight-name-editable-label]')||{}).innerText||(document.querySelector('[data-testid=flight-name-editable-label-input]')||{}).value||'').trim().startsWith('QA_'))\" --timeout 5",
+      "n": 2,
+      "part": 1,
+      "text": "Stop when the planner shows a flight that is not Hover's own (name not starting with QA_): a person's flight is never left or dropped; close it by hand, then run again",
+      "when_js": "location.pathname.includes('/planning/')"
+    },
+    {
+      "gates": [],
+      "helper": "act.py {target} tap testid:btn-sites --expect \"js:/Exit without saving|Do you really want to exit\\?/.test(document.body.innerText) || location.pathname === '/sites'\" --timeout 20",
+      "n": 3,
+      "part": 1,
+      "text": "Top bar: Sites (a planner or a flight setup left open asks first)"
+    },
+    {
+      "gates": [],
+      "helper": "act.py {target} tap \"text:Exit without saving\" --expect \"js:location.pathname === '/sites'\" --timeout 20",
+      "n": 4,
+      "part": 1,
+      "text": "Exit without saving, when the planner asks (writes nothing)",
+      "when_js": "/Exit without saving/.test(document.body.innerText)"
+    },
+    {
+      "gates": [],
+      "helper": "act.py {target} tap text:Exit --expect \"js:location.pathname === '/sites'\" --timeout 20",
+      "n": 5,
+      "part": 1,
+      "text": "Exit, when a flight setup asks 'Do you want to exit?' (writes nothing)",
+      "when_js": "/Do you really want to exit\\?/.test(document.body.innerText)"
+    },
+    {
+      "gates": [],
+      "helper": "act.py {target} tap testid:btn-new-site --expect sel:testid:input-site-name --timeout 20",
+      "n": 6,
+      "part": 1,
+      "text": "New site (opens site creation with the name field)"
+    },
+    {
+      "gates": [],
+      "helper": "act.py {target} type testid:input-site-name --text \"QA_{target} Boundary offline {time}\"",
+      "n": 7,
+      "part": 1,
+      "text": "Site name: QA_{target} Boundary offline {time}"
+    },
+    {
+      "gates": [],
+      "helper": "act.py {target} type testid:input-location --text \"47.352000, 8.491000\"",
+      "n": 8,
+      "part": 1,
+      "text": "Location: type the lat/long 47.352000, 8.491000"
+    },
+    {
+      "gates": [],
+      "helper": "act.py {target} tap \"text:47.352000, 8.491000\" --expect \"js:!document.querySelector('[data-testid=location-option]')\" --timeout 15",
+      "n": 9,
+      "part": 1,
+      "text": "Pick the lat/long suggestion: the map centres there at zoom 14 and the default site area is set"
+    },
+    {
+      "gates": [],
+      "helper": "act.py {target} tap \"text:Enable offline use\" --expect \"js:[...document.querySelectorAll('[role=checkbox]')].some(e => { let p = e; for (let i = 0; i < 4 && p; i++) { if (/Enable offline use/.test(p.innerText || '')) return e.getAttribute('aria-checked') === 'true'; p = p.parentElement; } return false; })\" --timeout 15",
+      "n": 10,
+      "part": 1,
+      "text": "Turn on Enable offline use"
+    },
+    {
+      "gates": [],
+      "helper": "act.py {target} tap testid:btn-sitecreation-next --expect \"text:Save new site\" --timeout 30",
+      "n": 11,
+      "part": 1,
+      "text": "Next (storage check; goes to the coordinate system step)"
+    },
+    {
+      "gates": [
+        "cloud_write"
+      ],
+      "helper": "act.py {target} tap \"text:Save new site\" --find-timeout 60 --expect \"js:/^\\/sites\\/[0-9a-f-]{36}/.test(location.pathname)\" --timeout 60",
+      "n": 12,
+      "part": 1,
+      "text": "Save new site: creates the QA_ site (cloud write) and starts its offline download"
+    },
+    {
+      "gates": [],
+      "helper": "act.py {target} wait --expect \"js:/Site available offline|Offline map not up to date|Waiting to resume download|Failed to make|Cannot make site available offline|Not enough storage/.test(document.body.innerText)\" --timeout 300",
+      "n": 13,
+      "part": 1,
+      "text": "Wait until the site download ends: available, not up to date, waiting or failed (up to 5 min)"
+    },
+    {
+      "gates": [],
+      "helper": "act.py {target} wifi off --until-offline",
+      "n": 14,
+      "part": 2,
+      "text": "Turn off the internet: Wi-Fi off on the tablet; wait until the app shows it is offline"
+    },
+    {
+      "gates": [],
+      "helper": "act.py {target} tap testid:create-new-flight-button --expect sel:testid:new-flight-name-input --timeout 30",
+      "n": 15,
+      "part": 3,
+      "text": "Create flight (opens the New flight form)"
+    },
+    {
+      "gates": [],
+      "helper": "act.py {target} type testid:new-flight-name-input --text \"QA_{target} Partly outside offline\"",
+      "n": 16,
+      "part": 3,
+      "text": "Flight name: QA_{target} Partly outside offline"
+    },
+    {
+      "gates": [
+        "cloud_write"
+      ],
+      "helper": "act.py {target} tap text:Create --find-timeout 60 --expect \"js:/\\/planning\\/[0-9a-f-]{36}$/.test(location.pathname)\" --timeout 30",
+      "n": 17,
+      "part": 3,
+      "text": "Create, offline: creates the QA_ flight in the downloaded site (synced later; cloud write) and opens its planner"
+    },
+    {
+      "gates": [],
+      "helper": "act.py {target} wait --expect \"text:Create area and take-off point\" --timeout 60",
+      "n": 18,
+      "part": 3,
+      "text": "Wait until the empty planner is loaded"
+    },
+    {
+      "gates": [],
+      "helper": "act.py {target} tap testid:btn-draw-area --expect \"js:!!(document.querySelector('[data-testid=btn-draw-area]') && document.querySelector('[data-testid=btn-draw-area]').parentElement.classList.contains('ring-interaction-primary-button-active'))\" --timeout 10",
+      "n": 19,
+      "part": 3,
+      "text": "Area tool on (its button shows the active ring)"
+    },
+    {
+      "gates": [],
+      "helper": "act.py {target} map-tap 0.03 0.4",
+      "n": 20,
+      "part": 3,
+      "text": "Area corner 1 at 0.03, 0.4 of the map"
+    },
+    {
+      "gates": [],
+      "helper": "act.py {target} map-tap 0.2 0.4",
+      "n": 21,
+      "part": 3,
+      "text": "Area corner 2 at 0.2, 0.4 of the map"
+    },
+    {
+      "gates": [],
+      "helper": "act.py {target} map-tap 0.2 0.56",
+      "n": 22,
+      "part": 3,
+      "text": "Area corner 3 at 0.2, 0.56 of the map"
+    },
+    {
+      "gates": [],
+      "helper": "act.py {target} map-tap 0.03 0.56 --double --expect \"text:A1 - Area\" --timeout 15",
+      "n": 23,
+      "part": 3,
+      "text": "Area corner 4 at 0.03, 0.56 of the map, finished (row A1 - Area)"
+    },
+    {
+      "gates": [],
+      "helper": "act.py {target} tap testid:btn-takeoff --expect \"js:!!(document.querySelector('[data-testid=btn-takeoff]') && document.querySelector('[data-testid=btn-takeoff]').parentElement.classList.contains('ring-interaction-primary-button-active'))\" --timeout 10",
+      "n": 24,
+      "part": 3,
+      "text": "Take-off tool on (its button shows the active ring)"
+    },
+    {
+      "gates": [],
+      "helper": "act.py {target} map-tap 0.26 0.48 --expect \"text:T - Take off\" --timeout 15",
+      "n": 25,
+      "part": 3,
+      "text": "Take-off at 0.26, 0.48, inside the site (row T - Take off)"
+    },
+    {
+      "gates": [
+        "write_list",
+        "cloud_write"
+      ],
+      "helper": "act.py {target} tap text:Save --expect sel:testid:btn-save-and-exit --timeout 30",
+      "n": 26,
+      "part": 3,
+      "text": "Save (planner): opens Flight overview for the QA_ flight (writes nothing itself)"
+    },
+    {
+      "gates": [],
+      "helper": "act.py {target} wait --expect \"js:!!document.querySelector('[data-testid=btn-save-and-exit]') && /Save & exit/.test(document.querySelector('[data-testid=btn-save-and-exit]').innerText)\" --timeout 60",
+      "n": 27,
+      "part": 4,
+      "text": "Wait until Flight overview has finished its mission checks (Save & exit shows its label)"
+    },
+    {
+      "gates": [],
+      "helper": "act.py {target} shot {shots}/{run}_result_p4.png",
+      "n": 28,
+      "part": 4,
+      "text": "Screenshot: Flight overview offline"
+    },
+    {
+      "assert": {
+        "expr": "v['overview']['warning'] == True and v['overview']['save_exit_disabled'] == True",
+        "kind": "scripted"
+      },
+      "gates": [],
+      "n": 29,
+      "part": 4,
+      "read_js": "({offline: !navigator.onLine, warning: [...document.querySelectorAll('[role=dialog] *')].some(e => (e.innerText || '').trim() === 'Flight elements outside of site boundaries' && e.getBoundingClientRect().width > 0), save_exit_disabled: !!(document.querySelector('[data-testid=btn-save-and-exit]') || {}).disabled})",
+      "save_as": "overview",
+      "text": "Check: offline, the outside-site warning shows and Save & exit is disabled"
+    },
+    {
+      "always": true,
+      "gates": [],
+      "helper": "act.py {target} tap testid:btn-close-modal --expect \"js:!document.querySelector('[data-testid=btn-save-and-exit]')\" --timeout 15",
+      "n": 30,
+      "text": "Clean-up: close Flight overview without saving (X; only when it is open)",
+      "when_js": "!!document.querySelector('[data-testid=btn-save-and-exit]')"
+    },
+    {
+      "always": true,
+      "gates": [],
+      "helper": "act.py {target} tap testid:btn-sites --expect \"js:/Exit without saving|Do you really want to exit\\?/.test(document.body.innerText) || location.pathname === '/sites'\" --timeout 20",
+      "n": 31,
+      "text": "Clean-up: leave the planner (always; a planner showing a flight that is not Hover's own stays as it is)",
+      "when_js": "!location.pathname.includes('/planning/') || (((document.querySelector('[data-testid=flight-name-editable-label]')||{}).innerText||(document.querySelector('[data-testid=flight-name-editable-label-input]')||{}).value||'').trim().startsWith('QA_'))"
+    },
+    {
+      "always": true,
+      "gates": [],
+      "helper": "act.py {target} tap \"text:Exit without saving\" --expect \"js:location.pathname === '/sites'\" --timeout 20",
+      "n": 32,
+      "text": "Exit without saving when asked (always; writes nothing; only for Hover's own flight)",
+      "when_js": "/Exit without saving/.test(document.body.innerText) && (((document.querySelector('[data-testid=flight-name-editable-label]')||{}).innerText||(document.querySelector('[data-testid=flight-name-editable-label-input]')||{}).value||'').trim().startsWith('QA_'))"
+    },
+    {
+      "always": true,
+      "gates": [],
+      "helper": "act.py {target} tap text:Exit --expect \"js:location.pathname === '/sites'\" --timeout 20",
+      "n": 33,
+      "text": "Exit when a flight setup asks 'Do you want to exit?' (always; writes nothing)",
+      "when_js": "/Do you really want to exit\\?/.test(document.body.innerText)"
+    },
+    {
+      "always": true,
+      "gates": [],
+      "helper": "act.py {target} wifi on",
+      "n": 34,
+      "text": "Clean-up: Wi-Fi back on (always)"
+    }
+  ],
+  "steps_note": "Written 2026-11-11 from New test W-20261111-004, from OFFL-004 c1. Stand-in: a new QA_ site of Hover's own for the person's Hedingen_Network_Correction (own sites only). Wi-Fi goes off after the download, then the flight is created and drawn offline. Offline the planner fits the map to the site bbox (FlightPlanningMap.tsx offlineFlightBounds, MapContext fitBounds), so the area's left corners sit at x 0.03, in the thin band left of the site; if they land inside, the check fails for a test reason (the result screenshot shows it). map-tap runs on a device for the first time.",
+  "supersedes": null,
+  "targets": "tablet",
+  "test_data": {
+    "new_site": "QA_{target} Boundary offline {time} in the qa-stag account (stays there)",
+    "site_id": "a0000001-0000-4000-8000-000000000001"
+  },
+  "title": "Offline: flight created offline, partly outside its site, cannot be saved"
+}

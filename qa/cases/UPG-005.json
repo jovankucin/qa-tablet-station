@@ -1,0 +1,83 @@
+{
+  "area": "UPG",
+  "author": "claude",
+  "covered_paths": [
+    "apps/android/app/src/main/java/com/wingtra/cloud/app/MainActivity.java",
+    "apps/android/app/src/main/AndroidManifest.xml",
+    "apps/android/app/src/main/res/values/strings.xml",
+    "apps/android/app/src/main/java/com/wingtra/cloud/app/plugins/systembars/**",
+    "apps/android/variables.gradle",
+    "apps/android/app/build.gradle",
+    "apps/capacitor.config.ts",
+    "apps/package.json"
+  ],
+  "created": "2026-10-20T15:40:22.385Z",
+  "expected_differences": [],
+  "fixtures": [],
+  "id": "UPG-005",
+  "kind": "case",
+  "needs": {
+    "account_lock": false,
+    "drone_hw": null,
+    "flags": [],
+    "link": "none",
+    "usb_port": false
+  },
+  "preconditions": [],
+  "requirement": {
+    "sha256": "c3cc3c834d3ed357b9d5b5f477e1a877ec4bbded720f0a53698a8718fc4e357d",
+    "source": {
+      "cache": "qa/cache/clickup/0000fake002.json",
+      "locator": "description bullet 5",
+      "ref": "0000fake002",
+      "requester": "Requester Colleague",
+      "type": "clickup_task"
+    },
+    "text": "*   Shared storage permission: deny on startup, grant on startup, revoke\n    *   You are not able to use the app when denying\n    *   You can use the app when later accepting"
+  },
+  "routing": [
+    {
+      "line": 70,
+      "path": "apps/android/app/src/main/java/com/wingtra/cloud/app/MainActivity.java",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "MainActivity.load() / Environment.isExternalStorageManager()",
+      "t": "git",
+      "why": "Android-only gate. Without all-files access, load() returns before super.load(), so the Capacitor WebView and the native log writers never start. This is what makes the app unusable while access is denied."
+    },
+    {
+      "line": 89,
+      "path": "apps/android/app/src/main/java/com/wingtra/cloud/app/MainActivity.java",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "MainActivity.showStoragePermissionDialog()",
+      "t": "git",
+      "why": "Native AlertDialog 'Allow shared file access', setCancelable(false) at line 105. OPEN SETTINGS opens ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION and CLOSE APP calls finish()."
+    },
+    {
+      "line": 122,
+      "path": "apps/android/app/src/main/java/com/wingtra/cloud/app/MainActivity.java",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "MainActivity.onResume() recreate()",
+      "t": "git",
+      "why": "When access is granted while the gate is waiting, the activity is recreated. This is the 'grant later' path, where the ET65 black-band layout defect appears."
+    },
+    {
+      "line": 5,
+      "path": "apps/android/app/src/main/AndroidManifest.xml",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "uses-permission MANAGE_EXTERNAL_STORAGE",
+      "t": "git",
+      "why": "Android-only special permission. Revoking it makes the OS kill the process ('MANAGE_EXTERNAL_STORAGE changed')."
+    }
+  ],
+  "schema": 1,
+  "status": "active",
+  "steps": [],
+  "steps_note": "back-test case: steps are authored for live runs in Step 3",
+  "supersedes": null,
+  "targets": "tablet",
+  "title": "Shared storage permission: deny on startup, grant on startup, revoke"
+}

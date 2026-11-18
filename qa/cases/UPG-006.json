@@ -1,0 +1,99 @@
+{
+  "area": "UPG",
+  "author": "claude",
+  "covered_paths": [
+    "apps/src/App.tsx",
+    "apps/src/common/environment.ts",
+    "apps/src/contexts/OfflineModeProvider.tsx",
+    "apps/src/hooks/connection/**",
+    "apps/src/hooks/auth/**",
+    "apps/src/hooks/offlineMode/**",
+    "apps/src/hooks/deviceStorage/**",
+    "apps/src/components/application/**",
+    "apps/src/database/**",
+    "apps/src/deviceStorage/**",
+    "apps/src/pages/Sites/**",
+    "apps/src/pages/FlightPlanning/**",
+    "apps/android/app/src/main/java/com/wingtra/cloud/app/MainActivity.java",
+    "apps/package.json",
+    "packages/local-api/**"
+  ],
+  "created": "2026-10-20T15:40:24.299Z",
+  "expected_differences": [],
+  "fixtures": [],
+  "id": "UPG-006",
+  "kind": "case",
+  "needs": {
+    "account_lock": false,
+    "drone_hw": null,
+    "flags": [],
+    "link": "none",
+    "usb_port": false
+  },
+  "preconditions": [],
+  "requirement": {
+    "sha256": "b3265d7440c97006e131d34328163ec9cfc1762dc2e2c213caf94b9281b95aa5",
+    "source": {
+      "cache": "qa/cache/clickup/0000fake002.json",
+      "locator": "description bullet 6",
+      "ref": "0000fake002",
+      "requester": "Requester Colleague",
+      "type": "clickup_task"
+    },
+    "text": "*   Offline startup"
+  },
+  "routing": [
+    {
+      "line": 7,
+      "path": "apps/src/common/environment.ts",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "isAndroid",
+      "t": "git",
+      "why": "Platform constant (Capacitor.getPlatform() === 'android') that every offline-mode gate below keys on; web/Electron never take the offline path."
+    },
+    {
+      "line": 64,
+      "path": "apps/src/App.tsx",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "isOfflineSyncEnabled = isAndroid && offlineSyncEnabled",
+      "t": "git",
+      "why": "Offline session restore/bootstrap at startup only runs on Android; lines 74-75 and 97-105 also hold startup until the Android network status and persisted OfflineSync flag are loaded."
+    },
+    {
+      "line": 124,
+      "path": "apps/src/contexts/OfflineModeProvider.tsx",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "isOfflineModeAvailable: isAndroid",
+      "t": "git",
+      "why": "Offline mode (and the local data root URL at line 94) is only available on Android."
+    },
+    {
+      "line": 122,
+      "path": "apps/src/hooks/connection/useLocalApi.ts",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "shouldInitializeOfflineSync",
+      "t": "git",
+      "why": "The offline local API (packages/local-api) that answers list/detail queries when offline is only initialised when isAndroid."
+    },
+    {
+      "line": 16,
+      "path": "apps/src/hooks/connection/useLocalApiSyncStatus.ts",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "subscribe = isAndroid ? subscribeThrottled : subscribeNoop",
+      "t": "git",
+      "why": "Sync status feeding the navbar offline/sync indicator (offline-status-indicator in NavbarSyncStatusIcon.tsx:65) is Android-only."
+    }
+  ],
+  "schema": 1,
+  "status": "active",
+  "steps": [],
+  "steps_note": "back-test case: steps are authored for live runs in Step 3",
+  "supersedes": null,
+  "targets": "tablet",
+  "title": "Offline startup"
+}

@@ -1,0 +1,1004 @@
+{
+ "schema": 1,
+ "kind": "case",
+ "id": "TERR-011",
+ "area": "TERR",
+ "author": "claude",
+ "status": "active",
+ "title": "Custom terrain 28 m limit at South Africa: existing map and Import file",
+ "supersedes": null,
+ "created": "2026-11-04T13:31:09.269Z",
+ "targets": "tablet",
+ "requirement": {
+  "text": "Android\nOffline - Download a flight plan offline with custom terrain imported and make sure the custom terrain is still used when going offline\n\nTest with terrain from various latitudes and make sure we have the same resolution constraint everywhere. e.g. ( create new sites for all of them )\nAlaska\nAntarctica\nSouth Africa\nSpain",
+  "sha256": "3b7bbafaaac05ab51fe9e6737f7efbd2b162956fc6655575dd49713645df037e",
+  "source": {
+   "type": "user_chat",
+   "ref": "0000fake007",
+   "custom_id": null,
+   "locator": "New test description, W-20261104-015 (latitudes: South Africa; your answer: both ways)",
+   "requester": "Owner"
+  }
+ },
+ "expected": "At South Africa (-33.900000, 18.400000), in a new QA_ site: both synthetic UTM DSMs import as maps and process (status MAP). In a new flight there, Add terrain / map > Use existing map lists both; QA_<run>-28 (SouthAfrica_33.9S_28m_UTM.tif, app measures about 28 m) is selectable and QA_<run>-29 (SouthAfrica_33.9S_29m_UTM.tif, about 29 m) is listed but greyed out. Add terrain / map > Import file: SouthAfrica_33.9S_28m_UTM.tif shows no warning and Next is enabled; SouthAfrica_33.9S_29m_UTM.tif shows 'Dataset has too low resolution. Select a map with 28 m/px or finer.' and Next is disabled. Nothing in the planner is saved.",
+ "expected_differences": [],
+ "needs": {
+  "account_lock": false,
+  "drone_hw": null,
+  "flags": [],
+  "link": "none",
+  "usb_port": false
+ },
+ "flags_watch": [
+  "SurveyOutcomes"
+ ],
+ "fixtures": [
+  {
+   "name": "SouthAfrica_33.9S_28m_UTM.tif",
+   "path": "tests/2026-11-04-custom-terrain-final/files/SouthAfrica_33.9S_28m_UTM.tif",
+   "sha256": "e4c1e1e778dd5d21226c0f8e83c208fc251c44588e332e14831a71c72c6fa89e",
+   "device_path": "/sdcard/Download/QA-TERR-011/SouthAfrica_33.9S_28m_UTM.tif",
+   "delivery": "engine: act.py deliver copies it to device_path on each tablet when it is missing and checks its sha256 there; a different file at that path is never overwritten"
+  },
+  {
+   "name": "SouthAfrica_33.9S_29m_UTM.tif",
+   "path": "tests/2026-11-04-custom-terrain-final/files/SouthAfrica_33.9S_29m_UTM.tif",
+   "sha256": "b293662c0f10ae7c28d610c5c3d21f1161094c68aa68ce65b352d9eb24a8cf12",
+   "device_path": "/sdcard/Download/QA-TERR-011/SouthAfrica_33.9S_29m_UTM.tif",
+   "delivery": "engine: act.py deliver copies it to device_path on each tablet when it is missing and checks its sha256 there; a different file at that path is never overwritten"
+  }
+ ],
+ "test_data": {
+  "new_site": "QA_{target} South Africa {time} in the CT account (stays there)",
+  "site_id": "a0000001-0000-4000-8000-000000000001"
+ },
+ "cloud_writes": [
+  {
+   "step": 10,
+   "object": "new site QA_{target} South Africa {time} in the CT account",
+   "what": "creates the site (stays; the engine does not delete)"
+  },
+  {
+   "step": 33,
+   "object": "that site",
+   "what": "imports the 28 m DSM as map QA_<run>-28 (upload, MAP job, tiling)"
+  },
+  {
+   "step": 56,
+   "object": "that site",
+   "what": "imports the 29 m DSM as map QA_<run>-29 (upload, MAP job, tiling)"
+  },
+  {
+   "step": 63,
+   "object": "that site",
+   "what": "creates the flight QA_<tablet> South Africa terrain (left unsaved)"
+  }
+ ],
+ "forbidden": [
+  "Confirm in the existing-map dialog (attaches a map to the flight)",
+  "the second Next in the flight's Import file flow",
+  "Save or Save & exit in the planner",
+  "Delete or archive",
+  "any site other than the one this case creates"
+ ],
+ "preconditions": [
+  {
+   "id": "P1",
+   "applies_to": "tablet",
+   "check": "run.py --check-account",
+   "text": "CT account logged in"
+  },
+  {
+   "id": "P2",
+   "applies_to": "tablet",
+   "check": "act.py <tag> deliver TERR-011 --check",
+   "text": "both DSMs on the tablet in Download/QA-TERR-011"
+  },
+  {
+   "id": "P3",
+   "applies_to": "tablet",
+   "check": "act.py ready (offline false)",
+   "text": "tablet online"
+  }
+ ],
+ "routing": [
+  {
+   "t": "git",
+   "repo": "WingtraCloud",
+   "ref": "82e23ff4a21a358460de108fc3ba9c621ac3960f",
+   "path": "apps/src/pages/FlightPlanning/components/LeftToolbar.tsx",
+   "symbol": "btn-open-left-sidebar (Layers)",
+   "line": 78
+  },
+  {
+   "t": "git",
+   "repo": "WingtraCloud",
+   "ref": "82e23ff4a21a358460de108fc3ba9c621ac3960f",
+   "path": "apps/src/pages/FlightPlanning/components/Layers/components/LayersHeader.tsx",
+   "symbol": "layer-actions-button (+)",
+   "line": 29
+  },
+  {
+   "t": "git",
+   "repo": "WingtraCloud",
+   "ref": "82e23ff4a21a358460de108fc3ba9c621ac3960f",
+   "path": "apps/src/components/map/Layers/components/ImportActionsDialog/components/terrain-selection/dialogs/TerrainSourceSelection.tsx",
+   "symbol": "Import file / Use existing map (WingtraCLOUD), Next",
+   "line": 13
+  },
+  {
+   "t": "git",
+   "repo": "WingtraCloud",
+   "ref": "82e23ff4a21a358460de108fc3ba9c621ac3960f",
+   "path": "apps/src/components/map/Layers/components/ImportActionsDialog/components/terrain-selection/flows/import-from-existing-dataset/components/DatasetsMenu.tsx",
+   "symbol": "terrainResolutionTooLow -> checkbox isDisabled + LowResolutionDatasetWarning tooltip",
+   "line": 30
+  },
+  {
+   "t": "git",
+   "repo": "WingtraCloud",
+   "ref": "82e23ff4a21a358460de108fc3ba9c621ac3960f",
+   "path": "apps/src/components/map/Layers/components/ImportActionsDialog/components/terrain-selection/flows/import-from-file/dialogs/map-files-upload/MapFilesUpload.tsx",
+   "symbol": "disableNextButton = terrainResolutionTooCoarse; LowResolutionDatasetWarning",
+   "line": 165
+  }
+ ],
+ "covered_paths": [
+  "apps/src/components/map/Layers/components/ImportActionsDialog/components/terrain-selection/**",
+  "apps/src/pages/FlightPlanning/components/Layers/**",
+  "apps/src/pages/Sites/screens/SiteCreate/**"
+ ],
+ "steps_note": "Written 2026-11-04 from New test W-20261104-015 (follow-up of W-20261104-014; the person chose 'Both ways'). Test DSMs from qa/runner/make_dsm.py (synthetic, UTM, north-up). Controls read from source at 82e23ff; not yet run on a device. Known risk: the site-name filter and the site lookup by name in step 'maps' assume the API /v1/sites lists the new site by name.",
+ "steps": [
+  {
+   "n": 1,
+   "text": "Top bar: Sites (a planner left open by an earlier run asks to save first)",
+   "gates": [],
+   "helper": "act.py {target} tap testid:btn-sites --expect \"js:/Exit without saving/.test(document.body.innerText) || location.pathname === '/sites'\" --timeout 20",
+   "on": "tablet"
+  },
+  {
+   "n": 2,
+   "text": "Exit without saving, when the app asks (writes nothing)",
+   "gates": [],
+   "helper": "act.py {target} tap \"text:Exit without saving\" --expect \"js:location.pathname === '/sites'\" --timeout 20",
+   "when_js": "/Exit without saving/.test(document.body.innerText)",
+   "on": "tablet"
+  },
+  {
+   "n": 3,
+   "text": "New site (opens site creation with the name field)",
+   "gates": [],
+   "helper": "act.py {target} tap testid:btn-new-site --expect sel:testid:input-site-name --timeout 20",
+   "on": "tablet"
+  },
+  {
+   "n": 4,
+   "text": "Site name: QA_{target} South Africa {time}",
+   "gates": [],
+   "helper": "act.py {target} type testid:input-site-name --text \"QA_{target} South Africa {time}\"",
+   "on": "tablet"
+  },
+  {
+   "n": 5,
+   "text": "Location: type the lat/long -33.900000, 18.400000",
+   "gates": [],
+   "helper": "act.py {target} type testid:input-location --text \"-33.900000, 18.400000\"",
+   "on": "tablet"
+  },
+  {
+   "n": 6,
+   "text": "Wait for the lat/long suggestion",
+   "gates": [],
+   "helper": "act.py {target} wait --expect \"text:-33.900000, 18.400000\" --timeout 20",
+   "on": "tablet"
+  },
+  {
+   "n": 7,
+   "text": "Pick the lat/long suggestion: the map centres there and the default site area is set",
+   "gates": [],
+   "helper": "act.py {target} tap \"text:-33.900000, 18.400000\" --expect \"js:!document.querySelector('[data-testid=location-option]')\" --timeout 15",
+   "on": "tablet"
+  },
+  {
+   "n": 8,
+   "text": "Next (goes to the coordinate system step)",
+   "gates": [],
+   "helper": "act.py {target} tap testid:btn-sitecreation-next --expect \"text:Save new site\" --timeout 30",
+   "on": "tablet"
+  },
+  {
+   "n": 9,
+   "text": "Wait until Save new site is enabled (coordinate system ready)",
+   "gates": [],
+   "helper": "act.py {target} wait --expect \"js:[...document.querySelectorAll('button')].some(b => b.innerText.trim() === 'Save new site' && !b.disabled)\" --timeout 60",
+   "on": "tablet"
+  },
+  {
+   "n": 10,
+   "text": "Save new site: creates the QA_ site at South Africa (cloud write)",
+   "gates": [
+    "cloud_write"
+   ],
+   "helper": "act.py {target} tap \"text:Save new site\" --expect \"js:/^\\/sites\\/[0-9a-f-]{36}/.test(location.pathname)\" --timeout 60",
+   "on": "tablet"
+  },
+  {
+   "n": 11,
+   "text": "Top bar: Maps",
+   "gates": [],
+   "helper": "act.py {target} tap testid:btn-maps --expect path:/maps --timeout 20",
+   "on": "tablet"
+  },
+  {
+   "n": 12,
+   "text": "Open the Actions menu (arrow half of the split button; never the main half, which reads Process)",
+   "gates": [],
+   "helper": "act.py {target} tap testid:dropdown-button --expect sel:testid:import-map",
+   "on": "tablet"
+  },
+  {
+   "n": 13,
+   "text": "Choose Import map",
+   "gates": [],
+   "helper": "act.py {target} tap testid:import-map --expect \"text:Import file\"",
+   "on": "tablet"
+  },
+  {
+   "n": 14,
+   "text": "Open the system file chooser (photo picker opens)",
+   "gates": [],
+   "helper": "act.py {target} tap testid:file-drop-modal-drop-zone --expect js:true",
+   "on": "tablet"
+  },
+  {
+   "n": 15,
+   "text": "Photo picker: More",
+   "gates": [],
+   "helper": "act.py {target} sys-tap More --expect js:true",
+   "on": "tablet"
+  },
+  {
+   "n": 16,
+   "text": "Photo picker: Browse… (opens the full-screen file browser)",
+   "gates": [],
+   "helper": "act.py {target} sys-tap \"Browse…\" --expect js:true",
+   "on": "tablet"
+  },
+  {
+   "n": 17,
+   "text": "File browser: open the places (Show roots)",
+   "gates": [],
+   "helper": "act.py {target} sys-tap \"Show roots\" --expect focus:com.google.android.documentsui",
+   "on": "tablet"
+  },
+  {
+   "n": 18,
+   "text": "File browser: the internal storage (titled with the tablet's device name)",
+   "gates": [],
+   "helper": "act.py {target} sys-tap @storage --expect focus:com.google.android.documentsui",
+   "pause_s": 1,
+   "on": "tablet"
+  },
+  {
+   "n": 19,
+   "text": "File browser: Download",
+   "gates": [],
+   "helper": "act.py {target} sys-tap Download --expect focus:com.google.android.documentsui",
+   "pause_s": 1,
+   "on": "tablet"
+  },
+  {
+   "n": 20,
+   "text": "File browser: the case's own folder QA-TERR-011",
+   "gates": [],
+   "helper": "act.py {target} sys-tap QA-TERR-011 --expect focus:com.google.android.documentsui",
+   "pause_s": 1,
+   "on": "tablet"
+  },
+  {
+   "n": 21,
+   "text": "File browser: tap SouthAfrica_33.9S_28m_UTM.tif; the app comes back",
+   "gates": [],
+   "helper": "act.py {target} sys-tap SouthAfrica_33.9S_28m_UTM.tif --expect focus:app --timeout 15",
+   "pause_s": 1,
+   "on": "tablet"
+  },
+  {
+   "n": 22,
+   "text": "Wait until the dialog shows SouthAfrica_33.9S_28m_UTM.tif (the app reads the file after the picker closed)",
+   "gates": [],
+   "helper": "act.py {target} wait --expect \"text:SouthAfrica_33.9S_28m_UTM.tif\" --timeout 30",
+   "on": "tablet"
+  },
+  {
+   "n": 23,
+   "text": "Read the file card of SouthAfrica_33.9S_28m_UTM.tif: name and type DSM (plain map import has no resolution limit)",
+   "gates": [],
+   "read_js": "(() => { const d = [...document.querySelectorAll('[role=dialog]')].pop(); const nx = d && [...d.querySelectorAll('button')].find(b => b.innerText.trim() === 'Next'); const t = d ? d.innerText : ''; return {text: t, low_res: /Dataset has too low resolution/.test(t), next_disabled: nx ? nx.disabled : null}; })()",
+   "save_as": "map_card_28",
+   "assert": {
+    "kind": "scripted",
+    "expr": "'SouthAfrica_33.9S_28m_UTM.tif' in v['map_card_28']['text'] and '\\nDSM\\n' in v['map_card_28']['text'] and v['map_card_28']['next_disabled'] is False"
+   },
+   "on": "tablet"
+  },
+  {
+   "n": 24,
+   "text": "First Next (reads the coordinate system; writes nothing)",
+   "gates": [
+    "write_list"
+   ],
+   "helper": "act.py {target} tap text:Next --expect \"js:!!(document.querySelector('[data-testid=input-dataset-name]') && document.querySelector('[data-testid=input-dataset-name]').value)\" --timeout 30",
+   "on": "tablet"
+  },
+  {
+   "n": 25,
+   "text": "Dataset name QA_{run}-28",
+   "gates": [],
+   "helper": "act.py {target} type testid:input-dataset-name --text QA_{run}-28",
+   "on": "tablet"
+  },
+  {
+   "n": 26,
+   "text": "Close the keyboard",
+   "gates": [],
+   "helper": "act.py {target} key back --expect js:true",
+   "on": "tablet"
+  },
+  {
+   "n": 27,
+   "text": "Open the Site select",
+   "gates": [],
+   "helper": "act.py {target} tap testid:new-flight-site-input --expect sel:testid:better-select-input",
+   "on": "tablet"
+  },
+  {
+   "n": 28,
+   "text": "Filter the site list with this run's own site name",
+   "gates": [],
+   "helper": "act.py {target} type testid:better-select-input --text \"QA_{target} South Africa {time}\"",
+   "on": "tablet"
+  },
+  {
+   "n": 29,
+   "text": "Choose this run's own QA_ site",
+   "gates": [],
+   "helper": "act.py {target} tap \"testid:dropdown-option-QA_{target} South Africa {time}\" --expect \"text:QA_{target} South Africa {time}\" --timeout 20",
+   "on": "tablet"
+  },
+  {
+   "n": 30,
+   "text": "Close the keyboard",
+   "gates": [],
+   "helper": "act.py {target} key back --expect js:true",
+   "on": "tablet"
+  },
+  {
+   "n": 31,
+   "text": "Wait for the form to show the name and the site",
+   "gates": [],
+   "helper": "act.py {target} wait --expect \"js:(() => { const i = document.querySelector('[data-testid=input-dataset-name]'); return !!(i && i.value === 'QA_{run}-28'); })()\" --timeout 20",
+   "on": "tablet"
+  },
+  {
+   "n": 32,
+   "text": "Read the filled form",
+   "gates": [],
+   "read_js": "(() => { const d = [...document.querySelectorAll('[role=dialog]')].pop(); const i = document.querySelector('[data-testid=input-dataset-name]'); const nx = d && [...d.querySelectorAll('button')].find(b => b.innerText.trim() === 'Next'); return {text: d ? d.innerText : '', name: i ? i.value : null, next_disabled: nx ? nx.disabled : null}; })()",
+   "save_as": "form_28",
+   "assert": {
+    "kind": "scripted",
+    "expr": "v['form_28']['name'] == 'QA_' + run + '-28' and v['form_28']['next_disabled'] is False"
+   },
+   "on": "tablet"
+  },
+  {
+   "n": 33,
+   "text": "Second Next: imports the 28 m DSM as a map into this run's own QA_ site (cloud write)",
+   "gates": [
+    "write_list",
+    "cloud_write"
+   ],
+   "helper": "act.py {target} tap text:Next --expect gone:testid:input-dataset-name --timeout 30",
+   "on": "tablet"
+  },
+  {
+   "n": 34,
+   "text": "Top bar: Maps",
+   "gates": [],
+   "helper": "act.py {target} tap testid:btn-maps --expect path:/maps --timeout 20",
+   "on": "tablet"
+  },
+  {
+   "n": 35,
+   "text": "Open the Actions menu (arrow half of the split button; never the main half, which reads Process)",
+   "gates": [],
+   "helper": "act.py {target} tap testid:dropdown-button --expect sel:testid:import-map",
+   "on": "tablet"
+  },
+  {
+   "n": 36,
+   "text": "Choose Import map",
+   "gates": [],
+   "helper": "act.py {target} tap testid:import-map --expect \"text:Import file\"",
+   "on": "tablet"
+  },
+  {
+   "n": 37,
+   "text": "Open the system file chooser (photo picker opens)",
+   "gates": [],
+   "helper": "act.py {target} tap testid:file-drop-modal-drop-zone --expect js:true",
+   "on": "tablet"
+  },
+  {
+   "n": 38,
+   "text": "Photo picker: More",
+   "gates": [],
+   "helper": "act.py {target} sys-tap More --expect js:true",
+   "on": "tablet"
+  },
+  {
+   "n": 39,
+   "text": "Photo picker: Browse… (opens the full-screen file browser)",
+   "gates": [],
+   "helper": "act.py {target} sys-tap \"Browse…\" --expect js:true",
+   "on": "tablet"
+  },
+  {
+   "n": 40,
+   "text": "File browser: open the places (Show roots)",
+   "gates": [],
+   "helper": "act.py {target} sys-tap \"Show roots\" --expect focus:com.google.android.documentsui",
+   "on": "tablet"
+  },
+  {
+   "n": 41,
+   "text": "File browser: the internal storage (titled with the tablet's device name)",
+   "gates": [],
+   "helper": "act.py {target} sys-tap @storage --expect focus:com.google.android.documentsui",
+   "pause_s": 1,
+   "on": "tablet"
+  },
+  {
+   "n": 42,
+   "text": "File browser: Download",
+   "gates": [],
+   "helper": "act.py {target} sys-tap Download --expect focus:com.google.android.documentsui",
+   "pause_s": 1,
+   "on": "tablet"
+  },
+  {
+   "n": 43,
+   "text": "File browser: the case's own folder QA-TERR-011",
+   "gates": [],
+   "helper": "act.py {target} sys-tap QA-TERR-011 --expect focus:com.google.android.documentsui",
+   "pause_s": 1,
+   "on": "tablet"
+  },
+  {
+   "n": 44,
+   "text": "File browser: tap SouthAfrica_33.9S_29m_UTM.tif; the app comes back",
+   "gates": [],
+   "helper": "act.py {target} sys-tap SouthAfrica_33.9S_29m_UTM.tif --expect focus:app --timeout 15",
+   "pause_s": 1,
+   "on": "tablet"
+  },
+  {
+   "n": 45,
+   "text": "Wait until the dialog shows SouthAfrica_33.9S_29m_UTM.tif (the app reads the file after the picker closed)",
+   "gates": [],
+   "helper": "act.py {target} wait --expect \"text:SouthAfrica_33.9S_29m_UTM.tif\" --timeout 30",
+   "on": "tablet"
+  },
+  {
+   "n": 46,
+   "text": "Read the file card of SouthAfrica_33.9S_29m_UTM.tif: name and type DSM (plain map import has no resolution limit)",
+   "gates": [],
+   "read_js": "(() => { const d = [...document.querySelectorAll('[role=dialog]')].pop(); const nx = d && [...d.querySelectorAll('button')].find(b => b.innerText.trim() === 'Next'); const t = d ? d.innerText : ''; return {text: t, low_res: /Dataset has too low resolution/.test(t), next_disabled: nx ? nx.disabled : null}; })()",
+   "save_as": "map_card_29",
+   "assert": {
+    "kind": "scripted",
+    "expr": "'SouthAfrica_33.9S_29m_UTM.tif' in v['map_card_29']['text'] and '\\nDSM\\n' in v['map_card_29']['text'] and v['map_card_29']['next_disabled'] is False"
+   },
+   "on": "tablet"
+  },
+  {
+   "n": 47,
+   "text": "First Next (reads the coordinate system; writes nothing)",
+   "gates": [
+    "write_list"
+   ],
+   "helper": "act.py {target} tap text:Next --expect \"js:!!(document.querySelector('[data-testid=input-dataset-name]') && document.querySelector('[data-testid=input-dataset-name]').value)\" --timeout 30",
+   "on": "tablet"
+  },
+  {
+   "n": 48,
+   "text": "Dataset name QA_{run}-29",
+   "gates": [],
+   "helper": "act.py {target} type testid:input-dataset-name --text QA_{run}-29",
+   "on": "tablet"
+  },
+  {
+   "n": 49,
+   "text": "Close the keyboard",
+   "gates": [],
+   "helper": "act.py {target} key back --expect js:true",
+   "on": "tablet"
+  },
+  {
+   "n": 50,
+   "text": "Open the Site select",
+   "gates": [],
+   "helper": "act.py {target} tap testid:new-flight-site-input --expect sel:testid:better-select-input",
+   "on": "tablet"
+  },
+  {
+   "n": 51,
+   "text": "Filter the site list with this run's own site name",
+   "gates": [],
+   "helper": "act.py {target} type testid:better-select-input --text \"QA_{target} South Africa {time}\"",
+   "on": "tablet"
+  },
+  {
+   "n": 52,
+   "text": "Choose this run's own QA_ site",
+   "gates": [],
+   "helper": "act.py {target} tap \"testid:dropdown-option-QA_{target} South Africa {time}\" --expect \"text:QA_{target} South Africa {time}\" --timeout 20",
+   "on": "tablet"
+  },
+  {
+   "n": 53,
+   "text": "Close the keyboard",
+   "gates": [],
+   "helper": "act.py {target} key back --expect js:true",
+   "on": "tablet"
+  },
+  {
+   "n": 54,
+   "text": "Wait for the form to show the name and the site",
+   "gates": [],
+   "helper": "act.py {target} wait --expect \"js:(() => { const i = document.querySelector('[data-testid=input-dataset-name]'); return !!(i && i.value === 'QA_{run}-29'); })()\" --timeout 20",
+   "on": "tablet"
+  },
+  {
+   "n": 55,
+   "text": "Read the filled form",
+   "gates": [],
+   "read_js": "(() => { const d = [...document.querySelectorAll('[role=dialog]')].pop(); const i = document.querySelector('[data-testid=input-dataset-name]'); const nx = d && [...d.querySelectorAll('button')].find(b => b.innerText.trim() === 'Next'); return {text: d ? d.innerText : '', name: i ? i.value : null, next_disabled: nx ? nx.disabled : null}; })()",
+   "save_as": "form_29",
+   "assert": {
+    "kind": "scripted",
+    "expr": "v['form_29']['name'] == 'QA_' + run + '-29' and v['form_29']['next_disabled'] is False"
+   },
+   "on": "tablet"
+  },
+  {
+   "n": 56,
+   "text": "Second Next: imports the 29 m DSM as a map into this run's own QA_ site (cloud write)",
+   "gates": [
+    "write_list",
+    "cloud_write"
+   ],
+   "helper": "act.py {target} tap text:Next --expect gone:testid:input-dataset-name --timeout 30",
+   "on": "tablet"
+  },
+  {
+   "n": 57,
+   "text": "Wait for the server-side processing of both maps (10 min), then read their status in this site",
+   "gates": [],
+   "read_js": "(async () => { const t = localStorage.getItem('accessToken') || ''; const h = {Authorization: 'Bearer ' + t}; const base = 'https://api.staging.company.example/api/v1'; const s = await window.Capacitor.Plugins.CapacitorHttp.get({url: base + '/sites', headers: h}); const sd = s.data || []; const arr = Array.isArray(sd) ? sd : (sd.items || sd.data || sd.sites || []); const site = arr.find(x => x.name === 'QA_{target} South Africa {time}'); if (!site) return {site: false}; const l = await window.Capacitor.Plugins.CapacitorHttp.get({url: base + '/datasets/sites/' + site.id, headers: h}); const out = {site: true}; for (const k of ['28', '29']) { const d = (l.data || []).find(x => x.name === 'QA_{run}-' + k); if (!d) { out[k] = null; continue; } const r = await window.Capacitor.Plugins.CapacitorHttp.get({url: base + '/datasets/' + d.id + '/map-outputs', headers: h}); out[k] = {status: (r.data || {}).datasetStatus, outputs: ((r.data || {}).outputs || []).map(o => o.type + ':' + o.status)}; } return out; })()",
+   "save_as": "maps",
+   "pause_s": 600,
+   "assert": {
+    "kind": "scripted",
+    "expr": "v['maps']['site'] and v['maps']['28'] is not None and v['maps']['29'] is not None and v['maps']['28']['status'] == 'MAP' and v['maps']['29']['status'] == 'MAP'"
+   },
+   "on": "tablet"
+  },
+  {
+   "n": 58,
+   "text": "Top bar: Sites",
+   "gates": [],
+   "helper": "act.py {target} tap testid:btn-sites --expect \"text:QA_{target} South Africa {time}\" --timeout 30",
+   "on": "tablet"
+  },
+  {
+   "n": 59,
+   "text": "Open this run's own QA_ site",
+   "gates": [],
+   "helper": "act.py {target} tap \"text:QA_{target} South Africa {time}\" --expect sel:testid:create-new-flight-button --timeout 30",
+   "on": "tablet"
+  },
+  {
+   "n": 60,
+   "text": "Create flight (opens the New flight form)",
+   "gates": [],
+   "helper": "act.py {target} tap testid:create-new-flight-button --expect sel:testid:new-flight-name-input --timeout 20",
+   "on": "tablet"
+  },
+  {
+   "n": 61,
+   "text": "Flight name",
+   "gates": [],
+   "helper": "act.py {target} type testid:new-flight-name-input --text \"QA_{target} South Africa terrain\"",
+   "on": "tablet"
+  },
+  {
+   "n": 62,
+   "text": "Wait until Create is enabled",
+   "gates": [],
+   "helper": "act.py {target} wait --expect \"js:[...document.querySelectorAll('[role=dialog] button')].some(b => b.innerText.trim() === 'Create' && !b.disabled)\" --timeout 30",
+   "on": "tablet"
+  },
+  {
+   "n": 63,
+   "text": "Create: creates the QA_ flight in this run's own site and opens its planner (cloud write)",
+   "gates": [
+    "cloud_write"
+   ],
+   "helper": "act.py {target} tap text:Create --expect \"js:/\\/planning\\/[0-9a-f-]{36}$/.test(location.pathname)\" --timeout 30",
+   "on": "tablet"
+  },
+  {
+   "n": 64,
+   "text": "Open the layers panel (Layers button, bottom left)",
+   "gates": [],
+   "helper": "act.py {target} tap testid:btn-open-left-sidebar --expect sel:testid:layer-actions-button --timeout 20",
+   "when_js": "!document.querySelector('[data-testid=layer-actions-button]')",
+   "on": "tablet"
+  },
+  {
+   "n": 65,
+   "text": "Layers: + (add layer menu)",
+   "gates": [],
+   "helper": "act.py {target} tap testid:layer-actions-button --expect \"text:Add terrain / map\"",
+   "on": "tablet"
+  },
+  {
+   "n": 66,
+   "text": "Choose Add terrain / map",
+   "gates": [],
+   "helper": "act.py {target} tap \"text:Add terrain / map\" --expect \"text:Use existing map (WingtraCLOUD)\"",
+   "on": "tablet"
+  },
+  {
+   "n": 67,
+   "text": "Next with Use existing map (WingtraCLOUD) (the default choice; writes nothing)",
+   "gates": [
+    "write_list"
+   ],
+   "helper": "act.py {target} tap text:Next --expect \"text:Add terrain / map from previous dataset\" --timeout 20",
+   "on": "tablet"
+  },
+  {
+   "n": 68,
+   "text": "Wait until both maps are listed",
+   "gates": [],
+   "helper": "act.py {target} wait --expect \"js:(() => { const d = [...document.querySelectorAll('[role=dialog]')].pop(); return !!d && d.innerText.includes('QA_{run}-28') && d.innerText.includes('QA_{run}-29'); })()\" --timeout 60",
+   "on": "tablet"
+  },
+  {
+   "n": 69,
+   "text": "Screenshot: the existing-map list",
+   "gates": [],
+   "helper": "act.py {target} shot {shots}/{run}_existing.png",
+   "on": "tablet"
+  },
+  {
+   "n": 70,
+   "text": "Read the list: 28 m map selectable, 29 m map listed but not selectable",
+   "gates": [],
+   "read_js": "(() => { const d = [...document.querySelectorAll('[role=dialog]')].pop(); const row = n => { const el = [...d.querySelectorAll('*')].find(e => e.children.length === 0 && e.textContent.trim() === n); let r = el; for (let i = 0; i < 5 && r; i++) { r = r.parentElement; const c = r && r.querySelector('input[type=checkbox], [role=checkbox], button'); if (c) return {found: true, disabled: !!(c.disabled || c.getAttribute('aria-disabled') === 'true' || c.hasAttribute('data-disabled') || (c.closest('[aria-disabled=true]')))}; } return {found: !!el, disabled: null}; }; return {m28: row('QA_{run}-28'), m29: row('QA_{run}-29')}; })()",
+   "save_as": "existing",
+   "assert": {
+    "kind": "scripted",
+    "expr": "v['existing']['m28']['found'] and v['existing']['m28']['disabled'] is False and v['existing']['m29']['found'] and v['existing']['m29']['disabled'] is True"
+   },
+   "on": "tablet"
+  },
+  {
+   "n": 71,
+   "text": "Cancel the existing-map dialog (selects nothing)",
+   "gates": [],
+   "helper": "act.py {target} tap text:Cancel --expect \"js:!/Add terrain \\/ map from previous dataset/.test(document.body.innerText)\" --timeout 15",
+   "on": "tablet"
+  },
+  {
+   "n": 72,
+   "text": "Open the layers panel (Layers button, bottom left)",
+   "gates": [],
+   "helper": "act.py {target} tap testid:btn-open-left-sidebar --expect sel:testid:layer-actions-button --timeout 20",
+   "when_js": "!document.querySelector('[data-testid=layer-actions-button]')",
+   "on": "tablet"
+  },
+  {
+   "n": 73,
+   "text": "Layers: + (add layer menu)",
+   "gates": [],
+   "helper": "act.py {target} tap testid:layer-actions-button --expect \"text:Add terrain / map\"",
+   "on": "tablet"
+  },
+  {
+   "n": 74,
+   "text": "Choose Add terrain / map",
+   "gates": [],
+   "helper": "act.py {target} tap \"text:Add terrain / map\" --expect \"text:Use existing map (WingtraCLOUD)\"",
+   "on": "tablet"
+  },
+  {
+   "n": 75,
+   "text": "Choose Import file",
+   "gates": [],
+   "helper": "act.py {target} tap \"text:Import file\" --expect js:true",
+   "on": "tablet"
+  },
+  {
+   "n": 76,
+   "text": "Next (opens the Import file dialog; writes nothing)",
+   "gates": [
+    "write_list"
+   ],
+   "helper": "act.py {target} tap text:Next --expect sel:testid:file-drop-modal-drop-zone --timeout 20",
+   "on": "tablet"
+  },
+  {
+   "n": 77,
+   "text": "Open the system file chooser (photo picker opens)",
+   "gates": [],
+   "helper": "act.py {target} tap testid:file-drop-modal-drop-zone --expect js:true",
+   "on": "tablet"
+  },
+  {
+   "n": 78,
+   "text": "Photo picker: More",
+   "gates": [],
+   "helper": "act.py {target} sys-tap More --expect js:true",
+   "on": "tablet"
+  },
+  {
+   "n": 79,
+   "text": "Photo picker: Browse… (opens the full-screen file browser)",
+   "gates": [],
+   "helper": "act.py {target} sys-tap \"Browse…\" --expect js:true",
+   "on": "tablet"
+  },
+  {
+   "n": 80,
+   "text": "File browser: open the places (Show roots)",
+   "gates": [],
+   "helper": "act.py {target} sys-tap \"Show roots\" --expect focus:com.google.android.documentsui",
+   "on": "tablet"
+  },
+  {
+   "n": 81,
+   "text": "File browser: the internal storage (titled with the tablet's device name)",
+   "gates": [],
+   "helper": "act.py {target} sys-tap @storage --expect focus:com.google.android.documentsui",
+   "pause_s": 1,
+   "on": "tablet"
+  },
+  {
+   "n": 82,
+   "text": "File browser: Download",
+   "gates": [],
+   "helper": "act.py {target} sys-tap Download --expect focus:com.google.android.documentsui",
+   "pause_s": 1,
+   "on": "tablet"
+  },
+  {
+   "n": 83,
+   "text": "File browser: the case's own folder QA-TERR-011",
+   "gates": [],
+   "helper": "act.py {target} sys-tap QA-TERR-011 --expect focus:com.google.android.documentsui",
+   "pause_s": 1,
+   "on": "tablet"
+  },
+  {
+   "n": 84,
+   "text": "File browser: tap SouthAfrica_33.9S_28m_UTM.tif; the app comes back",
+   "gates": [],
+   "helper": "act.py {target} sys-tap SouthAfrica_33.9S_28m_UTM.tif --expect focus:app --timeout 15",
+   "pause_s": 1,
+   "on": "tablet"
+  },
+  {
+   "n": 85,
+   "text": "Wait until the dialog shows SouthAfrica_33.9S_28m_UTM.tif (the app reads the file after the picker closed)",
+   "gates": [],
+   "helper": "act.py {target} wait --expect \"text:SouthAfrica_33.9S_28m_UTM.tif\" --timeout 30",
+   "on": "tablet"
+  },
+  {
+   "n": 86,
+   "text": "Screenshot: the Import file dialog with SouthAfrica_33.9S_28m_UTM.tif",
+   "gates": [],
+   "helper": "act.py {target} shot {shots}/{run}_import28.png",
+   "on": "tablet"
+  },
+  {
+   "n": 87,
+   "text": "Read the dialog for SouthAfrica_33.9S_28m_UTM.tif: no low-resolution warning, Next enabled",
+   "gates": [],
+   "read_js": "(() => { const d = [...document.querySelectorAll('[role=dialog]')].pop(); const nx = d && [...d.querySelectorAll('button')].find(b => b.innerText.trim() === 'Next'); const t = d ? d.innerText : ''; return {text: t, low_res: /Dataset has too low resolution/.test(t), next_disabled: nx ? nx.disabled : null}; })()",
+   "save_as": "flight_card_28",
+   "assert": {
+    "kind": "scripted",
+    "expr": "'SouthAfrica_33.9S_28m_UTM.tif' in v['flight_card_28']['text'] and v['flight_card_28']['low_res'] is False and v['flight_card_28']['next_disabled'] is False"
+   },
+   "on": "tablet"
+  },
+  {
+   "n": 88,
+   "text": "Cancel the Import file dialog (imports nothing)",
+   "gates": [],
+   "helper": "act.py {target} tap text:Cancel --expect \"js:!document.querySelector('[data-testid=file-drop-modal-drop-zone]')\" --timeout 15",
+   "on": "tablet"
+  },
+  {
+   "n": 89,
+   "text": "Open the layers panel (Layers button, bottom left)",
+   "gates": [],
+   "helper": "act.py {target} tap testid:btn-open-left-sidebar --expect sel:testid:layer-actions-button --timeout 20",
+   "when_js": "!document.querySelector('[data-testid=layer-actions-button]')",
+   "on": "tablet"
+  },
+  {
+   "n": 90,
+   "text": "Layers: + (add layer menu)",
+   "gates": [],
+   "helper": "act.py {target} tap testid:layer-actions-button --expect \"text:Add terrain / map\"",
+   "on": "tablet"
+  },
+  {
+   "n": 91,
+   "text": "Choose Add terrain / map",
+   "gates": [],
+   "helper": "act.py {target} tap \"text:Add terrain / map\" --expect \"text:Use existing map (WingtraCLOUD)\"",
+   "on": "tablet"
+  },
+  {
+   "n": 92,
+   "text": "Choose Import file",
+   "gates": [],
+   "helper": "act.py {target} tap \"text:Import file\" --expect js:true",
+   "on": "tablet"
+  },
+  {
+   "n": 93,
+   "text": "Next (opens the Import file dialog; writes nothing)",
+   "gates": [
+    "write_list"
+   ],
+   "helper": "act.py {target} tap text:Next --expect sel:testid:file-drop-modal-drop-zone --timeout 20",
+   "on": "tablet"
+  },
+  {
+   "n": 94,
+   "text": "Open the system file chooser (photo picker opens)",
+   "gates": [],
+   "helper": "act.py {target} tap testid:file-drop-modal-drop-zone --expect js:true",
+   "on": "tablet"
+  },
+  {
+   "n": 95,
+   "text": "Photo picker: More",
+   "gates": [],
+   "helper": "act.py {target} sys-tap More --expect js:true",
+   "on": "tablet"
+  },
+  {
+   "n": 96,
+   "text": "Photo picker: Browse… (opens the full-screen file browser)",
+   "gates": [],
+   "helper": "act.py {target} sys-tap \"Browse…\" --expect js:true",
+   "on": "tablet"
+  },
+  {
+   "n": 97,
+   "text": "File browser: open the places (Show roots)",
+   "gates": [],
+   "helper": "act.py {target} sys-tap \"Show roots\" --expect focus:com.google.android.documentsui",
+   "on": "tablet"
+  },
+  {
+   "n": 98,
+   "text": "File browser: the internal storage (titled with the tablet's device name)",
+   "gates": [],
+   "helper": "act.py {target} sys-tap @storage --expect focus:com.google.android.documentsui",
+   "pause_s": 1,
+   "on": "tablet"
+  },
+  {
+   "n": 99,
+   "text": "File browser: Download",
+   "gates": [],
+   "helper": "act.py {target} sys-tap Download --expect focus:com.google.android.documentsui",
+   "pause_s": 1,
+   "on": "tablet"
+  },
+  {
+   "n": 100,
+   "text": "File browser: the case's own folder QA-TERR-011",
+   "gates": [],
+   "helper": "act.py {target} sys-tap QA-TERR-011 --expect focus:com.google.android.documentsui",
+   "pause_s": 1,
+   "on": "tablet"
+  },
+  {
+   "n": 101,
+   "text": "File browser: tap SouthAfrica_33.9S_29m_UTM.tif; the app comes back",
+   "gates": [],
+   "helper": "act.py {target} sys-tap SouthAfrica_33.9S_29m_UTM.tif --expect focus:app --timeout 15",
+   "pause_s": 1,
+   "on": "tablet"
+  },
+  {
+   "n": 102,
+   "text": "Wait until the dialog shows SouthAfrica_33.9S_29m_UTM.tif (the app reads the file after the picker closed)",
+   "gates": [],
+   "helper": "act.py {target} wait --expect \"text:SouthAfrica_33.9S_29m_UTM.tif\" --timeout 30",
+   "on": "tablet"
+  },
+  {
+   "n": 103,
+   "text": "Screenshot: the Import file dialog with SouthAfrica_33.9S_29m_UTM.tif",
+   "gates": [],
+   "helper": "act.py {target} shot {shots}/{run}_result.png",
+   "on": "tablet"
+  },
+  {
+   "n": 104,
+   "text": "Read the dialog for SouthAfrica_33.9S_29m_UTM.tif: 'Dataset has too low resolution...' shown, Next disabled",
+   "gates": [],
+   "read_js": "(() => { const d = [...document.querySelectorAll('[role=dialog]')].pop(); const nx = d && [...d.querySelectorAll('button')].find(b => b.innerText.trim() === 'Next'); const t = d ? d.innerText : ''; return {text: t, low_res: /Dataset has too low resolution/.test(t), next_disabled: nx ? nx.disabled : null}; })()",
+   "save_as": "flight_card_29",
+   "assert": {
+    "kind": "scripted",
+    "expr": "'SouthAfrica_33.9S_29m_UTM.tif' in v['flight_card_29']['text'] and v['flight_card_29']['low_res'] is True and v['flight_card_29']['next_disabled'] is True"
+   },
+   "on": "tablet"
+  },
+  {
+   "n": 105,
+   "text": "Cancel the Import file dialog (imports nothing)",
+   "gates": [],
+   "helper": "act.py {target} tap text:Cancel --expect \"js:!document.querySelector('[data-testid=file-drop-modal-drop-zone]')\" --timeout 15",
+   "on": "tablet"
+  },
+  {
+   "n": 106,
+   "text": "Bring the app to the front (closes a leftover file picker)",
+   "gates": [],
+   "helper": "act.py {target} ready",
+   "always": true,
+   "on": "tablet"
+  },
+  {
+   "n": 107,
+   "text": "Close a leftover dialog (Cancel; only when one is open)",
+   "gates": [],
+   "helper": "act.py {target} tap text:Cancel --expect \"js:!document.querySelector('[role=dialog]')\" --timeout 10",
+   "always": true,
+   "when_js": "!!document.querySelector('[role=dialog]') && [...document.querySelectorAll('[role=dialog] button')].some(b => b.innerText.trim() === 'Cancel')",
+   "on": "tablet"
+  },
+  {
+   "n": 108,
+   "text": "Leave the planner (always)",
+   "gates": [],
+   "helper": "act.py {target} tap testid:btn-sites --expect \"js:/Exit without saving/.test(document.body.innerText) || location.pathname === '/sites'\" --timeout 20",
+   "always": true,
+   "on": "tablet"
+  },
+  {
+   "n": 109,
+   "text": "Exit without saving when asked (always; writes nothing)",
+   "gates": [],
+   "helper": "act.py {target} tap \"text:Exit without saving\" --expect \"js:location.pathname === '/sites'\" --timeout 20",
+   "always": true,
+   "when_js": "/Exit without saving/.test(document.body.innerText)",
+   "on": "tablet"
+  }
+ ]
+}

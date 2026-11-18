@@ -1,0 +1,214 @@
+{
+  "area": "PLAN",
+  "author": "claude",
+  "cloud_writes": [
+    {
+      "object": "flight in site a0000001 (QA engine)",
+      "step": 6,
+      "what": "creates the flight QA_PLAN001_MP_split (left in the QA site: the engine does not delete)"
+    },
+    {
+      "object": "that flight",
+      "step": 8,
+      "what": "creates Magic Planning item and path optimisation jobs; the plan is not saved"
+    }
+  ],
+  "covered_paths": [
+    "apps/src/pages/FlightPlanning/context/MagicPlanning/**",
+    "apps/src/pages/FlightPlanning/hooks/prepareItemsOptimisation.ts",
+    "apps/src/components/importFlight/**"
+  ],
+  "created": "2026-10-30T08:17:17.417Z",
+  "expected": "With MagicPlanning and MagicPlanningItemsOptimisation on, Optimize flight on the QA_ plan (one area up the Uetliberg slope, 60 m, terrain following, max ground clearance 90 m) ends with 'Flight successfully optimized' or 'No further improvements found', never a failure; the result is applied but not saved (the server still has the imported areas); 'Split areas.' appears only when the area rows grew.",
+  "expected_differences": [],
+  "fixtures": [
+    {
+      "delivery": "engine: act.py deliver copies it to ~/qa-fixtures on webpc044 when missing and checks its sha256",
+      "name": "QA_PLAN001_MP_split.flightplan",
+      "path": "tests/2026-10-29-magic-planning-cl80001/files/QA_PLAN001_MP_split.flightplan",
+      "sha256": "c01b486159336e1baba77d775eb47bd2cd4bc07abe7e22309986b30831a1a81f"
+    }
+  ],
+  "flags_watch": [
+    "MagicPlanning",
+    "MagicPlanningItemsOptimisation",
+    "MapTilerTerrainSource"
+  ],
+  "forbidden": [
+    "Save in the planner (would store the optimised plan)",
+    "Delete (write list; the QA_ flight stays in the QA site)",
+    "any site other than a0000001"
+  ],
+  "id": "PLAN-001",
+  "kind": "case",
+  "needs": {
+    "account_lock": false,
+    "drone_hw": null,
+    "flags": [
+      "MagicPlanning",
+      "MagicPlanningItemsOptimisation"
+    ],
+    "link": "none",
+    "usb_port": false
+  },
+  "preconditions": [
+    {
+      "applies_to": "web",
+      "check": "run.py --check-account",
+      "id": "P1",
+      "text": "CT account logged in on W044"
+    },
+    {
+      "applies_to": "web",
+      "check": "step 7",
+      "id": "P2",
+      "text": "MagicPlanning and MagicPlanningItemsOptimisation on for the CT account (step 7 records and asserts both)"
+    },
+    {
+      "applies_to": "web",
+      "check": "act.py W044 deliver PLAN-001 --check",
+      "id": "P3",
+      "text": "the plan file QA_PLAN001_MP_split.flightplan in ~/qa-fixtures on webpc044 with its sha256"
+    }
+  ],
+  "requirement": {
+    "sha256": "c548d9a7f1fd04f105447652472127282d26f293eb33d866c5889265ec7093c9",
+    "source": {
+      "custom_id": null,
+      "locator": "description: link to CL-80001",
+      "ref": "0000fake006",
+      "requester": "Requester Colleague",
+      "type": "clickup_task"
+    },
+    "text": "Magic Planning: area splitting and flight direction (CL-80001). Optimize flight on a hilly area may split it and/or change its flight direction; the result is applied unsaved and the toast names what changed."
+  },
+  "routing": [
+    {
+      "line": 216,
+      "path": "apps/src/pages/FlightPlanning/context/MagicPlanning/useMagicPlanning.ts",
+      "ref": "261b2d99de082d947c18f8f0888ea7b65992366f",
+      "repo": "WingtraCloud",
+      "symbol": "useMagicPlanning",
+      "t": "git",
+      "why": "items flag read per attempt; off = path optimisation only (227-232); 10 min deadline (46)"
+    },
+    {
+      "line": 95,
+      "path": "apps/src/components/importFlight/components/importFlightDialog.tsx",
+      "ref": "261b2d99de082d947c18f8f0888ea7b65992366f",
+      "repo": "WingtraCloud",
+      "symbol": "onSubmit",
+      "t": "git",
+      "why": "import creates a new flight in the chosen site (createFlight), planned when it has an area and a takeoff"
+    },
+    {
+      "line": 275,
+      "path": "apps/src/pages/FlightPlanning/components/FlightPlanMenuSidebar/screens/FlightPlanItemList.tsx",
+      "ref": "261b2d99de082d947c18f8f0888ea7b65992366f",
+      "repo": "WingtraCloud",
+      "symbol": "Optimize flight button",
+      "t": "git",
+      "why": "shown with MagicPlanning on and MapTilerTerrainSource off, for a planned editable flight"
+    }
+  ],
+  "schema": 1,
+  "status": "active",
+  "steps": [
+    {
+      "gates": [],
+      "helper": "act.py {target} tap testid:btn-sites --expect \"js:location.pathname.startsWith('/sites')\" --timeout 20",
+      "n": 1,
+      "text": "Top bar: Sites"
+    },
+    {
+      "gates": [],
+      "helper": "act.py {target} tap \"text:QA engine\" --expect \"js:location.pathname.startsWith('/sites/a0000001-0000-4000-8000-000000000001')\" --timeout 20",
+      "n": 2,
+      "text": "Open the QA engine site"
+    },
+    {
+      "gates": [],
+      "helper": "act.py {target} tap testid:dropdown-button --expect sel:testid:IMPORT_FLIGHT",
+      "n": 3,
+      "text": "Open the site's Actions menu"
+    },
+    {
+      "gates": [],
+      "helper": "act.py {target} tap testid:IMPORT_FLIGHT --expect sel:testid:drop-zone",
+      "n": 4,
+      "text": "Import flight"
+    },
+    {
+      "gates": [],
+      "helper": "act.py {target} choose-file testid:drop-zone --file QA_PLAN001_MP_split.flightplan --expect sel:testid:import-flight-dialog-submit-button",
+      "n": 5,
+      "text": "Give the dialog the plan file (file chooser intercepted)"
+    },
+    {
+      "gates": [
+        "cloud_write"
+      ],
+      "helper": "act.py {target} tap testid:import-flight-dialog-submit-button --expect \"js:/\\/planning\\/[0-9a-f-]{36}$/.test(location.pathname)\" --timeout 30",
+      "n": 6,
+      "text": "Import: creates the QA_ flight in the QA site (cloud write) and opens the planner"
+    },
+    {
+      "assert": {
+        "expr": "v['before']['magic_planning'] is True and v['before']['items_flag'] is True and v['before']['button'] is True and len(v['before']['server_areas']) == 1",
+        "kind": "scripted"
+      },
+      "gates": [],
+      "n": 7,
+      "read_js": "(async () => { const h = {Authorization: 'Bearer ' + localStorage.getItem('accessToken')}; const id = location.pathname.split('/').pop(); const f = await (await fetch('https://api.staging.company.example/api/v1/flights/' + id, {headers: h})).json(); const items = (((f.flightPlan || {}).flightPlan) || {}).items || []; const areas = items.filter(i => i.complexItemType === 'area').map(a => ({angle: (a.grid || {}).angle, alt: (a.grid || {}).altitude, gsd: (a.camera || {}).groundResolution})); let u = null; try { u = JSON.parse(localStorage.getItem('unleashFlags') || 'null'); } catch (e) {} const tg = Array.isArray(u) ? u : ((u && u.toggles) || []); const on = n => tg.some(t => t && t.name === n && t.enabled !== false); window.__qaToasts = []; const re = /Flight successfully optimi[sz]ed|No further improvements found|Failed to optimi[sz]e flight|Optimi[sz]ation takes too long|Split areas|Adjusted flight direction|Optimized transit/i; if (window.__qaObs) window.__qaObs.disconnect(); window.__qaObs = new MutationObserver(() => { for (const m of (document.body.innerText.match(new RegExp(re.source, 'gi')) || [])) if (!window.__qaToasts.includes(m)) window.__qaToasts.push(m); }); window.__qaObs.observe(document.body, {subtree: true, childList: true, characterData: true}); const rows = [...new Set([...document.querySelectorAll('*')].filter(e => e.children.length === 0 && /^A\\d+\\s*-\\s*Area/.test(e.innerText || '')).map(e => e.innerText.trim()))]; return {flight_id: id, status: f.flightPlanStatus, title: f.title, server_areas: areas, rows: rows.length, magic_planning: on('MagicPlanning'), items_flag: on('MagicPlanningItemsOptimisation'), button: !!document.querySelector('[data-testid=magic-planning-entry-point]')}; })()",
+      "save_as": "before",
+      "text": "Before: flags, area rows, the server's areas; start recording the Magic Planning messages"
+    },
+    {
+      "gates": [
+        "cloud_write"
+      ],
+      "helper": "act.py {target} tap testid:magic-planning-entry-point --find-timeout 30 --expect \"js:/Locked \\(optimizing\\)|optimi[sz]ed|No further improvements|Failed to optimi|takes too long/i.test(document.body.innerText)\" --timeout 20",
+      "n": 8,
+      "text": "Optimize flight (creates the optimisation jobs; cloud write)"
+    },
+    {
+      "gates": [],
+      "helper": "act.py {target} wait --expect \"js:(window.__qaToasts || []).some(x => /Flight successfully optimi|No further improvements|Failed to optimi|takes too long/i.test(x))\" --timeout 80",
+      "n": 9,
+      "text": "Wait for the result (up to 80 s; the success toast closes after 5 s, step 7 records it)"
+    },
+    {
+      "assert": {
+        "expr": "v['after']['success'] is True and v['after']['failed'] is False and v['after']['server_areas'] == len(v['before']['server_areas']) and v['after']['split_toast'] == (v['after']['rows'] > v['before']['rows'])",
+        "kind": "scripted"
+      },
+      "gates": [],
+      "n": 10,
+      "read_js": "(async () => { const h = {Authorization: 'Bearer ' + localStorage.getItem('accessToken')}; const id = location.pathname.split('/').pop(); const f = await (await fetch('https://api.staging.company.example/api/v1/flights/' + id, {headers: h})).json(); const items = (((f.flightPlan || {}).flightPlan) || {}).items || []; const rows = [...new Set([...document.querySelectorAll('*')].filter(e => e.children.length === 0 && /^A\\d+\\s*-\\s*Area/.test(e.innerText || '')).map(e => e.innerText.trim()))]; const t = window.__qaToasts || []; if (window.__qaObs) window.__qaObs.disconnect(); return {toasts: t, rows: rows.length, server_areas: items.filter(i => i.complexItemType === 'area').length, success: t.some(x => /Flight successfully optimi[sz]ed|No further improvements found/i.test(x)), failed: t.some(x => /Failed to optimi[sz]e|takes too long/i.test(x)), split_toast: t.some(x => /Split areas/i.test(x)), direction_toast: t.some(x => /Adjusted flight direction/i.test(x))}; })()",
+      "save_as": "after",
+      "text": "After: messages, area rows, the server's areas (unsaved)"
+    },
+    {
+      "always": true,
+      "gates": [],
+      "helper": "act.py {target} tap testid:btn-sites --expect \"js:/Exit without saving/.test(document.body.innerText) || location.pathname === '/sites'\" --timeout 20",
+      "n": 11,
+      "text": "Leave the planner (always)"
+    },
+    {
+      "always": true,
+      "gates": [],
+      "helper": "act.py {target} tap \"text:Exit without saving\" --expect \"js:location.pathname === '/sites'\" --timeout 20",
+      "n": 12,
+      "text": "Exit without saving when asked (always; writes nothing)",
+      "when_js": "/Exit without saving/.test(document.body.innerText)"
+    }
+  ],
+  "steps_note": "Written 2026-10-30 from qa/playbooks/flight-planning.md and the hand run of 2026-10-29 (tests/2026-10-29-magic-planning-cl80001). Splitting depends on the terrain the backend reads: a run that ends 'No further improvements found' passes but says the split was not exercised. The QA_ flight stays in the QA site (the engine does not delete); remove old ones by hand now and then. Direction changes are seen only through the toast (the unsaved plan's angles are not readable from the page). New case: a FAIL stays suspected until this version has passed once on the web.",
+  "supersedes": null,
+  "targets": "web",
+  "test_data": {
+    "site_id": "a0000001-0000-4000-8000-000000000001"
+  },
+  "title": "Magic Planning Optimize flight: area splitting and flight direction (web)"
+}

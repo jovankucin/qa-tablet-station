@@ -1,0 +1,103 @@
+{
+  "area": "UPG",
+  "author": "claude",
+  "covered_paths": [
+    "apps/src/hooks/metadata/**",
+    "apps/src/ProtectedRoute.tsx",
+    "apps/src/plugins/file-service-plugin/**",
+    "apps/android/app/src/main/java/com/wingtra/cloud/app/plugins/FileService/**",
+    "apps/cpp/wipapp/src/Metadata/**",
+    "apps/src/providers/wingtra-api/metadata-management.api*",
+    "apps/src/pages/Plane/screens/MetadataUploadPage.tsx",
+    "apps/src/common/environment.ts",
+    "packages/metadata/**",
+    "packages/shared/**"
+  ],
+  "created": "2026-10-20T15:40:29.799Z",
+  "expected_differences": [],
+  "fixtures": [],
+  "id": "UPG-014",
+  "kind": "case",
+  "needs": {
+    "account_lock": false,
+    "drone_hw": null,
+    "flags": [],
+    "link": "none",
+    "usb_port": false
+  },
+  "preconditions": [],
+  "requirement": {
+    "sha256": "e4db795b2f1b0e1fb1702758d835f8bced6571d62b10e8a91b4c4004cd58343d",
+    "source": {
+      "cache": "qa/cache/clickup/0000fake002.json",
+      "locator": "description bullet 14",
+      "ref": "0000fake002",
+      "requester": "Requester Colleague",
+      "type": "clickup_task"
+    },
+    "text": "*   Make sure metadata still uploads"
+  },
+  "routing": [
+    {
+      "line": 192,
+      "path": "apps/src/ProtectedRoute.tsx",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "if (isAndroid) { useMetadataUpload() }",
+      "t": "git",
+      "why": "The automatic metadata upload hook (line 194) only mounts on Android."
+    },
+    {
+      "line": 7,
+      "path": "apps/src/common/environment.ts",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "isAndroid",
+      "t": "git",
+      "why": "Platform flag from Capacitor.getPlatform() that gates the hook."
+    },
+    {
+      "line": 4,
+      "path": "apps/src/plugins/file-service-plugin/web.ts",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "FileServiceWeb.uploadFiles",
+      "t": "git",
+      "why": "The web implementation throws 'not supported on web platform'. Hashing and upload exist only in the native Android FileServicePlugin."
+    },
+    {
+      "line": 143,
+      "path": "apps/android/app/src/main/java/com/wingtra/cloud/app/plugins/FileService/FileService.java",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "FileService upload ('Uploading metadata file')",
+      "t": "git",
+      "why": "Native Android upload of the metadata CSV to the presigned URL."
+    },
+    {
+      "line": 91,
+      "path": "apps/src/hooks/metadata/useMetadataUpload.ts",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "uploadEnabled = (PROD || forceEnabled) && MetadataUpload flag",
+      "t": "git",
+      "why": "Upload preconditions. Line 123 shouldUploadMetadataFile filters files by APP_ENVIRONMENT (staging CSVs are not uploaded by a develop build)."
+    },
+    {
+      "line": 88,
+      "path": "apps/cpp/wipapp/src/Metadata/MetadataLogging.cc",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "MetadataLogging start logging in folder",
+      "t": "git",
+      "why": "The native writer of Documents/WingtraCloud/Metadata files."
+    }
+  ],
+  "schema": 1,
+  "status": "active",
+  "steps": [],
+  "steps_note": "back-test case: steps are authored for live runs in Step 3",
+  "supersedes": null,
+  "targets": "tablet",
+  "title": "Make sure metadata still uploads"
+}

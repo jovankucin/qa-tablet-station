@@ -1,0 +1,93 @@
+{
+  "area": "UPG",
+  "author": "claude",
+  "covered_paths": [
+    "apps/android/app/src/main/java/com/wingtra/cloud/app/MainActivity.java",
+    "apps/android/app/src/main/java/com/wingtra/cloud/app/LogcatCommand.java",
+    "apps/android/app/src/main/java/com/wingtra/cloud/app/helpers/LogcatDumpHelper.java",
+    "apps/android/app/src/main/java/com/wingtra/cloud/app/plugins/WiPPlugin/FileCleanupUtils.kt",
+    "apps/android/app/src/main/AndroidManifest.xml",
+    "apps/android/variables.gradle",
+    "apps/cpp/wipapp/src/QGCApplication.cc",
+    "apps/cpp/wipapp/src/Metadata/**",
+    "apps/package.json"
+  ],
+  "created": "2026-10-20T15:40:28.954Z",
+  "expected_differences": [],
+  "fixtures": [],
+  "id": "UPG-013",
+  "kind": "case",
+  "needs": {
+    "account_lock": false,
+    "drone_hw": null,
+    "flags": [],
+    "link": "none",
+    "usb_port": false
+  },
+  "preconditions": [],
+  "requirement": {
+    "sha256": "65dea3b40fe2f6fb5fec3389c659f0a50f92e16069e6c6ebfa42e6d271a28d36",
+    "source": {
+      "cache": "qa/cache/clickup/0000fake002.json",
+      "locator": "description bullet 13",
+      "ref": "0000fake002",
+      "requester": "Requester Colleague",
+      "type": "clickup_task"
+    },
+    "text": "*   Make sure app log files are still accessible and persist across reinstalls"
+  },
+  "routing": [
+    {
+      "line": 294,
+      "path": "apps/android/app/src/main/java/com/wingtra/cloud/app/MainActivity.java",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "MainActivity.redirectLogs()",
+      "t": "git",
+      "why": "Android-only: writes the app logcat to shared Documents/WingtraCloud/Logcat (line 296). Called from load() at line 84 only after the storage gate at line 70 passes."
+    },
+    {
+      "line": 123,
+      "path": "apps/cpp/wipapp/src/QGCApplication.cc",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "logFilesPath = _externalStorageDirPath + \"/Documents/WingtraCloud/Logs\"",
+      "t": "git",
+      "why": "The native Qt log goes to shared external storage, which survives uninstall, unlike app-private storage."
+    },
+    {
+      "line": 100,
+      "path": "apps/android/app/src/main/java/com/wingtra/cloud/app/plugins/WiPPlugin/FileCleanupUtils.kt",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "performFileCleanup()",
+      "t": "git",
+      "why": "Android cleanup that deletes old log and metadata files. It decides which files persist."
+    },
+    {
+      "line": 5,
+      "path": "apps/android/app/src/main/AndroidManifest.xml",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "uses-permission MANAGE_EXTERNAL_STORAGE",
+      "t": "git",
+      "why": "A reinstalled app (new UID) can only list and read the old files owned by the previous install through all-files access."
+    },
+    {
+      "line": 45,
+      "path": "apps/android/app/src/main/AndroidManifest.xml",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "android:hasFragileUserData / allowBackup=false (line 42)",
+      "t": "git",
+      "why": "Android reinstall and data-retention behaviour."
+    }
+  ],
+  "schema": 1,
+  "status": "active",
+  "steps": [],
+  "steps_note": "back-test case: steps are authored for live runs in Step 3",
+  "supersedes": null,
+  "targets": "tablet",
+  "title": "Make sure app log files are still accessible and persist across reinstalls"
+}

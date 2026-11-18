@@ -1,0 +1,123 @@
+{
+  "area": "UPG",
+  "author": "claude",
+  "covered_paths": [
+    "apps/src/common/environment.ts",
+    "apps/src/hooks/update/**",
+    "apps/src/plugins/updater/**",
+    "apps/src/providers/wingtraUpdaterProvider.ts",
+    "apps/src/helpers/update/**",
+    "apps/src/pages/Settings/screens/About.tsx",
+    "apps/android/app/src/main/java/com/wingtra/cloud/app/plugins/UpdaterPlugin/**",
+    "apps/android/app/src/main/AndroidManifest.xml",
+    "apps/android/app/src/main/res/xml/file_paths.xml",
+    "apps/android/variables.gradle",
+    "apps/android/app/build.gradle",
+    "apps/capacitor.config.ts"
+  ],
+  "created": "2026-10-20T15:40:20.831Z",
+  "expected_differences": [],
+  "fixtures": [],
+  "id": "UPG-004",
+  "kind": "case",
+  "needs": {
+    "account_lock": false,
+    "drone_hw": null,
+    "flags": [],
+    "link": "none",
+    "usb_port": false
+  },
+  "preconditions": [],
+  "requirement": {
+    "sha256": "5ff7f44c342eb2da81928fe5b1f19dffd87e35840af2c6e8e52b79156609cbdf",
+    "source": {
+      "cache": "qa/cache/clickup/0000fake002.json",
+      "locator": "description bullet 4",
+      "ref": "0000fake002",
+      "requester": "Requester Colleague",
+      "type": "clickup_task"
+    },
+    "text": "*   Install from scratch, APK download and installation permission flow\n    *   Only expect this to happen once (with the new Android version installed)"
+  },
+  "routing": [
+    {
+      "line": 7,
+      "path": "apps/src/common/environment.ts",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "isAndroid",
+      "t": "git",
+      "why": "Platform flag that gates the APK download/install path."
+    },
+    {
+      "line": 52,
+      "path": "apps/src/hooks/update/useCheckUpdate.ts",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "appUpdateCanBeChecked = isAndroid && autoUpdateEnabled && PROD",
+      "t": "git",
+      "why": "APK download is attempted only on Android."
+    },
+    {
+      "line": 70,
+      "path": "apps/src/pages/Settings/screens/About.tsx",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "{isAndroid && <CheckUpdateButton notifyUser fleetCheck />}",
+      "t": "git",
+      "why": "The manual 'Check for updates' entry exists only on Android."
+    },
+    {
+      "line": 166,
+      "path": "apps/src/hooks/update/useAppUpdateChecker.ts",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "UpdaterPlugin.downloadApk",
+      "t": "git",
+      "why": "Native APK download into the app cache (update.apk)."
+    },
+    {
+      "line": 254,
+      "path": "apps/src/hooks/update/useAppUpdateChecker.ts",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "UpdaterPlugin.installApk",
+      "t": "git",
+      "why": "Starts the install after the user confirms 'Update now'."
+    },
+    {
+      "line": 66,
+      "path": "apps/android/app/src/main/java/com/wingtra/cloud/app/plugins/UpdaterPlugin/UpdaterPlugin.kt",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "canRequestPackageInstalls() -> ACTION_MANAGE_UNKNOWN_APP_SOURCES",
+      "t": "git",
+      "why": "The installation-permission flow: if the app may not request installs, it opens Install unknown apps. installPermissionResult (line 85) rechecks the permission and rejects with PERMISSION_DENIED (line 87)."
+    },
+    {
+      "line": 101,
+      "path": "apps/android/app/src/main/java/com/wingtra/cloud/app/plugins/UpdaterPlugin/UpdaterService.kt",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "installApkFile",
+      "t": "git",
+      "why": "Launches the system package installer through FileProvider (ACTION_VIEW)."
+    },
+    {
+      "line": 39,
+      "path": "apps/android/app/src/main/AndroidManifest.xml",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "android.permission.REQUEST_INSTALL_PACKAGES",
+      "t": "git",
+      "why": "The Android permission behind the Install unknown apps grant."
+    }
+  ],
+  "schema": 1,
+  "status": "active",
+  "steps": [],
+  "steps_note": "back-test case: steps are authored for live runs in Step 3",
+  "supersedes": null,
+  "targets": "tablet",
+  "title": "Install from scratch, APK download and installation permission flow"
+}

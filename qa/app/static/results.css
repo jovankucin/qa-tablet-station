@@ -1,0 +1,256 @@
+/* results.css: the Results page (results.js; one test per page since 2026-11-04, tests/2026-11-04-results-redesign/
+   SPEC.md screens 1-4). Wingtra tokens from app.css; every verdict has an icon and its words, colour is never the only
+   signal. "Test error" (the code not_decided) is hatched at 45 degrees, as History hatches it. Blocked has no Wingtra
+   token: its orange-brown is local and checked for contrast (about 7:1 on its background). */
+
+.rv { max-width: 960px; }
+
+/* Verdict badge: Passed green, Failed red, Failed suspected red outline, Test error hatched gray with a wrench, Partly
+   passed yellow, Blocked orange-brown, Not tested dotted gray */
+.rv-badge {
+  display: inline-flex; align-items: center; gap: 5px; padding: 2px 10px 2px 8px; border: 1px solid transparent;
+  border-radius: var(--radius); font-size: 13px; line-height: 18px; font-weight: 700; white-space: nowrap;
+}
+.rv-icon {
+  width: 14px; height: 14px; flex: none; fill: none; stroke: currentColor; stroke-width: 2;
+  stroke-linecap: round; stroke-linejoin: round;
+}
+/* the box's marker: the verdict's badge colours around its icon (before the colours, which set its border) */
+.rv-verdict-icon {
+  display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; flex: none;
+  border: 1px solid transparent; border-radius: var(--radius-s);
+}
+.rv-verdict-icon .rv-icon { width: 16px; height: 16px; }
+.rv-v-passed { background: var(--green-0); color: var(--green-700); border-color: var(--green-500); }
+.rv-v-failed { background: var(--red-0); color: var(--red-700); border-color: var(--red-500); }
+.rv-v-failed_suspected { background: var(--white); color: var(--red-700); border: 1px dashed var(--red-500); }
+.rv-v-not_decided {
+  background: repeating-linear-gradient(45deg, var(--mercury-0) 0 2.5px, var(--white) 2.5px 4px);
+  color: var(--meteor-700); border: 1px dashed var(--meteor-400);
+}
+.rv-v-partly { background: var(--yamabuki-0); color: var(--yamabuki-700); border-color: var(--yamabuki-500); }
+.rv-v-blocked { background: #F6EDE4; color: #7A4419; border-color: #B97A47; }
+.rv-v-not_tested { background: var(--white); color: var(--meteor-500); border: 1px dotted var(--meteor-300); }
+.rv-v-running { background: var(--uranus-0); color: var(--uranus-700); border-color: var(--uranus-600); }
+
+/* the top line: other tests wait in History; another test runs */
+.rv-top { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 4px 16px; margin: -8px 0 10px; font-size: 13px; line-height: 20px; }
+.rv-also { font-weight: 700; }
+.rv-waiting { color: var(--uranus-700); }
+
+/* Header: the test's title in two lines at most, a grey line, '▸ What you asked and the plan' */
+.rv-head-card { padding-bottom: 14px; }
+.rv-test-title {
+  margin: 0; font-size: 20px; line-height: 28px; overflow-wrap: anywhere; display: -webkit-box; -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden;
+}
+.rv-meta { margin: 4px 0 0; font-size: 13px; line-height: 20px; color: var(--meteor-500); overflow-wrap: anywhere; }
+.rv-meta a { color: var(--uranus-700); }
+.rv-asked { margin-top: 8px; font-size: 13px; line-height: 20px; }
+.rv-asked > summary { color: var(--uranus-700); }
+.rv-pre { white-space: pre-wrap; }
+.rv-list { margin: 0; padding-left: 18px; }
+
+/* The box: the result in one sentence, its meaning, Hover's note, one Sun Orange button */
+.rv-box { border-left: 4px solid var(--mercury-100); }
+.rv-verdict { display: flex; align-items: flex-start; gap: 10px; margin: 0; font-size: 17px; line-height: 26px; }
+.rv-verdict > span + span { min-width: 0; overflow-wrap: anywhere; }
+.rv-verdict .chip { margin-left: 8px; }
+.rv-meaning { margin: 6px 0 0; color: var(--meteor-600); }
+.rv-note {
+  margin: 10px 0 0; padding: 8px 12px; background: var(--uranus-0); border-left: 4px solid var(--uranus-100);
+  border-radius: var(--radius-s); color: var(--meteor-700); overflow-wrap: anywhere;
+}
+.rv-done-line { display: flex; align-items: center; gap: 6px; margin: 10px 0 0; font-weight: 700; color: var(--mercury-600); }
+.rv-done-line:focus { outline: none; }
+.rv-confirm {
+  margin-top: 12px; padding: 10px 12px; background: var(--yamabuki-0); border-left: 4px solid var(--yamabuki-500);
+  border-radius: var(--radius-s); color: var(--yamabuki-700);
+}
+.rv-confirm p { margin: 0; }
+.rv-confirm .rv-actions { margin-top: 8px; }
+
+/* Actions: one Sun Orange button at most, quiet links */
+.rv-actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 14px; }
+.rv-status { font-size: 13px; line-height: 20px; color: var(--meteor-500); }
+.rv-status:focus { outline: none; }
+.rv-quiet { font-size: 13px; line-height: 20px; color: var(--meteor-500); }
+.rv-quiet:hover { color: var(--mercury-600); }
+.rv-error:empty { display: none; }
+/* in Plan again's place while a newer plan of the test can still run (2026-11-05) */
+.rv-newer { font-weight: 700; color: var(--uranus-700); }
+.rv-why { margin: 6px 0 0; font-size: 13px; line-height: 20px; color: var(--meteor-500); overflow-wrap: anywhere; }
+
+/* The results comment, once per test: the text the person reads is the text Post comment sends */
+.rv-comment { margin-top: 14px; min-width: 0; }
+.rv-comment > summary { font-size: 13px; line-height: 20px; color: var(--mercury-600); }
+.rv-comment-text {
+  margin: 0; padding: 8px 10px; max-height: 360px; overflow: auto; background: var(--uranus-0);
+  border: 1px solid var(--mercury-100); border-radius: var(--radius-s); font: inherit; color: var(--meteor-700);
+  white-space: pre-wrap; overflow-wrap: anywhere;
+}
+.rv-comment-text:focus { outline: 2px solid var(--uranus-600); outline-offset: 2px; }
+.rv-comment-file { margin: 6px 0 0; font-size: 13px; line-height: 20px; }
+.rv-box .rv-status { display: inline-flex; align-items: center; flex-wrap: wrap; gap: 0 5px; }
+.rv-box .rv-comment-done { color: var(--green-700); font-weight: 700; }
+.rv-box .rv-comment-done a { color: var(--green-700); }
+.rv-box .msg { margin: 8px 0 0; }
+
+/* Case rows: the case title and one chip per device in a grid; on a phone the chips wrap under the title and name
+   their device */
+.rv-cases { padding-top: 12px; padding-bottom: 8px; }
+.rv-case-line { display: grid; grid-template-columns: minmax(0, 1fr); align-items: start; gap: 4px 12px; padding: 10px 0; }
+.rv-cols-1 .rv-case-line { grid-template-columns: minmax(0, 1fr) 150px; }
+.rv-cols-2 .rv-case-line { grid-template-columns: minmax(0, 1fr) repeat(2, 150px); }
+.rv-cols-3 .rv-case-line { grid-template-columns: minmax(0, 1fr) repeat(3, 150px); }
+.rv-cols-4 .rv-case-line { grid-template-columns: minmax(0, 1fr) repeat(4, 140px); }
+.rv-cols-many .rv-case-line { display: flex; flex-wrap: wrap; }
+.rv-cols-many .rv-case-title { flex: 1 1 100%; }
+.rv-case-head { padding: 0 0 6px; font-size: 12px; line-height: 16px; font-weight: 700; color: var(--meteor-500); }
+.rv-case-head .rv-case-title { padding-left: 16px; }
+.rv-case, .rv-live-row { border-top: 1px solid var(--meteor-100); scroll-margin-top: 72px; }
+.rv-case > summary { list-style: none; font-weight: 400; color: var(--meteor-600); }
+.rv-case > summary::-webkit-details-marker { display: none; }
+.rv-case[open] > summary { margin-bottom: 0; }
+.rv-case > summary:hover .rv-case-name { color: var(--mercury-700); }
+.rv-case > summary:focus-visible { outline: 2px solid var(--uranus-600); outline-offset: 2px; }
+.rv-case.rv-target { outline: 2px solid var(--uranus-600); outline-offset: 2px; border-radius: var(--radius-s); }
+.rv-case-title { min-width: 0; }
+.rv-case-name { display: block; font-weight: 700; color: var(--mercury-600); overflow-wrap: anywhere; padding-left: 16px; }
+.rv-case > summary .rv-case-name { position: relative; }
+.rv-case > summary .rv-case-name::before { content: "\25B8"; position: absolute; left: 0; color: var(--uranus-700); }
+.rv-case[open] > summary .rv-case-name::before { content: "\25BE"; }
+.rv-why-line {
+  display: block; padding-left: 16px; font-size: 12px; line-height: 18px; color: var(--meteor-500);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.rv-cell { display: flex; align-items: center; flex-wrap: wrap; gap: 4px; min-width: 0; }
+.rv-cell .rv-badge { font-size: 12px; line-height: 16px; padding: 1px 8px 1px 6px; }
+.rv-cell .rv-badge .rv-icon { width: 12px; height: 12px; }
+.rv-cell-none { color: var(--meteor-400); }
+/* the device's name: read out everywhere, shown only where the columns stack */
+.rv-cell-tag {
+  position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0);
+  white-space: nowrap; border: 0;
+}
+
+/* An opened row: what it checks, the step x device table, What happened, Why, Not tested, the shots and run times,
+   the ticket part, Run records */
+.rv-case-body { padding: 0 0 14px 16px; min-width: 0; }
+.rv-checks { margin: 0 0 6px; color: var(--meteor-700); overflow-wrap: anywhere; }
+.rv-table .table-wrap { margin: 4px 0 0; }
+.rv-step-table { font-size: 13px; line-height: 20px; }
+.rv-step-text { color: var(--meteor-700); overflow-wrap: anywhere; }
+.rv-step-cell { width: 1%; min-width: 64px; white-space: nowrap; text-align: center; }
+td.rv-step-cell .rv-icon { width: 16px; height: 16px; vertical-align: middle; }
+.rv-o-as_expected { color: var(--green-700); }
+.rv-o-not_as_expected { color: var(--red-700); }
+.rv-o-stopped { color: var(--meteor-700); }
+.rv-o-not_run { color: var(--meteor-400); }
+.rv-legend { display: flex; flex-wrap: wrap; gap: 4px 16px; margin: 6px 0 0; font-size: 12px; line-height: 18px; color: var(--meteor-500); }
+.rv-legend span { display: inline-flex; align-items: center; gap: 4px; }
+.rv-legend .rv-icon { width: 12px; height: 12px; }
+.rv-facts { margin: 12px 0 0; }
+.rv-facts dt { font-size: 12px; line-height: 16px; font-weight: 700; color: var(--meteor-500); margin-top: 10px; }
+.rv-facts dt:first-child { margin-top: 0; }
+.rv-facts dd { margin: 2px 0 0; color: var(--meteor-700); overflow-wrap: anywhere; }
+.rv-records { margin: 10px 0 0; text-align: right; }
+
+/* Proof: the result shot (else each device's end shot), the flight plan, each device's run time */
+.rv-proof { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px 14px; margin-top: 12px; }
+.rv-shot { margin: 0; width: 200px; max-width: 100%; min-width: 0; }
+.rv-shot a {
+  display: block; border: 1px solid var(--meteor-100); border-radius: var(--radius); overflow: hidden;
+  background: var(--meteor-0); cursor: zoom-in;
+}
+.rv-shot a:hover { border-color: var(--mercury-300); }
+.rv-shot img { display: block; width: 100%; height: auto; }
+.rv-shot figcaption { margin-top: 4px; font-size: 12px; line-height: 16px; color: var(--meteor-500); }
+.rv-plan {
+  display: flex; align-items: center; gap: 10px; padding: 8px 10px; border: 1px solid var(--meteor-100);
+  border-radius: var(--radius); min-width: 0;
+}
+.rv-outline { width: 56px; height: 56px; flex: none; }
+.rv-area {
+  fill: var(--uranus-100); stroke: var(--uranus-600); stroke-width: 2; stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+.rv-outline.rv-bad .rv-area { fill: var(--red-0); stroke: var(--red-500); }
+.rv-plan-text { min-width: 0; }
+.rv-plan-label { font-size: 12px; line-height: 16px; color: var(--meteor-500); }
+.rv-plan a, .rv-plan span { font-size: 13px; line-height: 18px; overflow-wrap: anywhere; }
+.rv-times { margin: 0 0 0 auto; font-size: 13px; line-height: 20px; color: var(--meteor-500); }
+
+/* The ticket part (2026-11-03): Report issue, then the drafts; File ticket is the page's one Sun Orange button while a
+   ticket is not filed */
+.rv-ticket-part { margin-top: 14px; }
+.rv-ticket-part > .rv-actions { margin-top: 0; }
+/* a failure the server takes no ticket for: why there is no Report issue, where the ticket part would be */
+.rv-report-why { margin-top: 14px; }
+.rv-ticket-panel { margin-top: 10px; }
+.rv-ticket-panel > .rv-status { display: block; margin: 0; }
+.rv-ticket-panel .rv-ticket { margin-top: 0; }
+.rv-ticket { display: flex; flex-direction: column; gap: 10px; margin-top: 14px; }
+.rv-ticket-one {
+  min-width: 0; padding: 12px 14px; background: var(--uranus-0); border: 1px solid var(--mercury-100);
+  border-radius: var(--radius);
+}
+.rv-ticket-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 10px; }
+.rv-ticket-label { font-size: 12px; line-height: 16px; font-weight: 700; color: var(--mercury-600); }
+.rv-ticket-title { min-width: 0; font-weight: 700; color: var(--meteor-700); overflow-wrap: anywhere; }
+.rv-ticket-note {
+  margin: 8px 0 0; padding: 6px 10px; border-left: 4px solid var(--yamabuki-500); border-radius: var(--radius-s);
+  background: var(--yamabuki-0); color: var(--yamabuki-700); font-size: 13px; line-height: 20px;
+}
+.rv-ticket-desc { margin-top: 8px; font-size: 13px; line-height: 20px; }
+.rv-ticket-desc > summary { color: var(--uranus-700); }
+.rv-ticket-desc pre {
+  margin: 6px 0 0; padding: 8px 10px; max-height: 320px; overflow: auto; background: var(--white);
+  border: 1px solid var(--meteor-100); border-radius: var(--radius-s); font: inherit; color: var(--meteor-700);
+  white-space: pre-wrap; overflow-wrap: anywhere;
+}
+.rv-ticket .rv-actions { margin-top: 10px; }
+.rv-ticket .rv-status { display: inline-flex; align-items: center; gap: 5px; }
+.rv-ticket .rv-ticket-done { color: var(--green-700); font-weight: 700; }
+.rv-ticket .msg { margin: 8px 0 0; }
+
+/* The live box while the test runs (it took Running now's place, 2026-11-04): per device the step and the newest
+   screenshot (opens in a new tab); the case rows say done, running or waiting */
+.rv-live { border-left-color: var(--uranus-600); }
+.rv-run-devs { list-style: none; margin: 12px 0 0; padding: 0; }
+.rv-run-dev {
+  display: grid; grid-template-columns: minmax(0, 1fr) 132px; gap: 12px; align-items: start;
+  padding: 10px 0; border-top: 1px solid var(--meteor-100);
+}
+.rv-run-dev:first-child { border-top: 0; padding-top: 0; }
+.rv-run-dev:last-child { padding-bottom: 0; }
+.rv-run-dev.rv-no-shot { grid-template-columns: minmax(0, 1fr); }
+.rv-run-text { min-width: 0; }
+.rv-run-step { color: var(--meteor-700); overflow-wrap: anywhere; }
+.rv-run-shot {
+  display: block; border: 1px solid var(--meteor-100); border-radius: var(--radius-s); overflow: hidden;
+  background: var(--meteor-0); cursor: zoom-in;
+}
+.rv-run-shot:hover { border-color: var(--mercury-300); }
+.rv-run-shot img { display: block; width: 100%; height: auto; }
+.rv-run-note { margin: 10px 0 0; font-size: 13px; line-height: 20px; color: var(--meteor-500); }
+.rv-live-row { color: var(--meteor-600); }
+.rv-live-running { color: var(--uranus-700); font-weight: 700; }
+.rv-live-done { color: var(--meteor-600); }
+.rv-live-waiting { color: var(--meteor-400); }
+
+.rv a:focus-visible, .rv summary:focus-visible { outline: 2px solid var(--uranus-600); outline-offset: 2px; }
+
+@media (max-width: 720px) {
+  .rv-top { justify-content: flex-start; margin-top: -4px; }
+  .rv-case-line, .rv-cols-1 .rv-case-line, .rv-cols-2 .rv-case-line, .rv-cols-3 .rv-case-line,
+  .rv-cols-4 .rv-case-line { display: flex; flex-wrap: wrap; gap: 6px 12px; }
+  .rv-case-title { flex: 1 1 100%; }
+  .rv-cases .rv-case-head { display: none; }
+  .rv-cell { padding-left: 16px; }
+  .rv-cell-tag { position: static; width: auto; height: auto; margin: 0; overflow: visible; clip: auto; }
+  .rv-case-body { padding-left: 0; }
+  .rv-shot { width: 160px; }
+  .rv-times { margin-left: 0; flex-basis: 100%; }
+  .rv-run-dev { grid-template-columns: minmax(0, 1fr) 96px; }
+}

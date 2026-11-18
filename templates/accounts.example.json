@@ -1,0 +1,18 @@
+{
+  "kind": "account",
+  "schema": 1,
+  "id": "ACC-qa-stag",
+  "label": "qa-stag",
+  "env": "staging",
+  "allowed_envs": ["develop", "staging"],
+  "only_account": true,
+  "email_var": "QA_TEST_EMAIL",
+  "secret_var": "QA_TEST_PASSWORD",
+  "tenant_id": null,
+  "tenant_id_source": "fill in: the tenantId claim of your access token, read on a tablet with run.py's ACCOUNT_JS; null skips the tenant check",
+  "identity_check": "runner: access token email hashed in the page == sha256(lower(QA_TEST_EMAIL)) from qa/secrets.env, and the token's tenantId claim == tenant_id; a mismatch blocks the run",
+  "note": "Copy to qa/devices/accounts.v1.json and change label, id and tenant_id. label must equal \"account\" in qa/runner/engine.json.",
+  "author": "station owner",
+  "created": null,
+  "supersedes": null
+}

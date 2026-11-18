@@ -1,0 +1,14 @@
+{
+  "name": "wingtra-qa-local",
+  "owner": {
+    "name": "Wingtra CT (local workspace)"
+  },
+  "plugins": [
+    {
+      "name": "wingtra-qa",
+      "source": "./wingtra-qa",
+      "description": "WingtraApp QA engine: status pane and QA skills (local, project scope). The gate and ledger hooks are in the workspace .claude/settings.json."
+    }
+  ],
+  "description": "Local marketplace for the WingtraApp QA engine in this workspace (project scope only)"
+}

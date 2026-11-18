@@ -1,0 +1,861 @@
+{
+ "kind": "reference",
+ "what": "selector research at WingtraCloud 84d3721b (read, then checked)",
+ "ref": "84d3721b33ee195738a2a002313c55becb2643bc",
+ "checked": [
+  {
+   "topic": "0 scope",
+   "fact": "I re-read every cited line at commit 84d3721b33ee195738a2a002313c55becb2643bc (git describe 1.74.0-6-g84d3721b3), offline (GIT_NO_LAZY_FETCH=1). Every blob I needed was local. Most citations were right. The corrections below are marked 'Corrected:' and new controls are marked 'New:'.",
+   "selector": "n/a",
+   "where": "WingtraCloud @84d3721b33ee195738a2a002313c55becb2643bc"
+  },
+  {
+   "topic": "Button testid mechanics (applies to all items)",
+   "fact": "The shared Button takes the prop `testid`, which defaults to 'none'. It renders <button data-testid=\"btn-wrapper-<testid>\"> around an inner <span data-testid=\"<testid>\">. So every untagged Button shows up as btn-wrapper-none / none, which is not unique, and has to be matched by exact visible text. ButtonProps has no aria-label prop, so none of the write-list Buttons has an aria-label.",
+   "selector": "testid:<id> matches the inner span; testid:btn-wrapper-<id> matches the <button>",
+   "where": "apps/src/components/ui/Button/Button.tsx:37, :65, :246, :248 @84d3721b"
+  },
+  {
+   "topic": "1 App update dialog: title",
+   "fact": "The optional native-update prompt has the title 'Update WingtraApp on this tablet?' (updates.do_you_want_to_install_the_update) and the description 'After confirmation you will be asked to install the new version of the app'. It is built with getConfirmation(action=updates.update_now, cancel=general.not_now) and rendered by the global AsyncModal into ConfirmDialog. config.id is not set, and ConfirmDialog passes id only to Dialog.Content, so the panel gets floating-ui's generated id. aria-labelledby points at the Dialog.Header div.",
+   "selector": "text:Update WingtraApp on this tablet?",
+   "where": "apps/src/hooks/update/useAppUpdateChecker.ts:240-246; apps/src/i18n/locales/en.json:3416-3417; apps/src/components/ui/AsyncModal/AsyncModal.tsx:15-60; apps/src/components/ui/ConfrimDialog/ConfirmDialog.tsx:72-76; apps/src/components/ui/Dialog/components/DialogContent.tsx:100-105 @84d3721b"
+  },
+  {
+   "topic": "1 App update dialog: 'Update now' button",
+   "fact": "Label 'Update now' (updates.update_now). It is the ConfirmDialog action Button with testid 'btn-dialog-action': inner span btn-dialog-action, button btn-wrapper-btn-dialog-action. The handler is on onMouseDown (with preventDefault), not onClick. A real tap fires it, because the WebView emits mousedown after a tap. JS element.click() does not fire it. On confirm, if the drone is not armed, it calls UpdaterPlugin.installApk. btn-dialog-action is shared: 21 non-test files call getConfirmation( and 6 render <ConfirmDialog> directly, so scope the selector by the dialog title. Corrected: the first pass said 'any touch-down triggers it' and gave a count of 27 files. The same text 'Update now' is also used by the OTA and SD-card firmware dialogs (updates.firmware_update.start_update_cta).",
+   "selector": "text:Update now inside the dialog titled 'Update WingtraApp on this tablet?' (testid btn-dialog-action is shared)",
+   "where": "apps/src/components/ui/ConfrimDialog/ConfirmDialog.tsx:98-115; apps/src/hooks/update/useAppUpdateChecker.ts:241, :249-255; apps/src/i18n/locales/en.json:3411, :3459; apps/src/pages/Plane/components/FirmwareUpdate/OtaUpdateConfirmationModal.tsx:71; apps/src/pages/Plane/components/FirmwareUpdate/SdCardUpdateModal.tsx:215 @84d3721b"
+  },
+  {
+   "topic": "1 App update dialog: 'Not now' button",
+   "fact": "Label 'Not now' (general.not_now). It is the ConfirmDialog cancel Button with no testid (btn-wrapper-none / none). It postpones the install and logs 'the user postponed it'. general.not_now is also used by the bundle-restart dialog and the OTA firmware confirm dialog.",
+   "selector": "text:Not now (scope by dialog title)",
+   "where": "apps/src/components/ui/ConfrimDialog/ConfirmDialog.tsx:84-95; apps/src/hooks/update/useAppUpdateChecker.ts:242, :258-262, :331; apps/src/pages/Plane/components/FirmwareUpdate/OtaUpdateConfirmationModal.tsx:66; apps/src/i18n/locales/en.json:234 @84d3721b"
+  },
+  {
+   "topic": "2 Install: forced APK update dialog",
+   "fact": "When isUpdateRequired(APP_VERSION, latestBuild.version_name) is true, the prompt has the title 'To continue using the app install the latest version' and one 'Install' button (updates.install). It has hideClose, hideCancel and dismissDisabled set, and keepOpenOnConfirm keeps it open after confirm. onConfirmed calls UpdaterPlugin.installApk unless the drone is armed. The button is the shared btn-dialog-action. updates.install is used only here. Match it as an exact string, because other en.json strings contain 'Install', for example 'Install new propellers' and the help text 'Install WingtraCloud on your OS...'.",
+   "selector": "exact text:Install inside the dialog titled 'To continue using the app install the latest version'",
+   "where": "apps/src/hooks/update/useAppUpdateChecker.ts:216-239; apps/src/i18n/locales/en.json:3410, :3425, :663, :1573 @84d3721b"
+  },
+  {
+   "topic": "2 Install: Android system screens after confirm",
+   "fact": "UpdaterPlugin.installApk first checks canRequestPackageInstalls(). If that is false, it opens Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES (the 'Install unknown apps' screen) and returns. Otherwise it starts Intent.ACTION_VIEW with type application/vnd.android.package-archive, which opens Android's package installer with its own Install/Update button. Both screens are native, outside the WebView. CDP cannot see them, and an adb tap helper must not press anything on them. Corrected: added the unknown-sources branch.",
+   "selector": "native UI: 'Install unknown apps' settings and the system package installer",
+   "where": "apps/android/app/src/main/java/com/wingtra/cloud/app/plugins/UpdaterPlugin/UpdaterPlugin.kt:59-80; apps/android/app/src/main/java/com/wingtra/cloud/app/plugins/UpdaterPlugin/UpdaterService.kt:101-112 @84d3721b"
+  },
+  {
+   "topic": "2 Install: native WebView-too-old screen",
+   "fact": "The native Compose screen shown when the system WebView is too old has two buttons: 'Update from GooglePlay' (onDownloadFromGooglePlayClick) and 'Download update files' (onDownloadFromApkClick). Both are native and have no testTag.",
+   "selector": "text:Update from GooglePlay / text:Download update files (native)",
+   "where": "apps/android/app/src/main/java/com/wingtra/cloud/app/webview_version_error/Body.kt:68-104; apps/android/app/src/main/res/values/strings.xml:14-15 @84d3721b"
+  },
+  {
+   "topic": "1 App update: live-bundle restart dialog",
+   "fact": "After a new web bundle downloads, the dialog 'Restart Wingtra app to update' offers 'Restart now' (updates.restart_now) and 'Not now'. Restart now calls LiveUpdate.reload(), which applies the bundle. In the forced variant (isRestartRequired), close and Not now are hidden, dismiss is disabled, and reload runs in onConfirmed. The dialog appears only when notifyUser or isRestartRequired is true. Automatic checks otherwise show only a 'Downloaded update...' toast. The action is the shared btn-dialog-action.",
+   "selector": "text:Restart now inside the dialog titled 'Restart Wingtra app to update'",
+   "where": "apps/src/hooks/update/useAppUpdateChecker.ts:322-364; apps/src/i18n/locales/en.json:3412-3415 @84d3721b"
+  },
+  {
+   "topic": "1 Check for updates (Settings > About, Fleet drone)",
+   "fact": "Label 'Check for updates' (updates.check_for_updates). It is an outlined Button with no testid (btn-wrapper-none). It appears on Settings > About on Android only (notifyUser, fleetCheck). It also appears in the Fleet drone FirmwareInfo panel (notifyUser, droneCodesToCheck=[droneCode]) unless the drone status is inactive. When online, performUpdateCheck shows the 'Update checks are currently unavailable' toast and returns unless isAndroid && AutoUpdate flag && PROD. Otherwise it downloads an APK if one exists, then checks the bundle and firmware, which can open the APK, restart or OTA dialogs. Corrected: when offline on Android, checkUpdate runs checkFirmwareUpdate directly through execOfflineCompatibleFn and skips that gate, so cached firmware can still open the OTA dialog.",
+   "selector": "text:Check for updates",
+   "where": "apps/src/components/ui/CheckUpdateButton/CheckUpdateButton.tsx:14-20; apps/src/pages/Settings/screens/About.tsx:70; apps/src/pages/Fleet/SystemOverview/FirmwareInfo.tsx:44-47; apps/src/hooks/update/useCheckUpdate.ts:35, :52-72, :140-148; apps/src/configuration/variables.ts:43; apps/src/i18n/locales/en.json:3421-3422 @84d3721b"
+  },
+  {
+   "topic": "New: update dialogs can open without any tap",
+   "fact": "Automatic checks call checkUpdate with notifyUser:false at four points: (1) at startup through useAppUpdate, unless a flight is being continued; (2) through useScheduledAppUpdateCheck, at most once a day; (3) when a drone first connects, through useDroneConnects; (4) after drone activation. A downloaded APK is always prompted through promptNativeUpdate, regardless of notifyUser. A firmware update for the connected drone opens the 'Update drone firmware?' OTA modal even when notifyUser is false. The SD-card 'Update drone firmware?' dialog opens when the drone's OBC reports OBC_ASK_UPDATE. A tap-automation guard therefore has to check for these dialogs before every tap, not only after a tap on 'Check for updates'.",
+   "selector": "[data-modal-overlay] [role=\"dialog\"] whose title is one of the update titles",
+   "where": "apps/src/ProtectedRoute.tsx:175-181; apps/src/hooks/update/useAppUpdate.ts:20-26; apps/src/hooks/update/useScheduledAppUpdateCheck.ts:10, :36-40; apps/src/hooks/plane/useDroneConnects.ts:83-92; apps/src/pages/Fleet/contexts/DroneActivationProvider.tsx:124-128; apps/src/hooks/update/useCheckUpdate.ts:127-128; apps/src/pages/Plane/hooks/useFirmwareUpdateChecker.tsx:445-458; apps/src/pages/Plane/components/FirmwareUpdate/SdCardUpdateModal.tsx:97-108 @84d3721b"
+  },
+  {
+   "topic": "3 Start MockLink (Plane > Mocklink)",
+   "fact": "The visible text is 'Start mocklink', hardcoded with a lowercase m. It is an outlined Button with testid 'btn-start-mocklink', and onClick calls WiPPlugin.startMocklink with the page's options. The page is the tab with testid 'plane-tab-mocklink' (title 'Mocklink'). The MOCKLINK flag hides only the tab button: /plane/mocklink is always routed.",
+   "selector": "testid:btn-start-mocklink",
+   "where": "apps/src/pages/Plane/screens/MocklinkPage.tsx:52-73, :432-434; apps/src/pages/Plane/layouts/PlaneLayout.tsx:17-23; apps/src/pages/Plane/routers/PlaneRouter.router.tsx:20; apps/src/i18n/locales/en.json:2011 @84d3721b"
+  },
+  {
+   "topic": "3 Stop MockLink (Plane > Mocklink)",
+   "fact": "The visible text is 'Stop mocklink' (hardcoded). It is an outlined Button with testid 'btn-stop-mocklink', disabled unless activeVehicleAvailable && activeLinkIsMocklink. onClick calls WiPPlugin.stopMocklink(). A case-insensitive text match also hits the Swiss-knife 'Stop Mocklink' button, so use the testid.",
+   "selector": "testid:btn-stop-mocklink",
+   "where": "apps/src/pages/Plane/screens/MocklinkPage.tsx:74-76, :435-442; apps/src/pages/Dev/components/DevHelpTools.tsx:168 @84d3721b"
+  },
+  {
+   "topic": "3 MockLink controls in the Swiss Army Knife popup",
+   "fact": "The 'Dev help tools' popup has 'Start default Mocklink' (WiPPlugin.startMocklink with defaults built from the last valid payload) and 'Stop Mocklink' (WiPPlugin.stopMocklink, disabled unless the active link is MockLink). Neither has a testid. Both show only when isAndroid && DEV_FLYING && MOCKLINK. New: when the ShowTelemetryDropInSwissKnife flag is also on, the popup has a 'Package drop percentage' slider (name packageDropPercentageSlider). Each change calls WiPPlugin.setPackageDropPercentage, which alters link behaviour.",
+   "selector": "text:Start default Mocklink / exact text:Stop Mocklink / input[name=\"packageDropPercentageSlider\"]",
+   "where": "apps/src/pages/Dev/components/DevHelpTools.tsx:81-84, :91-117, :157-190; apps/src/common/enums/featureFlags.enum.ts:51 @84d3721b"
+  },
+  {
+   "topic": "4 'Update connected drone' (Plane > OTA Debug)",
+   "fact": "Hardcoded label 'Update connected drone'. It is an outlined Button with no testid, and onClick runs startDebugOtaUpdate. It is disabled unless connectedVehicleIp is set and no debug update is in progress. There is no confirmation dialog: the handler picks the newest compatible release (or the older debug tag when the 'Downgrade' toggle, testId debug-ota-use-older-firmware, is on) and calls performHttpUpdate straight away. The tab testid is 'plane-tab-ota-debug' (title 'OTA Debug'). It sits behind the MOCKLINK tab flag, but the route is always registered.",
+   "selector": "text:Update connected drone",
+   "where": "apps/src/pages/Plane/screens/PlaneOtaDebugPage.tsx:347-390, :472-488; apps/src/pages/Plane/layouts/PlaneLayout.tsx:31-37; apps/src/pages/Plane/routers/PlaneRouter.router.tsx:22 @84d3721b"
+  },
+  {
+   "topic": "4 OTA Debug network controls (adjacent write actions)",
+   "fact": "The same page has three hardcoded buttons without testids: 'Establish OTA connection' (WiPPlugin.startOtaConnection, needs an active vehicle), 'Create OTA network' (WiPPlugin.createDebugOtaNetwork) and 'Close OTA network' (WiPPlugin.closeDebugOtaNetwork). They change the drone and tablet OTA Wi-Fi state. Once a network exists, the page shows its passphrase in data-testid debug-ota-network-passphrase, so do not dump that text into logs.",
+   "selector": "text:Establish OTA connection / text:Create OTA network / text:Close OTA network",
+   "where": "apps/src/pages/Plane/screens/PlaneOtaDebugPage.tsx:274-345, :434-442, :462-464 @84d3721b"
+  },
+  {
+   "topic": "4 Firmware OTA confirm dialog: 'Update now'",
+   "fact": "The dialog title is 'Update drone firmware?' (updates.firmware_update.ask_update). The 'Update now' Button (start_update_cta) has testid 'ota-update-now'. If the OTADroneUpdates flag is on and OTA is supported, onConfirm is startOtaUpdate. That runs the pre-update checks (which can route to the battery-too-low or turn-off-Wi-Fi modals), then WiPPlugin.startOtaConnection(). Once the drone IP arrives, the HTTP firmware upload starts on its own. If the flag is off or OTA is unsupported, the button switches to the SD-card workflow instead. OtaUpdateModal renders this dialog in the AskUpdate state and is mounted globally on Android. The container is dismissDisabled.",
+   "selector": "testid:ota-update-now (button: btn-wrapper-ota-update-now)",
+   "where": "apps/src/pages/Plane/components/FirmwareUpdate/OtaUpdateConfirmationModal.tsx:32-37, :69-73, :106-107, :127; apps/src/pages/Plane/components/FirmwareUpdate/OtaUpdateModal.tsx:219-259, :272-312, :325-334; apps/src/AppLayout.tsx:29; apps/src/i18n/locales/en.json:3457-3459 @84d3721b"
+  },
+  {
+   "topic": "4 Firmware OTA confirm dialog: 'Not now'",
+   "fact": "The 'Not now' Button (general.not_now) has testid 'ota-update-not-now'. onClose runs endOtaUpdateWorkflow, and the button is disabled while a start is pending. The repo's own E2E dismisses it with [data-testid=\"btn-wrapper-ota-update-not-now\"]. Below the actions is the link 'Having issues? Update via SD card', an ExternalLinkButton with no testid that calls switchToSdCardWorkflow (it opens the copy-to-SD modal and does not write by itself).",
+   "selector": "testid:btn-wrapper-ota-update-not-now",
+   "where": "apps/src/pages/Plane/components/FirmwareUpdate/OtaUpdateConfirmationModal.tsx:64-67, :75-83; apps/src/pages/Plane/components/FirmwareUpdate/OtaUpdateModal.tsx:261-270, :330; apps/tests/e2e/src/pageobjects/BasePage.ts:43-45; apps/src/i18n/locales/en.json:234, :3493 @84d3721b"
+  },
+  {
+   "topic": "4 Turn-off-Wi-Fi modal 'Continue' also starts OTA",
+   "fact": "In the TurnOffWifi state, the 'Continue' Button (actions.continue) has testid 'ota-wifi-off-continue' but no onClick of its own. The click handler continueOtaUpdate sits on the wrapper div data-testid 'ota-wifi-off-continue-wrapper'. It shows a 'Turn off Wi-Fi before continuing.' toast while Wi-Fi is on, and otherwise calls onContinue = startOtaUpdate, which starts the firmware update. Corrected: the first pass did not say that the handler is on the wrapper div. The neighbouring 'Open Wi-Fi settings' button has testid ota-open-wifi-panel.",
+   "selector": "testid:ota-wifi-off-continue-wrapper (tap target) / testid:ota-wifi-off-continue",
+   "where": "apps/src/pages/Plane/components/FirmwareUpdate/TurnOffWifiModal.tsx:23-34, :53-59; apps/src/pages/Plane/components/FirmwareUpdate/OtaUpdateModal.tsx:343-351; apps/src/i18n/locales/en.json:284, :3465 @84d3721b"
+  },
+  {
+   "topic": "New: 4 Battery-too-low modal SD-card switch",
+   "fact": "In the BatteryTooLow state, the modal (data-testid ota-tablet-battery-too-low-modal) has 'Close' (testid ota-battery-too-low-close) and 'Update via SD card' (testid ota-battery-too-low-sd-card). The second calls switchToSdCardWorkflow, which leads to the 'Copy to SD card' write but does not write by itself.",
+   "selector": "testid:ota-battery-too-low-sd-card",
+   "where": "apps/src/pages/Plane/components/FirmwareUpdate/TabletBatteryTooLowModal.tsx:41-46; apps/src/pages/Plane/components/FirmwareUpdate/OtaUpdateModal.tsx:335-342; apps/src/i18n/locales/en.json:3496 @84d3721b"
+  },
+  {
+   "topic": "4 SD-card firmware update dialog 'Update now'",
+   "fact": "The dialog title is 'Update drone firmware?' (updates.sd_card_update.ask_update), with the description 'Updating takes up to 7 minutes. Connection to the drone will be lost during the update.'. Its only button is 'Update now' (updates.firmware_update.start_update_cta), with no testid. In AskUpdate, close is hidden and dismiss is disabled, so the dialog has no decline control. The handler calls WiPPlugin.setObcUpdateInProgress and sendOBCUpdateAck(DO_UPDATE). The dialog opens on its own when the OBC reports OBC_ASK_UPDATE. If the OBC asks again while the update is InProgress, DO_UPDATE is re-sent without a tap. SdCardUpdateModal is mounted globally on Android.",
+   "selector": "text:Update now inside the dialog whose description starts 'Updating takes up to 7 minutes'",
+   "where": "apps/src/pages/Plane/components/FirmwareUpdate/SdCardUpdateModal.tsx:97-108, :148-158, :206-216, :251-270; apps/src/AppLayout.tsx:28; apps/src/i18n/locales/en.json:3443-3444, :3459 @84d3721b"
+  },
+  {
+   "topic": "4 'Copy to SD card' (SD-card copy modal)",
+   "fact": "The 'Copy to SD card' Button (updates.sd_card_update.copy_to_sd_card_cta) has no testid and is shown in the SelectFolder and Error states. handleCopy calls copyFirmwareUpdateToPickedFolder, which writes the firmware file to the folder the user picks.",
+   "selector": "text:Copy to SD card",
+   "where": "apps/src/pages/Plane/components/FirmwareUpdate/SdCardCopyModal.tsx:34-54, :116-122; apps/src/i18n/locales/en.json:3442 @84d3721b"
+  },
+  {
+   "topic": "4 Plane updates page update/download icons",
+   "fact": "Corrected: 'Update WO' and 'Update WR' are table column headers. The buttons under them are icon-only Buttons (ExportProjectIcon) with no text and no testid, each wrapped in a div with data-testid 'firmware-update-action'. That wrapper repeats on every row and in both columns. startUpdate opens the OtaUpdate modal and navigates to '/', and the real gate is then ota-update-now. The Download column's icon Button (DownloadIcon, no testid) calls ensureFirmwareReleaseDownloaded, which writes the firmware to the tablet. 'Refresh available updates' is read-only. The tab testid is plane-tab-plane-updates.",
+   "selector": "testid:firmware-update-action (not unique; pick by row and column); the confirm gate is testid:ota-update-now",
+   "where": "apps/src/pages/Plane/screens/PlaneUpdatesPage.tsx:79-90, :204-237, :290-297, :304-309, :326-358; apps/src/pages/Plane/layouts/PlaneLayout.tsx:38-44 @84d3721b"
+  },
+  {
+   "topic": "5 Swiss Army Knife icon",
+   "fact": "An icon-only filled Button (SwissKnife icon, teal) sits in a div at absolute top-0 left-0. It has no text, testid (btn-wrapper-none) or aria-label, and opens the 'Dev help tools' popup. It renders only with the DevReporting flag. The popup is a plain div with an <h2>, not a role=dialog. Its close X is a div data-testid 'btn-close-modal', the same testid the Dialog close uses.",
+   "selector": "position top-left icon (no testid/text); popup header h2 text:Dev help tools",
+   "where": "apps/src/pages/Dev/components/DevHelpTools.tsx:31, :137-155 @84d3721b"
+  },
+  {
+   "topic": "5 'Report bug'",
+   "fact": "Hardcoded label 'Report bug', an orange Button with no testid. It only opens ReportingModal and writes nothing by itself.",
+   "selector": "text:Report bug",
+   "where": "apps/src/pages/Dev/components/DevHelpTools.tsx:196-198, :235 @84d3721b"
+  },
+  {
+   "topic": "5 Reporter 'Next' (submits the bug report)",
+   "fact": "The 'Next' text is hardcoded. It is a Button type=submit form={formId} with no testid (btn-wrapper-none), in the dialog headed 'Report'. The title is pre-filled with '[CT] <date>' and the description with the template, so the form is valid as soon as it opens. Submit runs onSubmit. That shares the last valid flight as ANYONE_WITH_LINK with file export (a cloud sharing write), calls clickupProxyApi.createTask, sets custom fields (reporter, platform, env, version, build time) and starts log auto-attachment. The toggle label 'Attach more files in the next step' contains 'next', so match 'Next' exactly. Corrected: the share citation is now 195-208.",
+   "selector": "exact text:Next inside the dialog headed 'Report'",
+   "where": "apps/src/pages/Dev/components/ReportingModal.tsx:78-87, :97-99, :195-208, :212-264, :428-429, :458-463, :485-487 @84d3721b"
+  },
+  {
+   "topic": "5 Reporter implicit submit via Enter (inferred)",
+   "fact": "Title (name=title) and Tablet name (name=tabletName) are single-line inputs inside <form id={formId}>, and the submit button is linked through its form attribute. TextField's onKeyDown only filters +, - and e for number inputs, so Enter is not blocked. Standard HTML implicit submission therefore means an Enter or newline typed into those inputs submits the report, just as 'Next' does. This is inferred from the code and not tested on a device. The Description textarea does not submit on Enter.",
+   "selector": "form input[name=\"title\"] / input[name=\"tabletName\"] inside the 'Report' dialog",
+   "where": "apps/src/pages/Dev/components/ReportingModal.tsx:429-448, :485; apps/src/components/ui/TextField/TextField.tsx:101-108, :140 @84d3721b"
+  },
+  {
+   "topic": "5 Reporter follow-up writes",
+   "fact": "The upload step is headed 'Attach files to report'. Dropping or picking files in FileDropModal calls handleFilesSubmit, then attachLogFiles, then clickupProxyApi.addAttachment (a ClickUp write). The done step has 'Go to ticket' (window.open of app.clickup.com/t/<id>) and 'Finish' (handleClose). Neither has a testid. The in-progress and done containers both use data-testid 'flight-success-modal-pop-up'.",
+   "selector": "text:Attach files to report / text:Go to ticket",
+   "where": "apps/src/pages/Dev/components/ReportingModal.tsx:341-350, :395-410, :412-419, :491-503, :506, :516, :522-529 @84d3721b"
+  },
+  {
+   "topic": "New: Failsafe testing (Swiss Army Knife, drone write)",
+   "fact": "The 'Failsafe testing' button (outlined, no testid) appears in the popup on Android while a vehicle is active. It opens FailsafeTesting. In that dialog, a SwipeToConfirm with testid 'btn-failure-swipe' and placeholder 'Trigger failure' sends WiPPlugin.sendFailsafeTestingCMD with the selected failure. 'Cancel failure' sends DISABLED x3. Both are drone commands.",
+   "selector": "text:Failsafe testing; testid:btn-failure-swipe; text:Cancel failure",
+   "where": "apps/src/pages/Dev/components/DevHelpTools.tsx:222-226, :236; apps/src/pages/Dev/components/FailsafeTesting.tsx:102-115, :166-169 @84d3721b"
+  },
+  {
+   "topic": "New: Plane > Debug page adjacent writes",
+   "fact": "/plane/debug (tab plane-tab-debug, behind the MOCKLINK tab flag, always routed) has these hardcoded buttons, none with a testid: 'Disconnect' (WiPPlugin.disconnectPlane; disabled on MockLink); PlaneLogDumpDevButton (drone log dump); 'Set Home position' (WiPPlugin.setSITLHomePosition); a red 'Crash the app' (AndroidServicesPlugin.crash); and 'Send Event'. The Swiss-knife 'Dump full logcat' writes a logcat file on the tablet.",
+   "selector": "text:Disconnect / text:Set Home position / text:Crash the app / text:Send Event",
+   "where": "apps/src/pages/Plane/screens/PlaneDebugPage.tsx:76-86, :100-107, :131-140, :170-172; apps/src/pages/Dev/components/DevHelpTools.tsx:119-127, :191-195 @84d3721b"
+  },
+  {
+   "topic": "1. About label: how it is built",
+   "fact": "The Settings > About badge, titled 'WingtraCloud version', shows versionLabel. That is `${APP_VERSION}-${APP_ENVIRONMENT}` in production and `${APP_VERSION}-${APP_ENVIRONMENT}-${GIT_HASH_SHORT}` otherwise. The Badge has no testid.",
+   "selector": "After navigating to /settings/about: document.body.innerText.match(/\\b\\d+\\.\\d+\\.\\d+-(?:production|(?:develop|staging|preproduction)-[0-9a-f]{7})\\b/)?.[0]",
+   "where": "apps/src/pages/Settings/screens/About.tsx:25-28, :36-42; apps/src/i18n/locales/en.json:1939-1945 @84d3721b"
+  },
+  {
+   "topic": "1. APP_VERSION source",
+   "fact": "APP_VERSION is a Vite define, JSON.stringify(process.env.npm_package_version), which is the apps/package.json version (1.74.0 at this ref). It is declared only as an ambient const and inlined into the bundle, so it is not a window property.",
+   "selector": "none as a global",
+   "where": "apps/vite.config.ts:198-199; apps/src/declarations.d.ts:13; apps/package.json:3 @84d3721b"
+  },
+  {
+   "topic": "1. GIT_HASH / GIT_HASH_SHORT source",
+   "fact": "GIT_HASH is `git rev-parse --verify HEAD` at build time, and GIT_HASH_SHORT is hash.slice(0,7). Both are Vite defines inlined at build. No global, meta tag or localStorage key holds them.",
+   "selector": "none as a global",
+   "where": "apps/vite.config.ts:53, :203-204; apps/vite-plugins/gitHelpers.ts:4-12; apps/src/declarations.d.ts:15-16 @84d3721b"
+  },
+  {
+   "topic": "1. Hash reachable only through the bundle text (inference, check on device)",
+   "fact": "ReportingModal builds 'App info': { Version: APP_VERSION, Environment: APP_ENVIRONMENT, ..., 'Git hash': GIT_HASH }. It is statically imported along this chain: DevHelpTools:19, AppLayout:6, ProtectedRoute:24, App:13, LoadingApp:2, index.tsx:26. vite.config sets no manualChunks, so the 40-character literal should be in the eagerly loaded entry chunk. Fetching that same-origin script is a read-only GET. The minified key spacing is assumed and not checked against a real build.",
+   "selector": "Runtime.evaluate awaitPromise:true: (async()=>{const s=document.querySelector('script[type=\"module\"][src]');const t=await (await fetch(s.src)).text();const h=(t.match(/\"Git hash\":\\s*\"([0-9a-f]{40})\"/)||[])[1];const v=(t.match(/\"App info\":\\s*\\{\\s*Version:\\s*\"([^\"]+)\"/)||[])[1];return {entry:s.src.split('/').pop(),version:v,gitHash:h,hash7:h&&h.slice(0,7)};})()",
+   "where": "apps/src/pages/Dev/components/ReportingModal.tsx:169-175; apps/src/pages/Dev/components/DevHelpTools.tsx:19; apps/src/AppLayout.tsx:6; apps/src/ProtectedRoute.tsx:24; apps/src/App.tsx:13; apps/src/LoadingApp.tsx:2; apps/src/index.tsx:26; apps/vite.config.ts:61-69 @84d3721b"
+  },
+  {
+   "topic": "1. Native version (Capacitor LiveUpdate)",
+   "fact": "On Android, About shows 'WingtraCloud native layer version' from LiveUpdate.getVersionCode(), which returns {versionCode}. The plugin is registered as LiveUpdate (@capawesome/capacitor-live-update 8.6.0). The call is read-only.",
+   "selector": "await window.Capacitor.Plugins.LiveUpdate.getVersionCode()  // -> {versionCode}",
+   "where": "apps/src/pages/Settings/screens/About.tsx:15-19, :50-57; apps/capacitor.config.ts:43-45; apps/package.json:163; apps/src/i18n/locales/en.json:1942 @84d3721b"
+  },
+  {
+   "topic": "1. LiveUpdate.getCurrentBundle does not give the hash",
+   "fact": "getCurrentBundle() returns {bundleId}. The APK's embedded bundle has no bundleId (code comment). CI uploads bundles with only appId, token, channel, path and androidMin/Max/Eq: no git hash. bundleId says only whether a live bundle is active.",
+   "selector": "await window.Capacitor.Plugins.LiveUpdate.getCurrentBundle()  // -> {bundleId|null}",
+   "where": "apps/src/hooks/update/useAppUpdateChecker.ts:288-293; .github/workflows/build-deploy-test-apps.yaml:252-262 @84d3721b"
+  },
+  {
+   "topic": "1. Other places that show the version without opening About",
+   "fact": "Plane > System overview shows 'WingtraCloud version' followed by `${APP_VERSION}-${APP_ENVIRONMENT}. ${BUILD_TIME_FORMATTED}`, with no hash. The mobile drawer shows 'Cloud version: ' + APP_VERSION. useMetadataLogging sends `${APP_VERSION}-${GIT_HASH_SHORT}` and APP_ENVIRONMENT to native through WiPPlugin.updateMetadataUserProperty. That call is a setter only.",
+   "selector": "/plane/system-overview DOM text; drawer text 'Cloud version:'",
+   "where": "apps/src/pages/Plane/screens/SystemOverviewPage.tsx:37-39; apps/src/components/application/AppNavbar/AppNavbar.tsx:257-258; apps/src/i18n/locales/en.json:408; apps/src/hooks/plane/useMetadataLogging.ts:237-249 @84d3721b"
+  },
+  {
+   "topic": "1. Sentry client carries release = APP_VERSION (Sentry internals, unverified)",
+   "fact": "Both SentryCapacitor.init and SentryReact.init get release: APP_VERSION, environment: VITE_SENTRY_ENVIRONMENT (CI: inputs.environment) and enabled: PROD. @sentry/react is 8.42.0. Reading this relies on the window.__SENTRY__ carrier internals and gives the version without the hash. The expression returns only release, environment and enabled, never the DSN.",
+   "selector": "(()=>{const c=window.__SENTRY__||{};return Object.keys(c).filter(k=>c[k]&&typeof c[k]==='object').map(k=>{const s=c[k].defaultCurrentScope||c[k].stack?.getScope?.();const o=s?.getClient?.()?.getOptions?.();return o&&{sdk:k,release:o.release,environment:o.environment,enabled:o.enabled};}).filter(Boolean);})()",
+   "where": "apps/src/index.tsx:69-81; apps/src/observability/sentryConfig.ts:56-61; apps/package.json:178; .github/workflows/build-web.yaml:95 @84d3721b"
+  },
+  {
+   "topic": "1. localStorage / Unleash",
+   "fact": "localStorageItems.ts has no key matching version, environment or hash. The Unleash context carries platform and swVersion: APP_VERSION as module config, not a window global.",
+   "selector": "none",
+   "where": "apps/src/configuration/localStorageItems.ts; apps/src/globals/unleashClient.ts:5-19 @84d3721b"
+  },
+  {
+   "topic": "2. APP_ENVIRONMENT definition and CI mapping",
+   "fact": "APP_ENVIRONMENT ('develop'|'staging'|'preproduction'|'production') is import.meta.env.VITE_APP_ENVIRONMENT, baked in at build. CI sets it from inputs.environment: sky-production gives production, sky-preproduction gives preproduction, sky-staging gives staging, and any other branch gives develop.",
+   "selector": "not a global by this name",
+   "where": "apps/src/configuration/variables.ts:35-36; .github/workflows/build-web.yaml:98; .github/workflows/setup.yaml:69-80 @84d3721b"
+  },
+  {
+   "topic": "2. window.env global (best runtime read)",
+   "fact": "index.html sets window.env = { VITE_APP_ENVIRONMENT: '<%= VITE_APP_ENVIRONMENT %>' }, filled by createHtmlPlugin at build. It is part of the web bundle, so it reflects the live bundle in use. It also gates Heap, which loads only in production.",
+   "selector": "window.env?.VITE_APP_ENVIRONMENT",
+   "where": "apps/index.html:15-18, :50; apps/vite.config.ts:116-122 @84d3721b"
+  },
+  {
+   "topic": "2. Entry script filename carries the environment",
+   "fact": "The entry and chunk names are `[name]-[hash]-${ENV}.js` with ENV = VITE_APP_ENVIRONMENT. [hash] is a content hash, not the git hash.",
+   "selector": "document.querySelector('script[type=\"module\"][src]')?.src.match(/-(develop|staging|preproduction|production)\\.js$/)?.[1]",
+   "where": "apps/vite.config.ts:26, :63-67 @84d3721b"
+  },
+  {
+   "topic": "2. E2E globals only on develop/staging Android",
+   "fact": "window.__wingtraE2EApiRequest and window.__wingtraE2EDownloadMapTiles are registered only on Android when APP_ENVIRONMENT is develop or staging. They are a secondary env signal. Do not call them.",
+   "selector": "typeof window.__wingtraE2EApiRequest === 'function'",
+   "where": "apps/src/index.tsx:64-67; apps/src/testing/e2eApiRequest.ts:23-27, :66-72; apps/src/testing/e2eMapTilesDownload.ts:58 @84d3721b"
+  },
+  {
+   "topic": "2. location.origin and platform",
+   "fact": "On Android the origin is https://${CAPACITOR_HOSTNAME}. It is http when the hostname is 'localhost', and APP_URL when USE_SERVER=true. .env.common sets localhost and USE_SERVER=true for local dev. CI sets CAPACITOR_HOSTNAME from a GitHub variable whose values are not in the repo. Corrected: platform is 'electron' when window.electron exists, and otherwise Capacitor.getPlatform().",
+   "selector": "location.origin; window.Capacitor?.getPlatform?.()",
+   "where": "apps/capacitor.config.ts:8, :19-31; apps/.env.common:3-5; .github/workflows/build-android.yaml:160; .github/workflows/build-web.yaml:111; apps/src/common/environment.ts:3-7 @84d3721b"
+  },
+  {
+   "topic": "2. API base is baked, not global",
+   "fact": "WINGTRA_API_URI is resolveWingtraApiUrl(VITE_APP_WINGTRA_API_URI || 'http://localhost:9016'), with CI setting vars.API_URL. It is a module constant only.",
+   "selector": "none",
+   "where": "apps/src/configuration/variables.ts:23-29, :56-58; .github/workflows/build-web.yaml:105 @84d3721b"
+  },
+  {
+   "topic": "3. Router type and top-level routes",
+   "fact": "The app uses createBrowserRouter with '*' mapped to LoadingApp, so location.pathname is the route. Under '/': the index and unknown paths redirect to /sites; the other routes are /sites/create, /sites/:siteId/*, /flights/:flightId?, /maps/*, /settings/*, /plane/*, /fleet/:droneId?/*, /help/*, /history/*, /processing/*, /object-detection/*, /survey-outcomes and /detect-anything. /log-analysis and /telemetry-analysis exist only with the LogAnalysisTool flag. Public routes start with /shared.",
+   "selector": "location.pathname",
+   "where": "apps/src/index.tsx:85; apps/src/ProtectedRoute.tsx:61, :67-91; apps/src/common/enums/appRoutes.enum.ts:1-21; apps/src/common/enums/featureFlags.enum.ts:66; apps/src/App.tsx:53 @84d3721b"
+  },
+  {
+   "topic": "3. Sites sub-routes",
+   "fact": "Under /sites/:siteId: site-details, flights?/* (the site tabs; the 'flights' segment is optional), planning/:flightId, fly/:flightId and surveying/:flightId. Anything else redirects to flights. The site tabs are flights-overview/:flightId? and maps/:datasetId?, and unknown tabs show a 404 stub. Corrected: urls.ts builds only the flights-tab link, /sites/:siteId/flights/flights-overview/:flightId?. The maps tab path is defined in SiteTabsLayout and routes to /sites/:siteId/flights/maps/:datasetId?.",
+   "selector": "/sites/<siteId>/flights/flights-overview, /sites/<siteId>/flights/maps, /sites/<siteId>/planning/<flightId>, /sites/<siteId>/fly/<flightId>, /sites/<siteId>/surveying/<flightId>, /sites/<siteId>/site-details",
+   "where": "apps/src/pages/Sites/routers/SiteOverviewRouter.router.tsx:14-21; apps/src/pages/Sites/enums/SiteOverviewRoutesEnum.ts:1-10; apps/src/pages/Sites/routers/SiteTabsRouter.router.tsx:12-17; apps/src/pages/Sites/enums/SiteTabsRoutesEnum.ts:1-4; apps/src/pages/Sites/urls.ts:9-16; apps/src/pages/Sites/layouts/SiteTabsLayout.tsx:47; apps/src/common/utils/resolveRoute.ts:3-6 @84d3721b"
+  },
+  {
+   "topic": "3. Flights routes",
+   "fact": "The flights table is /flights, and a focused flight is /flights/:flightId.",
+   "selector": "/flights, /flights/<flightId>",
+   "where": "apps/src/common/enums/appRoutes.enum.ts:4; apps/src/pages/Flights/urls.ts:4-11; apps/src/ProtectedRoute.tsx:74 @84d3721b"
+  },
+  {
+   "topic": "3. Maps routes",
+   "fact": "The maps table is /maps/:datasetId?. The viewer is /maps/:datasetId/map-viewer/:viewerId/*. /maps/:datasetId/overview/* holds export/* (files and processing-history; anything else redirects to files) and legacy-viewer. ExportRoutesEnum.Reports has no route.",
+   "selector": "/maps, /maps/<datasetId>/map-viewer/<viewerId>, /maps/<datasetId>/overview/export/files, /maps/<datasetId>/overview/export/processing-history, /maps/<datasetId>/overview/legacy-viewer",
+   "where": "apps/src/pages/Maps/routers/MapsRouter.router.tsx:12-14; apps/src/pages/Maps/enums/MapRoute.ts:1-5; apps/src/pages/Maps/routers/MapOverviewRouter.tsx:19-21; apps/src/pages/Maps/enums/OverviewRoute.ts:1-4; apps/src/pages/Maps/routers/ExportRouter.tsx:19-23; apps/src/pages/Maps/enums/ExportRoutesEnum.ts:1-5 @84d3721b"
+  },
+  {
+   "topic": "3. Plane and its tabs",
+   "fact": "/plane redirects to system-overview. The tabs are system-overview, mocklink, debug, ota-debug, plane-updates, plane-parameters, telemetry-settings-debug (title 'Telemetry Tools', testid plane-tab-telemetry-dev-tools), metadata-upload and powersync. The Mocklink flag shows the mocklink, debug and ota-debug tabs, MetadataDebugPage shows metadata-upload, and OfflineSync shows powersync. The flags hide only the tab buttons: every route is registered.",
+   "selector": "/plane/system-overview, /plane/mocklink, /plane/debug, /plane/ota-debug, /plane/plane-updates, /plane/plane-parameters, /plane/telemetry-settings-debug, /plane/metadata-upload, /plane/powersync",
+   "where": "apps/src/pages/Plane/routers/PlaneRouter.router.tsx:17-28; apps/src/pages/Plane/enums/PlaneEnum.ts:1-11; apps/src/pages/Plane/layouts/PlaneLayout.tsx:9-86; apps/src/common/enums/featureFlags.enum.ts:5, :61, :83 @84d3721b"
+  },
+  {
+   "topic": "3. Settings and About",
+   "fact": "/settings redirects to account. The sub-routes are account, organization, users, global, flights, processing, about and subscriptions/:seePlans?. SettingsEnum.UsageData has no route.",
+   "selector": "/settings/about",
+   "where": "apps/src/pages/Settings/routers/SettingsRouter.router.tsx:16-26; apps/src/pages/Settings/enums/SettingsEnum.ts:1-12 @84d3721b"
+  },
+  {
+   "topic": "3. Fleet and Help",
+   "fact": "Fleet is /fleet, and /fleet/:droneId opens the drone sidebar. Closing the sidebar navigates to /fleet with replace. Help is /help/*.",
+   "selector": "/fleet, /fleet/<droneId>, /help",
+   "where": "apps/src/common/enums/appRoutes.enum.ts:9-10; apps/src/ProtectedRoute.tsx:76-77; apps/src/pages/Fleet/DronesSidebar.tsx:22-26; apps/src/pages/Fleet/DroneTable.tsx:42 @84d3721b"
+  },
+  {
+   "topic": "1 test-id coverage: counts",
+   "fact": "data-testid is the only test-hook attribute: data-test=, data-test-id, data-cy, data-qa, testID and aria-modal each have 0 hits. data-testid has 787 hits in 313 files under apps/src, of which 245 hits in 164 files are outside spec, test and stories files. There are 1249 non-test .tsx files. In non-test tsx, ' testid=' gives 178 lines in 122 files and ' testId=' gives 157 lines in 90 files. Other hooks: aria-label= 46 hits in 40 files, role= 23 in 21, static id=\"...\" 21 in 18. Corrected: name=\"...\" gives 182 hits in 67 files, not 184 in 69. Most non-test data-testid hits are in components/ui (64), pages/Processing (20) and pages/Plane (20).",
+   "selector": "[data-testid=\"...\"] (the E2E helper builds exactly this)",
+   "where": "apps/tests/e2e/src/helpers/testId.ts:4; counts via git grep -c over apps/src @84d3721b"
+  },
+  {
+   "topic": "1 test-id coverage: shared components (approximate)",
+   "fact": "Script-based and approximate: a regex recount gave the same totals but somewhat fewer tagged tags than the first pass. Only a minority of shared controls carry a test-id prop: Button about 75-92 of ~395, IconButton about 10-15 of ~85-90, FormTextField about 8-9 of 48, ToggleSwitch about 4-7 of 30, FormToggleSwitch 0 of 13. Most buttons and inputs need text, name= or type= selectors.",
+   "selector": "n/a",
+   "where": "script over git cat-file of apps/src/**/*.tsx @84d3721b"
+  },
+  {
+   "topic": "1 shared Button",
+   "fact": "The prop is `testid` (lowercase), default 'none'. The <button> gets data-testid=\"btn-wrapper-<testid>\" and type={type}. The inner span gets data-testid=\"<testid>\", and the loading spinner gets spinner-for-<testid>. Tap the <button> wrapper, not the span.",
+   "selector": "button[data-testid=\"btn-wrapper-<id>\"]",
+   "where": "apps/src/components/ui/Button/Button.tsx:37, :65, :245, :246, :248, :250 @84d3721b"
+  },
+  {
+   "topic": "1 shared IconButton",
+   "fact": "The prop is `testId` (camelCase), and data-testid is forbidden at the type level. The <button> gets data-testid={testId}, which is undefined when unset. There is no default aria-label and no explicit type.",
+   "selector": "button[data-testid=\"<testId>\"]",
+   "where": "apps/src/components/ui/IconButton/BetterIconButton.tsx:29, :33, :36, :59 @84d3721b"
+  },
+  {
+   "topic": "1 shared inputs (TextField / FormTextField)",
+   "fact": "TextField takes `testId` and puts data-testid on the <input>. The input id comes from useId(), so it is unstable. restProps, including name=, are spread onto the input after id. FormTextField always passes name, so every react-hook-form text field has input[name=\"<field>\"].",
+   "selector": "input[name=\"<field>\"] or input[data-testid=\"<testId>\"]",
+   "where": "apps/src/components/ui/TextField/TextField.tsx:55, :84, :115, :130-143; apps/src/components/ui/FormComponents/FormTextField.tsx:41-61 @84d3721b"
+  },
+  {
+   "topic": "1 other shared components that emit data-testid",
+   "fact": "These take lowercase `testid`: Checkbox (plus data-testparam), Typography, Badge, Spinner, SwipeToConfirm, PageNavbar, AppTabs Tab (config.testid). These take camelCase `testId`: ToggleSwitch (outer div with role=checkbox and aria-checked), Select (wrapper; options use data.testId ?? dropdown-option-<label>; input better-select-input) and DropdownList (plus data-testparam). Fixed ids: SearchBar btn-sites-search, input-sites-search and close-search-bar; TableRow flights-table-row; Card card and card-title; Avatar user-menu (on every Avatar).",
+   "selector": "[data-testid=\"dropdown-option-<label>\"], [role=\"checkbox\"][aria-checked], [data-testid=\"flights-table-row\"]",
+   "where": "apps/src/components/ui/Checkbox/Checkbox.tsx:135-136; apps/src/components/ui/ToggleSwitch/ToggleSwitch.tsx:79-86; apps/src/components/ui/Select/Select.tsx:114; apps/src/components/ui/Select/components.tsx:43, :74, :127; apps/src/components/ui/Typography/Typography/Typography.tsx:66; apps/src/components/ui/Badge/Badge.tsx:155; apps/src/components/ui/Spinner/Spinner.tsx:29; apps/src/components/ui/SwipeToConfirm/SwipeToConfirm.tsx:79; apps/src/components/ui/PageNavbar/PageNavbar.tsx:18; apps/src/components/ui/Dropdown/Dropdown.tsx:158-159; apps/src/components/ui/SearchBar/SearchBar.tsx:66, :79, :95; apps/src/components/ui/Card/Card.tsx:49, :109; apps/src/components/ui/Avatar/Avatar.tsx:115; apps/src/components/application/AppTabs/components/Tab.tsx:37; apps/src/components/table/TableRow.tsx:28 @84d3721b"
+  },
+  {
+   "topic": "2 top navigation: component",
+   "fact": "AppNavbar link labels are hardcoded English. AppNavLink renders <span role=\"button\"> around a react-router <NavLink data-testid={testid}>. Corrected: the span's underline uses activeStartingPoint ?? location.pathname, while NavLink's own class 'active' and aria-current='page' (library behaviour) follow the real location, so the two can differ. The left group is Sites, Flights, Maps, Plane, Fleet, SAR and Survey Outcomes, plus Log Analysis and Telemetry Analysis when not on Android. The right group is History, Settings and Help. Offline, links with disableWhenOffline sit in an inert div with pointer-events-none. Maps and History are hidden when user.syncDisabled. Below 768 CSS px a drawer replaces the bar, with Typography items and no href or testid. At about 1280 CSS px, the office tablet gets the full bar.",
+   "selector": "a[href=\"/sites\"] or [data-testid=\"btn-sites\"]",
+   "where": "apps/src/components/application/AppNavbar/AppNavbar.tsx:105-111, :127-134, :143, :167-197, :229-248; apps/src/components/application/AppNavbar/components/AppNavbarLink.tsx:19-24, :36-52; apps/src/components/ui/Tooltip/OfflineBlockingTooltip.tsx:54-62; apps/src/hooks/utils/useMatchMedia.ts:9 @84d3721b"
+  },
+  {
+   "topic": "2 nav items with testids",
+   "fact": "Sites goes to /sites (btn-sites). The logo is a Link to the sites list with data-testid WingtraLogo. Flights goes to /flights (btn-flights). Maps goes to /maps (btn-maps) and is disabled offline and hidden when syncDisabled. Plane goes to /plane (btn-plane) and shows only on Android with the DevFlying flag. Fleet goes to /fleet (btn-fleet) and stays enabled offline. Settings goes to /settings (btn-settings). The repo's E2E NavbarPage uses these same ids.",
+   "selector": "[data-testid=\"btn-sites|btn-flights|btn-maps|btn-plane|btn-fleet|btn-settings|WingtraLogo\"]",
+   "where": "apps/src/components/application/AppNavbar/AppNavbar.tsx:37-73, :160-164; apps/src/common/enums/featureFlags.enum.ts:4; apps/tests/e2e/src/pageobjects/NavbarPage.ts:12-42 @84d3721b"
+  },
+  {
+   "topic": "2 nav items without testids (SAR, History, Help, AI)",
+   "fact": "SAR goes to /object-detection, needs the ObjectDetection flag and is disabled offline. History goes to /history and is disabled offline. Help goes to /help. AI is not a link: AiToolsButton is a <button type=\"button\"> with the text 'AI' (navbar.ai_tools) that opens AiToolsDialog. It renders only with the DetectAnything flag.",
+   "selector": "a[href=\"/object-detection\"], a[href=\"/history\"], a[href=\"/help\"], //button[normalize-space()='AI']",
+   "where": "apps/src/components/application/AppNavbar/AppNavbar.tsx:74-89, :118, :181; apps/src/components/application/AppNavbar/components/AiToolsButton.tsx:10, :18-36; apps/src/i18n/locales/en.json:2155; apps/src/common/enums/featureFlags.enum.ts:24, :73 @84d3721b"
+  },
+  {
+   "topic": "2 user dropdown and sync status",
+   "fact": "The Avatar (data-testid user-menu) opens the dropdown. Its Settings item is drop-down-settings and its log-out item is data-testid log-out-btn. The sync icon is data-testid offline-status-indicator, or sync-status-indicator with data-state failed, syncing or synced.",
+   "selector": "[data-testid=\"sync-status-indicator\"][data-state=\"synced\"]; [data-testid=\"log-out-btn\"]",
+   "where": "apps/src/components/application/AppNavbar/components/UserDropdown/UserDropdown.tsx:64-74, :108, :139; apps/src/components/application/AppNavbar/components/UserDropdown/UserDropdownItem.tsx:13, :22; apps/src/components/application/AppNavbar/components/NavbarSyncStatusIcon.tsx:65, :79, :89, :99 @84d3721b"
+  },
+  {
+   "topic": "3 dialogs: structure and role",
+   "fact": "Most modals use the in-house Dialog: Dialog.Container 109 hits in 105 files, Dialog.Content 125 in 120, Dialog.Header 93 in 89. Corrected: the only third-party modal is flowbite-react Modal, imported in ObjectDetection FullImageView.jsx (not on the write list); no material-tailwind Dialog is imported. The source never writes role=\"dialog\". The role comes from floating-ui useRole (default 'dialog') spread through getFloatingProps; that is library behaviour, so confirm it on the device. The panel gets aria-labelledby from Dialog.Header (a div) and aria-describedby from Dialog.Description. Its id is props.id ?? the Container id ?? floating-ui's id. className is set after the spread, so ConfirmDialog's className 'Dialog' never reaches the DOM. The panel is portaled into #router-outlet inside FloatingOverlay [data-modal-overlay]. Content mounts only while open. Escape and an outside pointerdown dismiss it unless dismissDisabled.",
+   "selector": "[data-modal-overlay] [role=\"dialog\"] (last match = topmost)",
+   "where": "apps/src/components/ui/Dialog/components/DialogContent.tsx:74-81, :89-112; apps/src/components/ui/Dialog/hooks/useDialog.tsx:52-63; apps/src/components/ui/Dialog/components/DialogHeader.tsx:8-21; apps/src/components/ui/Dialog/components/DialogDescription.tsx:9-19; apps/src/components/ui/Dialog/components/DialogContainer.tsx:10-14; apps/src/layouts/RouterOutlet.tsx:19; apps/src/components/Devices/components/PayloadInternetRecovery.tsx:16; apps/src/pages/ObjectDetection/components/FullImageView.jsx:4 @84d3721b"
+  },
+  {
+   "topic": "3 dialogs: close button",
+   "fact": "The X is a <div data-testid=\"btn-close-modal\"> holding an IconButton <button> with no testid, no aria-label and tabIndex -1. It is not rendered with hideClose. Dialog.Close (4 files) is a Button with testid btn-close-modal, rendering btn-wrapper-btn-close-modal plus the span. New: the Swiss-knife popup's close X is also a div data-testid btn-close-modal, outside any dialog. Bare [data-testid=\"btn-close-modal\"] is therefore ambiguous.",
+   "selector": "X: [role=\"dialog\"] > div[data-testid=\"btn-close-modal\"] button ; Dialog.Close: button[data-testid=\"btn-wrapper-btn-close-modal\"]",
+   "where": "apps/src/components/ui/Dialog/components/DialogContent.tsx:113-121; apps/src/components/ui/Dialog/components/DialogClose.tsx:8; apps/src/pages/Dev/components/DevHelpTools.tsx:152-154; apps/tests/e2e/src/pageobjects/BasePage.ts:35-41 @84d3721b"
+  },
+  {
+   "topic": "3 dialogs: ConfirmDialog / useAsyncModal buttons",
+   "fact": "The global AsyncModal renders ConfirmDialog. The cancel Button has no testid (btn-wrapper-none). The action Button has testid btn-dialog-action and fires on onMouseDown with preventDefault and stopPropagation. An adb tap works; element.click() does not, so dispatch mousedown instead.",
+   "selector": "button[data-testid=\"btn-wrapper-btn-dialog-action\"] scoped by title",
+   "where": "apps/src/AppLayout.tsx:30; apps/src/components/ui/AsyncModal/AsyncModal.tsx:15-60; apps/src/components/ui/ConfrimDialog/ConfirmDialog.tsx:72-73, :84-95, :100-108 @84d3721b"
+  },
+  {
+   "topic": "4 login form",
+   "fact": "/login has FormTextFields name=\"email\" and name=\"password\" (type password, which switches to text when the eye icon is tapped). Neither has a testId. The Login button is an orange Button type=submit form={formId} with the text 'Login' and no testid. The <h1> also reads 'Login'. A GraphQL 404 shows an error under the email field and a 403 under the password field. A connection error and other errors show toasts. Links: forgot-password-btn and create-new-account-btn. The E2E LoginPage uses the same selectors.",
+   "selector": "input[name=\"email\"] ; input[name=\"password\"] ; form button[type=\"submit\"]",
+   "where": "apps/src/pages/Auth/screens/Login.tsx:149-162, :175, :179-198, :202-206, :212-214, :218; apps/src/components/ui/FormComponents/FormTextField.tsx:43, :59; apps/src/pages/Auth/enums/AuthRoutes.ts:2; apps/tests/e2e/src/pageobjects/LoginPage.ts:8-22 @84d3721b"
+  },
+  {
+   "topic": "5 toasts: container and classes",
+   "fact": "The app uses react-toastify 9.1.3. One ToastContainer is set to bottom-right with hideProgressBar, icon={false} and closeButton={false}. toastr.css overrides the stock .Toastify__toast-container, __toast, __toast-body and __toast--default, --info, --success, --warning and --error classes. ToastType values are success, warning, info and error. FlyToastr reuses the same container.",
+   "selector": ".Toastify__toast-container .Toastify__toast ; .Toastify__toast--success / --error / --warning / --info",
+   "where": "apps/src/components/utils/Toastr/ToastContext.tsx:21-27; apps/src/styles/toastr.css:8-43; apps/src/index.css:2; apps/src/index.tsx:23; apps/src/components/utils/Toastr/Toastr.tsx:188-193; apps/package.json:282; pnpm-lock.yaml:19765; apps/src/components/utils/Toastr/FlyToastr.tsx:8, :11 @84d3721b"
+  },
+  {
+   "topic": "5 toasts: content hooks and timing",
+   "fact": "Each toast's content is a div data-testid 'notification-label' holding a title (default 'Unexpected error' when an error is passed) and the text. Its close button has aria-label 'Close' and data-testid 'notification-close'. Auto-close times: success 5000 ms, warning 10000 ms, neutral (info) 5000 ms, error 10000 ms. FlyToastr's BlockingError never auto-closes.",
+   "selector": "[data-testid=\"notification-label\"] filtered by textContent; close: [data-testid=\"notification-close\"]",
+   "where": "apps/src/components/utils/Toastr/Toastr.tsx:115-118, :126, :134-139, :171-176, :234-239, :255-256; apps/src/i18n/locales/en.json:1544; apps/src/components/utils/Toastr/FlyToastr.tsx:43-57; apps/tests/e2e/src/pageobjects/BasePage.ts:23-33 @84d3721b"
+  },
+  {
+   "topic": "5 'Report sent' is not a toast",
+   "fact": "'Report sent' is Typography text in ReportingModal's done state, inside div data-testid flight-success-modal-pop-up, followed by 'Go to ticket' and 'Finish' (both untagged). The in-progress state 'Reporting ...' reuses the same testid, and while it is shown the X is hidden and dismiss is disabled. ReportingModal's real toasts are: the warning \"Couldn't attach the flight plan link...\"; the error \"Couldn't create report, retry or cancel.\"; 'ClickUp task not created yet.'; 'Failed to auto attach log files.'; and 'Failed to upload one or more files.'.",
+   "selector": "[role=\"dialog\"] [data-testid=\"flight-success-modal-pop-up\"] whose text includes 'Report sent'",
+   "where": "apps/src/pages/Dev/components/ReportingModal.tsx:230, :276, :360, :389, :397, :406, :416, :422-423, :504-529 @84d3721b"
+  }
+ ],
+ "first_pass": [
+  {
+   "topic": "Button testid mechanics (applies to all items)",
+   "fact": "The shared Button renders <button data-testid=\"btn-wrapper-<testid>\"> around an inner <span data-testid=\"<testid>\">. The testid defaults to 'none'. Any control without an explicit testid therefore shows up as btn-wrapper-none / none, which is not unique, so such controls have to be matched by exact visible text. None of the write-list buttons below has an aria-label.",
+   "selector": "testid:<id> matches inner span; testid:btn-wrapper-<id> matches the <button>",
+   "where": "apps/src/components/ui/Button/Button.tsx:65, :246, :248 @84d3721b"
+  },
+  {
+   "topic": "1 App update dialog: title",
+   "fact": "The optional native-update prompt is title 'Update WingtraApp on this tablet?' (en.json updates.do_you_want_to_install_the_update) with description 'After confirmation you will be asked to install the new version of the app' (updates.after_confirmation_you_will_be_asked_to_install_the_new_version_of_the_app). It is built with getConfirmation(action=updates.update_now, cancel=general.not_now) and rendered by AsyncModal into the generic ConfirmDialog. config.id is not set, so the dialog div gets a generated id. aria-labelledby points at the header.",
+   "selector": "text:Update WingtraApp on this tablet?",
+   "where": "apps/src/hooks/update/useAppUpdateChecker.ts:240-246; apps/src/i18n/locales/en.json:3416-3417; apps/src/components/ui/AsyncModal/AsyncModal.tsx:15-60; apps/src/components/ui/Dialog/components/DialogContent.tsx:100-105 @84d3721b"
+  },
+  {
+   "topic": "1 App update dialog: 'Update now' button",
+   "fact": "Label 'Update now' (en.json updates.update_now). ConfirmDialog action Button with testid 'btn-dialog-action', so the inner span is data-testid=btn-dialog-action and the button is btn-wrapper-btn-dialog-action. It fires on onMouseDown, not onClick, so any touch-down triggers it. On confirm, while the drone is disarmed, it calls UpdaterPlugin.installApk. The testid btn-dialog-action is shared by every getConfirmation/ConfirmDialog dialog (27 files), so it must be scoped by the dialog title. The text 'Update now' also appears in the firmware dialogs (updates.firmware_update.start_update_cta).",
+   "selector": "text:Update now (inside the dialog titled 'Update WingtraApp on this tablet?'); testid:btn-dialog-action is shared",
+   "where": "apps/src/components/ui/ConfrimDialog/ConfirmDialog.tsx:98-115; apps/src/hooks/update/useAppUpdateChecker.ts:241, :249-255; apps/src/i18n/locales/en.json:3411 @84d3721b"
+  },
+  {
+   "topic": "1 App update dialog: 'Not now' button",
+   "fact": "Label 'Not now' (en.json general.not_now). ConfirmDialog cancel Button with no testid, so it is btn-wrapper-none / none. It postpones the install (logs 'the user postponed it'). The same key is used by the bundle-restart dialog and the firmware OTA confirm dialog.",
+   "selector": "text:Not now",
+   "where": "apps/src/components/ui/ConfrimDialog/ConfirmDialog.tsx:84-95; apps/src/hooks/update/useAppUpdateChecker.ts:242, :258-262; apps/src/i18n/locales/en.json:234 @84d3721b"
+  },
+  {
+   "topic": "2 Install: forced APK update dialog",
+   "fact": "When isUpdateRequired(APP_VERSION, latestBuild.version_name) is true, the prompt is instead title 'To continue using the app install the latest version' with a single 'Install' button (en.json updates.install). It has no Cancel and no close, dismiss is disabled, and it stays open after confirm. onConfirmed calls UpdaterPlugin.installApk. The button is the same ConfirmDialog action button (btn-dialog-action, shared). This is the only 'Install' button label in the WebView UI; no firmware 'Install' label exists in apps/src.",
+   "selector": "text:Install (inside the dialog titled 'To continue using the app install the latest version'); testid:btn-dialog-action is shared",
+   "where": "apps/src/hooks/update/useAppUpdateChecker.ts:216-239; apps/src/i18n/locales/en.json:3410, :3425 @84d3721b"
+  },
+  {
+   "topic": "2 Install: Android system installer after confirm",
+   "fact": "UpdaterPlugin.installApk starts Intent.ACTION_VIEW with type application/vnd.android.package-archive. This opens Android's own package-installer screen, which has its own Install/Update button. That screen is outside the WebView, so CDP cannot see it, and an adb tap tool must not press it either.",
+   "selector": "text:Install (Android system package installer, native UI)",
+   "where": "apps/android/app/src/main/java/com/wingtra/cloud/app/plugins/UpdaterPlugin/UpdaterPlugin.kt:60-75; apps/android/app/src/main/java/com/wingtra/cloud/app/plugins/UpdaterPlugin/UpdaterService.kt:101-108 @84d3721b"
+  },
+  {
+   "topic": "2 Install: native WebView-too-old screen",
+   "fact": "The native Compose screen shown when the system WebView is too old has the buttons 'Update from GooglePlay' (Play Store intent) and 'Download update files'. These are native, not in the WebView, and have no testTag.",
+   "selector": "text:Update from GooglePlay / text:Download update files (native)",
+   "where": "apps/android/app/src/main/java/com/wingtra/cloud/app/webview_version_error/Body.kt:68-99; apps/android/app/src/main/res/values/strings.xml:14-15 @84d3721b"
+  },
+  {
+   "topic": "1 App update: live-bundle restart dialog",
+   "fact": "After a new web bundle downloads, the dialog 'Restart Wingtra app to update' (updates.restart_wingtra_app_to_update) offers 'Restart now' (updates.restart_now) and 'Not now'. Restart now calls LiveUpdate.reload(), which applies the new bundle. In the forced variant (isRestartRequired), Not now and close are hidden and dismiss is disabled. The action is again the shared btn-dialog-action.",
+   "selector": "text:Restart now",
+   "where": "apps/src/hooks/update/useAppUpdateChecker.ts:329-361; apps/src/i18n/locales/en.json:3413-3415 @84d3721b"
+  },
+  {
+   "topic": "1 Check for updates (Settings > About)",
+   "fact": "Label 'Check for updates' (en.json updates.check_for_updates). Outlined Button in CheckUpdateButton with no testid (btn-wrapper-none). Shown on Settings > About only on Android, with notifyUser and fleetCheck. The same component appears on Fleet > drone FirmwareInfo for that drone. It runs useCheckUpdate: it downloads a native APK if one is available, then checks the bundle and firmware, which can open the app-update, restart or firmware dialogs. It is skipped with a toast unless isAndroid && AUTO_UPDATE flag && PROD (import.meta.env.PROD).",
+   "selector": "text:Check for updates",
+   "where": "apps/src/components/ui/CheckUpdateButton/CheckUpdateButton.tsx:14-19; apps/src/pages/Settings/screens/About.tsx:70; apps/src/pages/Fleet/SystemOverview/FirmwareInfo.tsx:46; apps/src/hooks/update/useCheckUpdate.ts:52-72; apps/src/configuration/variables.ts:43; apps/src/i18n/locales/en.json:3421 @84d3721b"
+  },
+  {
+   "topic": "3 Start MockLink (Plane > Mocklink)",
+   "fact": "Visible text is 'Start mocklink' (lowercase m). It is hardcoded, not i18n. Outlined Button with testid 'btn-start-mocklink'. onClick runs onStartMocklink, which calls WiPPlugin.startMocklink with the page's HW, payload, debug, license, vehicleId and firmware options. The page sits under tab testid 'plane-tab-mocklink' (title plane.mocklink.label 'Mocklink'), gated by the MOCKLINK flag.",
+   "selector": "testid:btn-start-mocklink",
+   "where": "apps/src/pages/Plane/screens/MocklinkPage.tsx:432-434, :52-73; apps/src/pages/Plane/layouts/PlaneLayout.tsx:17-23; apps/src/i18n/locales/en.json:2011 @84d3721b"
+  },
+  {
+   "topic": "3 Stop MockLink (Plane > Mocklink)",
+   "fact": "Visible text is 'Stop mocklink' (hardcoded). Outlined Button with testid 'btn-stop-mocklink'. It is disabled unless activeVehicleAvailable && activeLinkIsMocklink. onClick calls WiPPlugin.stopMocklink().",
+   "selector": "testid:btn-stop-mocklink",
+   "where": "apps/src/pages/Plane/screens/MocklinkPage.tsx:435-442, :74-76 @84d3721b"
+  },
+  {
+   "topic": "3 MockLink start/stop in Swiss Army Knife popup",
+   "fact": "The Dev help tools popup has the duplicates 'Start default Mocklink' (calls WiPPlugin.startMocklink with defaults) and 'Stop Mocklink' (calls WiPPlugin.stopMocklink, disabled unless the active link is MockLink). Neither has a testid (btn-wrapper-none). They are shown only when isAndroid && DEV_FLYING && MOCKLINK.",
+   "selector": "text:Start default Mocklink / text:Stop Mocklink",
+   "where": "apps/src/pages/Dev/components/DevHelpTools.tsx:157-169, :91-117 @84d3721b"
+  },
+  {
+   "topic": "4 'Update connected drone' (Plane > OTA Debug)",
+   "fact": "Hardcoded label 'Update connected drone'. Outlined Button with no testid (btn-wrapper-none), onClick startDebugOtaUpdate. It is disabled unless connectedVehicleIp is set and no debug OTA update is in progress. The 'Downgrade' toggle next to it has testId debug-ota-use-older-firmware. The tab testid is 'plane-tab-ota-debug' (title 'OTA Debug'), gated by the MOCKLINK flag.",
+   "selector": "text:Update connected drone",
+   "where": "apps/src/pages/Plane/screens/PlaneOtaDebugPage.tsx:472-488; apps/src/pages/Plane/layouts/PlaneLayout.tsx:31-36 @84d3721b"
+  },
+  {
+   "topic": "4 OTA Debug network controls (adjacent write actions)",
+   "fact": "The same page has the hardcoded buttons 'Establish OTA connection' (startOtaConnection, needs an active vehicle), 'Create OTA network' (createDebugOtaNetwork) and 'Close OTA network' (closeDebugOtaNetwork). None has a testid. They change the drone and tablet OTA Wi-Fi state.",
+   "selector": "text:Establish OTA connection / text:Create OTA network / text:Close OTA network",
+   "where": "apps/src/pages/Plane/screens/PlaneOtaDebugPage.tsx:434-442 @84d3721b"
+  },
+  {
+   "topic": "4 Firmware OTA confirm dialog: 'Update now'",
+   "fact": "Dialog title 'Update drone firmware?' (updates.firmware_update.ask_update) with description updates.firmware_update.ask_update_description. Button 'Update now' (updates.firmware_update.start_update_cta) has testid 'ota-update-now'. onConfirm runs startOtaUpdate when the OTA_DRONE_UPDATES flag is on and OTA is supported, otherwise it switches to the SD-card workflow. The dialog is rendered from OtaUpdateModal in state AskUpdate (OtaUpdateModal is mounted globally in AppLayout on Android).",
+   "selector": "testid:ota-update-now",
+   "where": "apps/src/pages/Plane/components/FirmwareUpdate/OtaUpdateConfirmationModal.tsx:36-37, :69-72, :127; apps/src/pages/Plane/components/FirmwareUpdate/OtaUpdateModal.tsx:325-333; apps/src/AppLayout.tsx:29; apps/src/i18n/locales/en.json:3457-3459 @84d3721b"
+  },
+  {
+   "topic": "4 Firmware OTA confirm dialog: 'Not now'",
+   "fact": "Button 'Not now' (general.not_now) has testid 'ota-update-not-now'. onClose runs endOtaUpdateWorkflow. It is disabled while start is pending. Under the actions is the link 'Having issues? Update via SD card' (updates.firmware_update.switch_to_sd_card), an ExternalLinkButton with no testid that starts the SD-card workflow.",
+   "selector": "testid:ota-update-not-now",
+   "where": "apps/src/pages/Plane/components/FirmwareUpdate/OtaUpdateConfirmationModal.tsx:64-67, :75-81; apps/src/i18n/locales/en.json:234, :3493 @84d3721b"
+  },
+  {
+   "topic": "4 Turn-off-Wi-Fi modal 'Continue' also starts OTA",
+   "fact": "In OTA state TurnOffWifi, 'Continue' (actions.continue) has testid 'ota-wifi-off-continue' inside the wrapper div data-testid 'ota-wifi-off-continue-wrapper'. onContinue is startOtaUpdate, so it starts the firmware update. The neighbouring button 'Open Wi-Fi settings' has testid ota-open-wifi-panel.",
+   "selector": "testid:ota-wifi-off-continue",
+   "where": "apps/src/pages/Plane/components/FirmwareUpdate/TurnOffWifiModal.tsx:53-58; apps/src/pages/Plane/components/FirmwareUpdate/OtaUpdateModal.tsx:343-351; apps/src/i18n/locales/en.json:284 @84d3721b"
+  },
+  {
+   "topic": "4 SD-card firmware update dialog 'Update now'",
+   "fact": "Dialog title 'Update drone firmware?' (updates.sd_card_update.ask_update) with description 'Updating takes up to 7 minutes...'. It has a single 'Update now' (start_update_cta) Button with no testid. Close is hidden and dismiss is disabled in AskUpdate. The handler sets OBC update in progress and sends sendOBCUpdateAck(DO_UPDATE). SdCardUpdateModal is mounted globally on Android.",
+   "selector": "text:Update now (inside the SD-card dialog titled 'Update drone firmware?')",
+   "where": "apps/src/pages/Plane/components/FirmwareUpdate/SdCardUpdateModal.tsx:206-216, :154-157, :251-270; apps/src/AppLayout.tsx:28; apps/src/i18n/locales/en.json:3443-3444, :3459 @84d3721b"
+  },
+  {
+   "topic": "4 'Copy to SD card' (SD-card copy modal)",
+   "fact": "Button 'Copy to SD card' (updates.sd_card_update.copy_to_sd_card_cta) has no testid. handleCopy writes the firmware file to the SD card the user picks.",
+   "selector": "text:Copy to SD card",
+   "where": "apps/src/pages/Plane/components/FirmwareUpdate/SdCardCopyModal.tsx:116-122; apps/src/i18n/locales/en.json:3442 @84d3721b"
+  },
+  {
+   "topic": "4 Plane updates page update/download icons",
+   "fact": "The Plane updates table (tab testid plane-tab-plane-updates) has icon-only 'Update WO' and 'Update WR' buttons. Each sits in a div data-testid 'firmware-update-action', which is repeated on every row and has no label. startUpdate opens the OtaUpdate modal and navigates Home, and the real gate is then the ota-update-now button. The Download icon button (no testid) downloads the firmware release to the tablet. 'Refresh available updates' is read-only.",
+   "selector": "testid:firmware-update-action (not unique, per row); the confirm gate is testid:ota-update-now",
+   "where": "apps/src/pages/Plane/screens/PlaneUpdatesPage.tsx:80-87, :230-237, :326-358; apps/src/pages/Plane/layouts/PlaneLayout.tsx:38-43 @84d3721b"
+  },
+  {
+   "topic": "5 Swiss Army Knife icon",
+   "fact": "An icon-only filled Button (SwissKnife icon, teal) placed absolute at top-0 left-0. It has no text, testid (btn-wrapper-none) or aria-label, and opens the 'Dev help tools' popup. It renders only with the DEV_REPORTING flag.",
+   "selector": "position top-left icon (no testid/text); popup header text:Dev help tools",
+   "where": "apps/src/pages/Dev/components/DevHelpTools.tsx:31, :137-155 @84d3721b"
+  },
+  {
+   "topic": "5 'Report bug'",
+   "fact": "Hardcoded label 'Report bug', an orange Button with no testid. It only opens ReportingModal, which is not a write by itself.",
+   "selector": "text:Report bug",
+   "where": "apps/src/pages/Dev/components/DevHelpTools.tsx:196-198, :235 @84d3721b"
+  },
+  {
+   "topic": "5 Reporter 'Next' (submits the bug report)",
+   "fact": "Hardcoded 'Next' (not t('general.next')). Button type=submit form={formId} with no testid (btn-wrapper-none), in the dialog headed 'Report'. Submit runs onSubmit, which shares the last flight as ANYONE_WITH_LINK, calls clickupProxyApi.createTask, then updateTaskCustomField for reporter, platform, env, version and build time, and starts log attachment. The toggle label 'Attach more files in the next step' contains 'next', so the selector must be an exact-text match.",
+   "selector": "text:Next (exact match, inside the dialog headed 'Report')",
+   "where": "apps/src/pages/Dev/components/ReportingModal.tsx:428-429, :460, :485-487, :207, :212-251 @84d3721b"
+  },
+  {
+   "topic": "5 Reporter implicit submit via Enter (inferred)",
+   "fact": "Title and Tablet name are single-line FormTextFields inside <form id={formId}>, and the submit button is associated through the form attribute. By standard HTML implicit submission, pressing Enter (typing a newline) in those fields would submit the report the same way 'Next' does. This is inferred from the markup, not tested. The Description textarea does not submit on Enter.",
+   "selector": "form containing the input placeholder 'Title' / 'Tablet name'",
+   "where": "apps/src/pages/Dev/components/ReportingModal.tsx:429-448, :485 @84d3721b"
+  },
+  {
+   "topic": "5 Reporter follow-up writes",
+   "fact": "In the upload step ('Attach files to report'), dropping or picking files in FileDropModal calls handleFilesSubmit, then attachLogFiles, then clickupProxyApi.addAttachment (a ClickUp write). The done step has 'Go to ticket' (window.open of app.clickup.com/t/<id>) and 'Finish'. Neither has a testid. Both in-progress and done containers reuse data-testid 'flight-success-modal-pop-up'.",
+   "selector": "text:Attach files to report / text:Go to ticket",
+   "where": "apps/src/pages/Dev/components/ReportingModal.tsx:491-500, :395-403, :341-348, :413-414, :506, :516, :523-528 @84d3721b"
+  },
+  {
+   "topic": "1. About label: how it is built",
+   "fact": "The Settings > About badge (title 'WingtraCloud version') is versionLabel = APP_ENVIRONMENT === 'production' ? `${APP_VERSION}-${APP_ENVIRONMENT}` : `${APP_VERSION}-${APP_ENVIRONMENT}-${GIT_HASH_SHORT}`. Production has no hash. The Badge gets no testid, so after navigating it can only be found by its text.",
+   "selector": "After navigating to /settings/about: document.body.innerText.match(/\\b\\d+\\.\\d+\\.\\d+-(?:production|(?:develop|staging|preproduction)-[0-9a-f]{7})\\b/)?.[0]",
+   "where": "84d3721b33ee195738a2a002313c55becb2643bc:apps/src/pages/Settings/screens/About.tsx:25-28,36-42; apps/src/i18n/locales/en.json:1939-1945"
+  },
+  {
+   "topic": "1. APP_VERSION source",
+   "fact": "APP_VERSION is a Vite compile-time `define` = JSON.stringify(process.env.npm_package_version), which is the apps/package.json version (1.74.0 at this ref). It is declared only as an ambient TS const. It is not a window property; the literal is inlined into the bundle.",
+   "selector": "none as a global (typeof APP_VERSION === 'undefined' in page scope)",
+   "where": "84d3721b33ee195738a2a002313c55becb2643bc:apps/vite.config.ts:198-199; apps/src/declarations.d.ts:13; apps/package.json:3"
+  },
+  {
+   "topic": "1. GIT_HASH / GIT_HASH_SHORT source",
+   "fact": "GIT_HASH = `git rev-parse --verify HEAD` of the repo at build time. GIT_HASH_SHORT = hash.slice(0,7), a fixed 7 characters. Both are Vite `define` constants inlined at build and declared as ambient consts. No window global, meta tag or localStorage key holds them.",
+   "selector": "none as a global",
+   "where": "84d3721b33ee195738a2a002313c55becb2643bc:apps/vite.config.ts:53,203-204; apps/vite-plugins/gitHelpers.ts:4-12; apps/src/declarations.d.ts:15-16"
+  },
+  {
+   "topic": "1. Hash reachable only through the bundle text (inference, check on device)",
+   "fact": "ReportingModal builds an object with 'App info': { Version: APP_VERSION, Environment: APP_ENVIRONMENT, ..., 'Git hash': GIT_HASH }. ReportingModal is statically imported through DevHelpTools <- AppLayout <- ProtectedRoute <- App <- LoadingApp <- index.tsx. vite.config sets no manualChunks, so the full 40-char hash literal should be in the eagerly loaded entry chunk. Fetching that same-origin script and running a regex is a read-only GET. Not run against a real build: the minified key spacing is assumed.",
+   "selector": "Runtime.evaluate with awaitPromise:true: (async()=>{const s=document.querySelector('script[type=\"module\"][src]');const t=await (await fetch(s.src)).text();const h=(t.match(/\"Git hash\":\\s*\"([0-9a-f]{40})\"/)||[])[1];const v=(t.match(/\"App info\":\\s*\\{\\s*Version:\\s*\"([^\"]+)\"/)||[])[1];return {entry:s.src.split('/').pop(),version:v,gitHash:h,hash7:h&&h.slice(0,7)};})()",
+   "where": "84d3721b33ee195738a2a002313c55becb2643bc:apps/src/pages/Dev/components/ReportingModal.tsx:169-175; apps/src/pages/Dev/components/DevHelpTools.tsx:19; apps/src/AppLayout.tsx:6; apps/src/ProtectedRoute.tsx:24; apps/src/LoadingApp.tsx:2; apps/src/index.tsx:26; apps/vite.config.ts:61-69"
+  },
+  {
+   "topic": "1. Native version (Capacitor LiveUpdate)",
+   "fact": "About shows 'WingtraCloud native layer version' from LiveUpdate.getVersionCode() (Android only); the result is {versionCode: string}. The plugin is registered as LiveUpdate (@capawesome/capacitor-live-update 8.6.0). The call is read-only and reachable from page JS through the Capacitor bridge.",
+   "selector": "await window.Capacitor.Plugins.LiveUpdate.getVersionCode()  // -> {versionCode}",
+   "where": "84d3721b33ee195738a2a002313c55becb2643bc:apps/src/pages/Settings/screens/About.tsx:15-19,50-57; apps/capacitor.config.ts:43-45; apps/package.json:163; apps/src/i18n/locales/en.json:1942"
+  },
+  {
+   "topic": "1. LiveUpdate.getCurrentBundle does not give the hash",
+   "fact": "getCurrentBundle() returns {bundleId}. The bundleId is Capawesome's own ID, and it is null for the bundle embedded in the APK (code comment). CI uploads the bundle with appId/channel/path/androidMin/Max/Eq only, with no git hash or name. The app logs 'Checking for app updates. Current bundle ID: ...'. The bundleId tells you whether a live bundle is active, not which commit it is.",
+   "selector": "await window.Capacitor.Plugins.LiveUpdate.getCurrentBundle()  // -> {bundleId|null}",
+   "where": "84d3721b33ee195738a2a002313c55becb2643bc:apps/src/hooks/update/useAppUpdateChecker.ts:288-293; .github/workflows/build-deploy-test-apps.yaml:252-262"
+  },
+  {
+   "topic": "1. Other places that show the version without opening About",
+   "fact": "Plane > System overview shows `${APP_VERSION}-${APP_ENVIRONMENT}. ${BUILD_TIME_FORMATTED}`, with no hash. The navbar drawer shows 'Cloud version: ' + APP_VERSION. useMetadataLogging sends `${APP_VERSION}-${GIT_HASH_SHORT}` and APP_ENVIRONMENT to native through WiPPlugin.updateMetadataUserProperty (setter only; JS does not read it back here).",
+   "selector": "/plane/system-overview DOM text; drawer text 'Cloud version:'",
+   "where": "84d3721b33ee195738a2a002313c55becb2643bc:apps/src/pages/Plane/screens/SystemOverviewPage.tsx:37-39; apps/src/components/application/AppNavbar/AppNavbar.tsx:257-258; apps/src/i18n/locales/en.json:408; apps/src/hooks/plane/useMetadataLogging.ts:237-249"
+  },
+  {
+   "topic": "1. Sentry client carries release = APP_VERSION (Sentry internals, unverified)",
+   "fact": "Sentry is initialised with release: APP_VERSION and environment: VITE_SENTRY_ENVIRONMENT (CI sets it to the same inputs.environment). @sentry/react is 8.42.0. Reading it relies on the window.__SENTRY__ carrier internals, not on repo code, and gives the version without the hash. The expression returns only release/environment/enabled and never the DSN.",
+   "selector": "(()=>{const c=window.__SENTRY__||{};return Object.keys(c).filter(k=>c[k]&&typeof c[k]==='object').map(k=>{const s=c[k].defaultCurrentScope||c[k].stack?.getScope?.();const o=s?.getClient?.()?.getOptions?.();return o&&{sdk:k,release:o.release,environment:o.environment,enabled:o.enabled};}).filter(Boolean);})()",
+   "where": "84d3721b33ee195738a2a002313c55becb2643bc:apps/src/index.tsx:69-81; apps/src/observability/sentryConfig.ts:56-61; apps/package.json:178; .github/workflows/build-web.yaml:95"
+  },
+  {
+   "topic": "1. localStorage / Unleash",
+   "fact": "localStorageItems.ts has no version, environment or hash key (grep empty). The Unleash context carries swVersion: APP_VERSION and platform, but the client is a module object, not a window global.",
+   "selector": "none",
+   "where": "84d3721b33ee195738a2a002313c55becb2643bc:apps/src/configuration/localStorageItems.ts; apps/src/globals/unleashClient.ts:5-19"
+  },
+  {
+   "topic": "2. APP_ENVIRONMENT definition and CI mapping",
+   "fact": "APP_ENVIRONMENT: 'develop'|'staging'|'preproduction'|'production' = import.meta.env.VITE_APP_ENVIRONMENT, baked at build. CI sets VITE_APP_ENVIRONMENT = inputs.environment from setup.yaml: sky-production->production, sky-preproduction->preproduction, sky-staging->staging, anything else (sky and feature/_build_apk branches) -> develop.",
+   "selector": "not a global by this name",
+   "where": "84d3721b33ee195738a2a002313c55becb2643bc:apps/src/configuration/variables.ts:32-36; .github/workflows/build-web.yaml:98; .github/workflows/setup.yaml:69-80"
+  },
+  {
+   "topic": "2. window.env global (best runtime read)",
+   "fact": "index.html runs an inline script `window.env = { VITE_APP_ENVIRONMENT: '<%= VITE_APP_ENVIRONMENT %>' }`, filled at build by vite-plugin-html createHtmlPlugin from process.env.VITE_APP_ENVIRONMENT. It is part of the web bundle, so after a live update it describes the bundle in use. It also gates Heap (loaded only in production).",
+   "selector": "window.env?.VITE_APP_ENVIRONMENT",
+   "where": "84d3721b33ee195738a2a002313c55becb2643bc:apps/index.html:15-18,50; apps/vite.config.ts:116-122"
+  },
+  {
+   "topic": "2. Entry script filename carries the environment",
+   "fact": "Rollup output names are `[name]-[hash]-${ENV}.js` with ENV = VITE_APP_ENVIRONMENT, for entry and chunks. The env can be read from the loaded script URL. The [hash] here is a content hash, not the git hash.",
+   "selector": "document.querySelector('script[type=\"module\"][src]')?.src.match(/-(develop|staging|preproduction|production)\\.js$/)?.[1]",
+   "where": "84d3721b33ee195738a2a002313c55becb2643bc:apps/vite.config.ts:26,63-67"
+  },
+  {
+   "topic": "2. E2E globals only on develop/staging Android",
+   "fact": "index.tsx registers window.__wingtraE2EApiRequest and window.__wingtraE2EDownloadMapTiles only when APP_ENVIRONMENT is develop or staging and the platform is Android. Their presence is a secondary env signal; do not call them.",
+   "selector": "typeof window.__wingtraE2EApiRequest === 'function'",
+   "where": "84d3721b33ee195738a2a002313c55becb2643bc:apps/src/index.tsx:64-67; apps/src/testing/e2eApiRequest.ts:23-27,66-72; apps/src/testing/e2eMapTilesDownload.ts:58"
+  },
+  {
+   "topic": "2. location.origin and platform",
+   "fact": "On Android the WebView origin is https://${CAPACITOR_HOSTNAME}. It is http when the hostname is localhost (local dev default in .env.common), or APP_URL when USE_SERVER=true. CAPACITOR_HOSTNAME is a GitHub variable whose per-env values are not in the repo, and it is baked into the APK's native config, not the live bundle, so window.env is the more direct read. Platform comes from Capacitor.getPlatform() ('android'|'web'|'electron').",
+   "selector": "location.origin; window.Capacitor?.getPlatform?.()",
+   "where": "84d3721b33ee195738a2a002313c55becb2643bc:apps/capacitor.config.ts:8,19-31; apps/.env.common:4; .github/workflows/build-android.yaml:160; .github/workflows/build-web.yaml:111; apps/src/common/environment.ts:1-7"
+  },
+  {
+   "topic": "2. API base is baked, not global",
+   "fact": "WINGTRA_API_URI = import.meta.env.VITE_APP_WINGTRA_API_URI (CI: vars.API_URL), or http://localhost:9016, or a devcontainer override. It is a module constant only, with no window property.",
+   "selector": "none",
+   "where": "84d3721b33ee195738a2a002313c55becb2643bc:apps/src/configuration/variables.ts:23-29,56-58; .github/workflows/build-web.yaml:105"
+  },
+  {
+   "topic": "3. Router type and top-level routes",
+   "fact": "BrowserRouter with path routing (createBrowserRouter; '*' -> LoadingApp), so location.pathname is the route. Protected routes under '/': /sites (default; index and unknown paths redirect there), /sites/create, /sites/:siteId/*, /flights/:flightId?, /maps/*, /settings/*, /plane/*, /fleet/:droneId?/*, /help/*, /history/*, /processing/*, /object-detection/*, /detect-anything, /survey-outcomes. /log-analysis and /telemetry-analysis exist only when flag LogAnalysisTool is on. Public share routes start with /shared.",
+   "selector": "location.pathname",
+   "where": "84d3721b33ee195738a2a002313c55becb2643bc:apps/src/index.tsx:85; apps/src/ProtectedRoute.tsx:61,67-91; apps/src/common/enums/appRoutes.enum.ts:1-21; apps/src/common/enums/featureFlags.enum.ts:66; apps/src/App.tsx:53"
+  },
+  {
+   "topic": "3. Sites sub-routes",
+   "fact": "Under /sites/:siteId: site-details, flights?/* (site tabs), planning/:flightId, fly/:flightId, surveying/:flightId; anything else redirects to flights. Site tabs: flights-overview/:flightId? and maps/:datasetId?. The app builds links as /sites/:siteId/flights/flights-overview/:flightId? and /sites/:siteId/flights/maps/:datasetId?. Unknown tab paths show a 404 stub.",
+   "selector": "/sites/<siteId>/flights/flights-overview, /sites/<siteId>/flights/maps, /sites/<siteId>/planning/<flightId>, /sites/<siteId>/fly/<flightId>, /sites/<siteId>/surveying/<flightId>, /sites/<siteId>/site-details",
+   "where": "84d3721b33ee195738a2a002313c55becb2643bc:apps/src/pages/Sites/routers/SiteOverviewRouter.router.tsx:14-21; apps/src/pages/Sites/enums/SiteOverviewRoutesEnum.ts:1-10; apps/src/pages/Sites/routers/SiteTabsRouter.router.tsx:12-17; apps/src/pages/Sites/enums/SiteTabsRoutesEnum.ts:1-4; apps/src/pages/Sites/urls.ts:9-30; apps/src/common/utils/resolveRoute.ts:3-6"
+  },
+  {
+   "topic": "3. Flights routes",
+   "fact": "The flights table is /flights; a focused flight is /flights/:flightId.",
+   "selector": "/flights, /flights/<flightId>",
+   "where": "84d3721b33ee195738a2a002313c55becb2643bc:apps/src/common/enums/appRoutes.enum.ts:4; apps/src/pages/Flights/urls.ts:4-11; apps/src/ProtectedRoute.tsx:74"
+  },
+  {
+   "topic": "3. Maps routes",
+   "fact": "Maps: /maps/:datasetId? is the table; /maps/:datasetId/map-viewer/:viewerId/* is the viewer; /maps/:datasetId/overview/* holds export/* (files, processing-history; anything else redirects to files) and legacy-viewer. ExportRoutesEnum.Reports exists but has no route.",
+   "selector": "/maps, /maps/<datasetId>/map-viewer/<viewerId>, /maps/<datasetId>/overview/export/files, /maps/<datasetId>/overview/export/processing-history, /maps/<datasetId>/overview/legacy-viewer",
+   "where": "84d3721b33ee195738a2a002313c55becb2643bc:apps/src/pages/Maps/routers/MapsRouter.router.tsx:12-14; apps/src/pages/Maps/enums/MapRoute.ts:1-5; apps/src/pages/Maps/routers/MapOverviewRouter.tsx:19-21; apps/src/pages/Maps/enums/OverviewRoute.ts:1-4; apps/src/pages/Maps/routers/ExportRouter.tsx:19-23; apps/src/pages/Maps/enums/ExportRoutesEnum.ts:1-5"
+  },
+  {
+   "topic": "3. Plane and its tabs",
+   "fact": "/plane redirects to system-overview. Tabs: system-overview, mocklink, debug, ota-debug, plane-updates, plane-parameters, telemetry-settings-debug, metadata-upload, powersync. Flag 'Mocklink' shows the mocklink/debug/ota-debug tabs, 'MetadataDebugPage' shows metadata-upload and 'OfflineSync' shows powersync. The flags only hide the tab buttons: every route is registered unconditionally, so a direct navigation renders the page.",
+   "selector": "/plane/system-overview, /plane/mocklink, /plane/debug, /plane/ota-debug, /plane/plane-updates, /plane/plane-parameters, /plane/telemetry-settings-debug, /plane/metadata-upload, /plane/powersync",
+   "where": "84d3721b33ee195738a2a002313c55becb2643bc:apps/src/pages/Plane/routers/PlaneRouter.router.tsx:17-28; apps/src/pages/Plane/enums/PlaneEnum.ts:1-11; apps/src/pages/Plane/layouts/PlaneLayout.tsx:9-86; apps/src/common/enums/featureFlags.enum.ts:5,61,83"
+  },
+  {
+   "topic": "3. Settings and About",
+   "fact": "/settings redirects to account. Sub-routes: account, organization, users, global, flights, processing, about, subscriptions/:seePlans?. About is /settings/about. SettingsEnum.UsageData has no route.",
+   "selector": "/settings/about (also /settings/account, /settings/organization, /settings/users, /settings/global, /settings/flights, /settings/processing, /settings/subscriptions)",
+   "where": "84d3721b33ee195738a2a002313c55becb2643bc:apps/src/pages/Settings/routers/SettingsRouter.router.tsx:16-26; apps/src/pages/Settings/enums/SettingsEnum.ts:1-12"
+  },
+  {
+   "topic": "3. Fleet and Help",
+   "fact": "Fleet is /fleet, and /fleet/:droneId opens the drone sidebar (closing it navigates back to /fleet). Help is /help with no nested routes in Help.tsx; the navbar links to it.",
+   "selector": "/fleet, /fleet/<droneId>, /help",
+   "where": "84d3721b33ee195738a2a002313c55becb2643bc:apps/src/common/enums/appRoutes.enum.ts:9-10; apps/src/ProtectedRoute.tsx:76-77; apps/src/pages/Fleet/DronesSidebar.tsx:17-25; apps/src/pages/Fleet/DroneTable.tsx:42; apps/src/components/application/AppNavbar/AppNavbar.tsx:82"
+  },
+  {
+   "topic": "0 scope",
+   "fact": "Every line number below is at commit 84d3721b33ee195738a2a002313c55becb2643bc (git describe 1.74.0-6-g84d3721b3, contained in origin/sky-staging). All reads were offline (GIT_NO_LAZY_FETCH=1). Only one blob was missing locally, a spec file: OfflineSyncInitializationGate.spec.tsx.",
+   "selector": "n/a",
+   "where": "WingtraCloud @84d3721b33ee195738a2a002313c55becb2643bc"
+  },
+  {
+   "topic": "1 test-id coverage: counts",
+   "fact": "data-testid is the only test-hook attribute. There are 0 hits for data-test=, data-test-id, data-cy, data-qa and testID. Counts for data-testid (git grep -c): 787 hits in 313 files across apps/src, of which 245 hits in 164 files are outside spec, test and stories files. apps/src has 1249 non-test .tsx files. Most call sites pass a prop that shared components turn into data-testid. ' testid=' gives 178 lines in 122 tsx files and ' testId=' gives 157 lines in 90 files (these counts include prop declarations). Other hooks in non-test tsx: aria-label= 46 hits in 40 files, role= 23 in 21, static id=\"...\" 21 in 18, name=\"...\" 184 in 69. aria-modal has 0 hits. Directories with the most non-test data-testid hits: components/ui 64, pages/Processing 20, pages/Plane 20, components/application 14, pages/Sites 13, pages/Fleet 13, pages/Flying 12.",
+   "selector": "[data-testid=\"...\"] (the repo's own E2E helper builds exactly this: testId = id => `[data-testid=\"${id}\"]`)",
+   "where": "apps/tests/e2e/src/helpers/testId.ts:4 @84d3721b; counts via git grep -c over apps/src @84d3721b"
+  },
+  {
+   "topic": "1 test-id coverage: how often shared components get a test id",
+   "fact": "Rough count of opening JSX tags in non-test tsx that carry a test-id prop: Button 92 of 397, IconButton 15 of 90, TextField 7 of 26, FormTextField 9 of 48, Checkbox 7 of 34, ToggleSwitch 7 of 30, FormToggleSwitch 0 of 13, Typography 23 of 732. Most buttons and inputs have no specific id, so a reader has to fall back to text, name= or type=.",
+   "selector": "n/a",
+   "where": "script over git cat-file of apps/src/**/*.tsx @84d3721b"
+  },
+  {
+   "topic": "1 shared Button",
+   "fact": "The Button prop is `testid` (lowercase) and defaults to 'none'. The <button> element (material-tailwind) gets data-testid=\"btn-wrapper-<testid>\" and type={type}. The inner span gets data-testid=\"<testid>\". The loading spinner gets testid spinner-for-<testid>. So every untagged Button renders data-testid=\"btn-wrapper-none\" and \"none\", which is useless and not unique. To tap, target the wrapper on the <button>, not the span.",
+   "selector": "button[data-testid=\"btn-wrapper-<id>\"] (or the inner [data-testid=\"<id>\"])",
+   "where": "apps/src/components/ui/Button/Button.tsx:37,65,245,246,248,250 @84d3721b"
+  },
+  {
+   "topic": "1 shared IconButton",
+   "fact": "The IconButton prop is `testId` (camelCase). Passing data-testid directly is forbidden at the type level. The <button> gets data-testid={testId}, which is undefined when unset. There is no default aria-label.",
+   "selector": "button[data-testid=\"<testId>\"]",
+   "where": "apps/src/components/ui/IconButton/BetterIconButton.tsx:29,33,36,59 @84d3721b"
+  },
+  {
+   "topic": "1 shared inputs (TextField / FormTextField)",
+   "fact": "TextField takes `testId` and puts data-testid on the <input>. The input id is React useId(), so it is unstable (e.g. ':r3:') and not usable. The label uses htmlFor that unstable id. restProps, including name=, are spread onto the <input> after id, so name= is stable. FormTextField always passes name={name} to TextField, so every react-hook-form text field has input[name=\"<field>\"].",
+   "selector": "input[name=\"<field>\"] or input[data-testid=\"<testId>\"]",
+   "where": "apps/src/components/ui/TextField/TextField.tsx:55,84,115,130-143; apps/src/components/ui/FormComponents/FormTextField.tsx:41-61 @84d3721b"
+  },
+  {
+   "topic": "1 other shared components that emit data-testid",
+   "fact": "The prop name casing varies by component, so check each one. Lowercase `testid`: Checkbox (on material-tailwind Checkbox, plus data-testparam), Typography (createElement with 'data-testid': testid), Badge, Spinner, SwipeToConfirm, PageNavbar, AppTabs Tab (config.testid), AppNavLink, UserDropdownItem. camelCase `testId`: ToggleSwitch (on the outer div, which also has role=\"checkbox\" and aria-checked), Select (wrapper div, plus option data-testid={data.testId ?? `dropdown-option-${label}`} and input better-select-input), DropdownList, Table/TableBody, FlexBox, Accordion, Sidebar, SquareInput. Fixed ids: SearchBar input-sites-search, btn-sites-search, close-search-bar; TableRow flights-table-row; Card card and card-title; DropZone drop-zone; Avatar user-menu (on every Avatar). Some components add data-testparam for a dynamic value.",
+   "selector": "[data-testid=\"dropdown-option-<label>\"], [role=\"checkbox\"][aria-checked], [data-testid=\"flights-table-row\"]",
+   "where": "apps/src/components/ui/Checkbox/Checkbox.tsx:135-136; ToggleSwitch/ToggleSwitch.tsx:79-86; Select/Select.tsx:114; Select/components.tsx:43,74,127; Typography/Typography/Typography.tsx:66; Badge/Badge.tsx:155; Spinner/Spinner.tsx:29; SwipeToConfirm/SwipeToConfirm.tsx:79; PageNavbar/PageNavbar.tsx:18; Dropdown/Dropdown.tsx:158-159; SearchBar/SearchBar.tsx:66,79,95; Card/Card.tsx:49,109; Avatar/Avatar.tsx:115; apps/src/components/application/AppTabs/components/Tab.tsx:37; apps/src/components/table/TableRow.tsx:28 @84d3721b"
+  },
+  {
+   "topic": "2 top navigation: component",
+   "fact": "The desktop bar is AppNavbar, a material-tailwind Navbar. Links are hard-coded English labels (not i18n), declared as NavbarLink objects and rendered through AppNavLink. AppNavLink wraps a react-router NavLink, which renders <a href=\"<to>\" data-testid={testid}> inside <span role=\"button\">. The span gets the underline class border-b-2 when active. NavLink (react-router-dom ^6.30.3) also sets class \"active\" and aria-current=\"page\". The router is createBrowserRouter, so hrefs are plain paths. Left group: Sites, Flights, Maps, Plane, Fleet, SAR, Survey Outcomes (plus Log/Telemetry Analysis when not on Android). Right group: History, Settings, Help. Each link is wrapped in OfflineBlockingTooltip. When offline, links with disableWhenOffline (Maps, History, SAR) sit in an inert div with pointer-events-none and are not clickable. Maps and History are removed entirely when user.syncDisabled. Below 768 CSS px (the MD breakpoint) a drawer replaces the bar. It shows only Sites, Flights, Maps and Help, as plain Typography divs with no href or testid. The office tablet is about 1280 CSS px wide, so it gets the desktop bar.",
+   "selector": "a[href=\"/sites\"] or [data-testid=\"btn-sites\"]; active link: a[aria-current=\"page\"]",
+   "where": "apps/src/components/application/AppNavbar/AppNavbar.tsx:26-35,105-111,127-134,143,167-197,229-247; apps/src/components/application/AppNavbar/components/AppNavbarLink.tsx:36-52; apps/src/components/ui/Tooltip/OfflineBlockingTooltip.tsx:54-62; apps/src/index.tsx:85; apps/src/hooks/utils/useMatchMedia.ts:9; apps/package.json:279 @84d3721b"
+  },
+  {
+   "topic": "2 nav item: Sites",
+   "fact": "Label 'Sites', to AppRoutesEnum.Sites = '/sites', testid 'btn-sites'. Always shown. The Wingtra logo link also goes to the sites list and has data-testid WingtraLogo.",
+   "selector": "[data-testid=\"btn-sites\"] (= a[href=\"/sites\"])",
+   "where": "apps/src/components/application/AppNavbar/AppNavbar.tsx:37-42,160-164; apps/src/common/enums/appRoutes.enum.ts:3 @84d3721b"
+  },
+  {
+   "topic": "2 nav item: Flights",
+   "fact": "Label 'Flights', to '/flights' (from '/flights/:flightId?'.split('/:')[0]), testid 'btn-flights'.",
+   "selector": "[data-testid=\"btn-flights\"] (= a[href=\"/flights\"])",
+   "where": "apps/src/components/application/AppNavbar/AppNavbar.tsx:43-47; apps/src/common/enums/appRoutes.enum.ts:4 @84d3721b"
+  },
+  {
+   "topic": "2 nav item: Maps",
+   "fact": "Label 'Maps', to '/maps', testid 'btn-maps'. Disabled (inert) when offline and hidden when user.syncDisabled.",
+   "selector": "[data-testid=\"btn-maps\"] (= a[href=\"/maps\"])",
+   "where": "apps/src/components/application/AppNavbar/AppNavbar.tsx:48-54,132; apps/src/common/enums/appRoutes.enum.ts:5 @84d3721b"
+  },
+  {
+   "topic": "2 nav item: Plane",
+   "fact": "Label 'Plane', to '/plane', testid 'btn-plane'. hide: !isAndroid, and it needs Unleash flag DevFlying (FeatureFlagsEnum.DEV_FLYING), so it is absent in the browser or when the flag is off.",
+   "selector": "[data-testid=\"btn-plane\"] (= a[href=\"/plane\"])",
+   "where": "apps/src/components/application/AppNavbar/AppNavbar.tsx:61-67,130; apps/src/common/enums/featureFlags.enum.ts:4; apps/src/common/enums/appRoutes.enum.ts:11 @84d3721b"
+  },
+  {
+   "topic": "2 nav item: Fleet",
+   "fact": "Label 'Fleet', to '/fleet' (from '/fleet/:droneId?'), testid 'btn-fleet'. It stays enabled offline (disableWhenOffline: false).",
+   "selector": "[data-testid=\"btn-fleet\"] (= a[href=\"/fleet\"])",
+   "where": "apps/src/components/application/AppNavbar/AppNavbar.tsx:68-73; apps/src/common/enums/appRoutes.enum.ts:10 @84d3721b"
+  },
+  {
+   "topic": "2 nav item: AI",
+   "fact": "AI is not a link. AiToolsButton renders <button type=\"button\"> with MagicIcon and Typography text t('navbar.ai_tools') = 'AI'. It has no testid and no href, and clicking it opens AiToolsDialog (it does not navigate). It is rendered only when Unleash flag DetectAnything is on. It shows as active when the dialog is open or the path is /detect-anything.",
+   "selector": "button[type=\"button\"] whose trimmed textContent === 'AI' inside the navbar (XPath //button[normalize-space()='AI'])",
+   "where": "apps/src/components/application/AppNavbar/components/AiToolsButton.tsx:10,18-36; apps/src/components/application/AppNavbar/AppNavbar.tsx:118,181; apps/src/i18n/locales/en.json:2155; apps/src/common/enums/featureFlags.enum.ts:73; apps/src/common/enums/appRoutes.enum.ts:15 @84d3721b"
+  },
+  {
+   "topic": "2 nav item: SAR (object detection)",
+   "fact": "Label 'SAR', to '/object-detection', no testid, needs flag ObjectDetection, disabled offline.",
+   "selector": "a[href=\"/object-detection\"]",
+   "where": "apps/src/components/application/AppNavbar/AppNavbar.tsx:74-79; apps/src/common/enums/featureFlags.enum.ts:24 @84d3721b"
+  },
+  {
+   "topic": "2 nav item: History",
+   "fact": "Label 'History', to '/history', no testid (right group). Disabled offline and hidden when user.syncDisabled.",
+   "selector": "a[href=\"/history\"]",
+   "where": "apps/src/components/application/AppNavbar/AppNavbar.tsx:84-89,110,186-195; apps/src/common/enums/appRoutes.enum.ts:12 @84d3721b"
+  },
+  {
+   "topic": "2 nav item: Settings",
+   "fact": "Label 'Settings', to '/settings', testid 'btn-settings' (right group). The user dropdown also has a Settings entry with testid drop-down-settings. The dropdown opens from the Avatar (data-testid user-menu, set on every Avatar) and holds the log-out entry data-testid log-out-btn.",
+   "selector": "[data-testid=\"btn-settings\"] (= a[href=\"/settings\"]); [data-testid=\"log-out-btn\"]",
+   "where": "apps/src/components/application/AppNavbar/AppNavbar.tsx:55-60,199; apps/src/components/application/AppNavbar/components/UserDropdown/UserDropdown.tsx:64-74,108,139; apps/src/components/application/AppNavbar/components/UserDropdown/UserDropdownItem.tsx:13,22; apps/src/components/ui/Avatar/Avatar.tsx:115 @84d3721b"
+  },
+  {
+   "topic": "2 nav item: Help",
+   "fact": "Label 'Help', to '/help', no testid. It is in the right group and also in the mobile drawer.",
+   "selector": "a[href=\"/help\"]",
+   "where": "apps/src/components/application/AppNavbar/AppNavbar.tsx:80-83,110,111; apps/src/common/enums/appRoutes.enum.ts:9 @84d3721b"
+  },
+  {
+   "topic": "2 navbar extras (sync status)",
+   "fact": "The sync status icon has stable hooks: data-testid offline-status-indicator, or sync-status-indicator with data-state failed, syncing or synced. These are useful for waiting until the tablet is synced. The repo's own E2E NavbarPage uses btn-sites, btn-flights, btn-maps, btn-settings, btn-plane, btn-fleet, WingtraLogo and offline-status-indicator.",
+   "selector": "[data-testid=\"sync-status-indicator\"][data-state=\"synced\"]",
+   "where": "apps/src/components/application/AppNavbar/components/NavbarSyncStatusIcon.tsx:65,79,89,99; apps/tests/e2e/src/pageobjects/NavbarPage.ts:13-41 @84d3721b"
+  },
+  {
+   "topic": "3 dialogs: structure and role",
+   "fact": "Nearly all modals use the in-house Dialog: Dialog.Container in 109 places, Dialog.Content in 125, Dialog.Header in 93. No material-tailwind Dialog or flowbite Modal is imported. Source never writes role=\"dialog\" and has 0 aria-modal. The role comes from @floating-ui/react (^0.26.1) useRole(context) with its default role 'dialog', merged in through getFloatingProps and spread onto the panel div. That is library behaviour, so confirm it on device with a DOM read. The panel also gets aria-labelledby (set by Dialog.Header, a <div> with a useId id, not a heading) and aria-describedby (set by Dialog.Description). Its id is props.id, else the Container's id, else floating-ui's generated id. Only a few dialogs set a stable id, e.g. payload-internet-recovery, POLE_HEIGHT_MODAL_ID, TELEMETRY_RECONFIGURATION_MODAL_ID. The className is overwritten after the spread, so ConfirmDialog's className=\"Dialog\" never reaches the DOM. The panel is portaled into #router-outlet inside FloatingOverlay with the attribute data-modal-overlay (z-[999]). Content is mounted only while the dialog is open, so the presence of the overlay or role means a dialog is open. Escape and an outside pointerdown close it unless dismissDisabled.",
+   "selector": "[data-modal-overlay] [role=\"dialog\"] (last match = topmost); dialog by title: [role=\"dialog\"] whose aria-labelledby target has the text",
+   "where": "apps/src/components/ui/Dialog/components/DialogContent.tsx:74-81,89-112; apps/src/components/ui/Dialog/hooks/useDialog.tsx:52-63; apps/src/components/ui/Dialog/components/DialogHeader.tsx:8-21; apps/src/components/ui/Dialog/components/DialogDescription.tsx:9-19; apps/src/components/ui/Dialog/components/DialogContainer.tsx:11-14; apps/src/layouts/RouterOutlet.tsx:19; apps/src/components/Devices/components/PayloadInternetRecovery.tsx:16; apps/package.json:169 @84d3721b"
+  },
+  {
+   "topic": "3 dialogs: close button",
+   "fact": "The X close button is a <div data-testid=\"btn-close-modal\"> wrapper at the top right holding an IconButton <button>. That button has no testid, no aria-label and tabIndex -1, and is not rendered when hideClose is set. Dialog.Close is a separate Button with testid 'btn-close-modal', used in 4 files. It renders <button data-testid=\"btn-wrapper-btn-close-modal\"> with an inner <span data-testid=\"btn-close-modal\">. So [data-testid=\"btn-close-modal\"] can match both the X wrapper div and a Dialog.Close span in the same dialog. The repo's E2E BasePage uses [data-testid=\"btn-close-modal\"] and [data-modal-overlay].",
+   "selector": "X: [role=\"dialog\"] > div[data-testid=\"btn-close-modal\"] button ; Dialog.Close: button[data-testid=\"btn-wrapper-btn-close-modal\"]",
+   "where": "apps/src/components/ui/Dialog/components/DialogContent.tsx:113-121; apps/src/components/ui/Dialog/components/DialogClose.tsx:8; apps/tests/e2e/src/pageobjects/BasePage.ts:35-41 @84d3721b"
+  },
+  {
+   "topic": "3 dialogs: ConfirmDialog / useAsyncModal buttons",
+   "fact": "AsyncModal (useAsyncModal) renders ConfirmDialog, built on Dialog.Container and Dialog.Content. Its Cancel Button has no testid, so it renders data-testid btn-wrapper-none. The action Button has testid 'btn-dialog-action' and fires on onMouseDown with preventDefault, not onClick. A real tap (adb) works, but JS element.click() does not trigger it; dispatch mousedown instead.",
+   "selector": "button[data-testid=\"btn-wrapper-btn-dialog-action\"]; cancel: [role=\"dialog\"] button with the cancel text",
+   "where": "apps/src/components/ui/AsyncModal/AsyncModal.tsx:15-60; apps/src/components/ui/ConfrimDialog/ConfirmDialog.tsx:72-73,84-95,100-108 @84d3721b"
+  },
+  {
+   "topic": "4 login form",
+   "fact": "The Login screen (route /login) is a react-hook-form form with two FormTextFields, name=\"email\" and name=\"password\" (type=\"password\"). Neither has a testId, and their DOM ids are unstable useId values. The password input switches to type=\"text\" when the eye icon is tapped, so select it by name, not type. Labels and placeholders from en.json: 'Email' / 'e.g. wingtrauser@gmail.com' and 'Password' / 'Your password'. The Login button is the shared Button with type=\"submit\", form={formId}, color orange, text t('actions.login') = 'Login', and no testid (so data-testid btn-wrapper-none). The page <h1> also reads 'Login', so matching on text is ambiguous; use the submit button. Other hooks: the forgot-password link is data-testid forgot-password-btn and the create-account link is create-new-account-btn. Wrong email or password shows a field error under the input, not a toast. A network failure shows a toast. The repo's E2E LoginPage uses exactly input[name=\"email\"], input[name=\"password\"] and button[type=\"submit\"].",
+   "selector": "input[name=\"email\"] ; input[name=\"password\"] ; form button[type=\"submit\"]",
+   "where": "apps/src/pages/Auth/screens/Login.tsx:149-162,175,179-198,202-206,212-214,218; apps/src/components/ui/FormComponents/FormTextField.tsx:43,59; apps/src/pages/Auth/enums/AuthRoutes.ts:2; apps/src/i18n/locales/en.json:298,2758,2760-2761,2765-2766; apps/tests/e2e/src/pageobjects/LoginPage.ts:8-22 @84d3721b"
+  },
+  {
+   "topic": "5 toasts: container and classes",
+   "fact": "The app uses react-toastify 9.1.3 (^9.1.3, lockfile react-toastify@9.1.3). A single <ToastContainer> has position bottom-right, hideProgressBar, icon={false} and closeButton={false]. Its stylesheet is imported in index.tsx and the app overrides the standard classes in styles/toastr.css: .Toastify__toast-container, .Toastify__toast, .Toastify__toast-body, .Toastify__toast--default, --info, --success, --warning and --error. So the DOM uses the stock v9 class names: .Toastify__toast-container--bottom-right, .Toastify__toast plus .Toastify__toast--<type>, and .Toastify__toast-body (react-toastify gives the body role=\"alert\" by default; library behaviour, not in this repo). The in-flight FlyToastr reuses the same container.",
+   "selector": ".Toastify__toast-container .Toastify__toast ; by type: .Toastify__toast--success / --error / --warning / --info",
+   "where": "apps/src/components/utils/Toastr/ToastContext.tsx:21-27; apps/src/styles/toastr.css:8-43; apps/src/index.css:2; apps/src/index.tsx:23; apps/package.json:282; pnpm-lock.yaml:19765; apps/src/components/utils/Toastr/FlyToastr.tsx:8,11 @84d3721b"
+  },
+  {
+   "topic": "5 toasts: content hooks and timing",
+   "fact": "Each toast's content is ToastItem, a <div data-testid=\"notification-label\"> holding a title Typography (default 'Unexpected error' when an error is passed) and a text Typography. Its close button is <button aria-label=\"Close\" data-testid=\"notification-close\">. Auto-close times: success 5000 ms, warning 10000 ms, neutral (type info) 5000 ms, error 10000 ms. FlyToastr's BlockingError never auto-closes. The repo's E2E waits for a toast with $('[data-testid=\"notification-label\"]*=<text>').",
+   "selector": "[data-testid=\"notification-label\"] filtered by textContent.includes('<msg>'); close: [data-testid=\"notification-close\"]",
+   "where": "apps/src/components/utils/Toastr/Toastr.tsx:115-118,126,134-139,171-176,234-239,255-256; apps/src/components/utils/Toastr/FlyToastr.tsx:43-57; apps/tests/e2e/src/pageobjects/BasePage.ts:23-33 @84d3721b"
+  },
+  {
+   "topic": "5 'Report sent' is not a toast",
+   "fact": "'Report sent' appears in the Swiss Army Knife ReportingModal dialog in its 'done' state. It is Typography text inside <div data-testid=\"flight-success-modal-pop-up\">, followed by Buttons 'Go to ticket' and 'Finish' (both untagged, data-testid btn-wrapper-none). The same testid is also used by the 'Reporting ...' in-progress state, so match on the text. While in progress, the close X is hidden and dismiss is disabled. ReportingModal's real toasts are: warning \"Couldn't attach the flight plan link...\"; error \"Couldn't create report, retry or cancel.\"; errors 'ClickUp task not created yet.', 'Failed to auto attach log files.' and 'Failed to upload one or more files.'. The modal's Next button is an untagged type=\"submit\" Button with the text 'Next'. The 'Attach more files in the next step' option is a FormToggleSwitch (role=\"checkbox\"), which is why a substring match on 'Next' can hit it.",
+   "selector": "[role=\"dialog\"] [data-testid=\"flight-success-modal-pop-up\"] with textContent including 'Report sent'",
+   "where": "apps/src/pages/Dev/components/ReportingModal.tsx:230,276,360,389,397,406,416,422-423,458-463,485-487,504-529 @84d3721b"
+  }
+ ]
+}

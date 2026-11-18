@@ -1,0 +1,9 @@
+{
+  "name": "wingtra-qa",
+  "version": "0.4.22",
+  "description": "WingtraApp QA engine: status pane and QA skills incl. qa-prep (local, project scope). The gate and ledger hooks are in the workspace .claude/settings.json.",
+  "types": "./types/index.d.ts",
+  "author": {
+    "name": "Wingtra CT"
+  }
+}

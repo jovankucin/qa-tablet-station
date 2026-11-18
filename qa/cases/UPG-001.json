@@ -1,0 +1,61 @@
+{
+  "area": "UPG",
+  "author": "claude",
+  "covered_paths": [
+    "apps/android/variables.gradle",
+    "apps/android/app/build.gradle",
+    "apps/android/build.gradle",
+    "apps/android/app/src/main/AndroidManifest.xml"
+  ],
+  "created": "2026-10-20T15:40:10.726Z",
+  "expected_differences": [],
+  "fixtures": [],
+  "id": "UPG-001",
+  "kind": "case",
+  "needs": {
+    "account_lock": false,
+    "drone_hw": null,
+    "flags": [],
+    "link": "none",
+    "usb_port": false
+  },
+  "preconditions": [],
+  "requirement": {
+    "sha256": "04c605ebe449f44e98973d56c6c317db0af266d6e31dd79a1e53953ddfb177ed",
+    "source": {
+      "cache": "qa/cache/clickup/0000fake002.json",
+      "locator": "description bullet 1",
+      "ref": "0000fake002",
+      "requester": "Requester Colleague",
+      "type": "clickup_task"
+    },
+    "text": "*   Android 12/11 installation rejection\n    *   Will look something like this"
+  },
+  "routing": [
+    {
+      "line": 3,
+      "path": "apps/android/variables.gradle",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "minSdkVersion = 33",
+      "t": "git",
+      "why": "Android's package manager enforces minSdk when it installs an APK, so this rejects Android 11/12 (SDK 30-32). It is a property of the Android APK only and has no web or Electron equivalent."
+    },
+    {
+      "line": 56,
+      "path": "apps/android/app/build.gradle",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "minSdkVersion rootProject.ext.minSdkVersion",
+      "t": "git",
+      "why": "Writes the minSdk value into the APK manifest that the Android installer checks."
+    }
+  ],
+  "schema": 1,
+  "status": "active",
+  "steps": [],
+  "steps_note": "back-test case: steps are authored for live runs in Step 3",
+  "supersedes": null,
+  "targets": "tablet",
+  "title": "Android 12/11 installation rejection"
+}

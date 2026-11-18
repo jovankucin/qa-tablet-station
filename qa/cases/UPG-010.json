@@ -1,0 +1,123 @@
+{
+  "area": "UPG",
+  "author": "claude",
+  "covered_paths": [
+    "apps/src/components/map/hooks/useTabletMapMaker.tsx",
+    "apps/src/hooks/map/useMapMarkerDrawer.tsx",
+    "apps/src/pages/Surveying/components/GroundMarkersContainer.tsx",
+    "apps/src/pages/FlightPlanning/layouts/FlightPlanningLayout.tsx",
+    "apps/src/pages/Flying/layouts/FlyingLayout.tsx",
+    "apps/src/hooks/plane/usePlaneListeners.ts",
+    "apps/src/pages/Flying/hooks/useRemoteIdPFCHandler.ts",
+    "apps/src/pages/Flying/components/PreflightChecks/**",
+    "apps/src/helpers/android/**",
+    "apps/src/plugins/wipplugin/**",
+    "apps/src/plugins/android-services/**",
+    "apps/src/common/environment.ts",
+    "apps/android/app/src/main/java/com/wingtra/cloud/app/plugins/WiPPlugin/**",
+    "apps/android/app/src/main/java/com/wingtra/cloud/app/plugins/AndroidServicesPlugin/**",
+    "apps/android/app/src/main/AndroidManifest.xml",
+    "apps/android/app/build.gradle",
+    "apps/android/variables.gradle",
+    "apps/cpp/wipapp/src/Vehicle/RemoteIDController.*",
+    "apps/cpp/wipapp/src/SafetyChecklist/SafetyChecks/SafetyCheckRemoteID.*",
+    "apps/cpp/wipapp/src/comm/MockLink*",
+    "apps/package.json"
+  ],
+  "created": "2026-10-20T15:40:27.292Z",
+  "expected_differences": [],
+  "fixtures": [],
+  "id": "UPG-010",
+  "kind": "case",
+  "needs": {
+    "account_lock": false,
+    "drone_hw": null,
+    "flags": [],
+    "link": "none",
+    "usb_port": false
+  },
+  "preconditions": [],
+  "requirement": {
+    "sha256": "202ed1134c2bc25d725811cf1b16ee4ddd0895ced0674953be19b94dea3bf8ff",
+    "source": {
+      "cache": "qa/cache/clickup/0000fake002.json",
+      "locator": "description bullet 10",
+      "ref": "0000fake002",
+      "requester": "Requester Colleague",
+      "type": "clickup_task"
+    },
+    "text": "*   GPS acquisition for tablet marker and RemoteID (field testing)\n    *   Blue dot on the tablet is where we expect it to be\n    *   RemoteID check passes - should be enabled"
+  },
+  "routing": [
+    {
+      "line": 14,
+      "path": "apps/src/components/map/hooks/useTabletMapMaker.tsx",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "useTabletMapMarker: if (isAndroid) Geolocation.getCurrentPosition / watchPosition (line 24)",
+      "t": "git",
+      "why": "The blue tablet dot (#00C2FF, 22 px) only gets a position from @capacitor/geolocation 8.2.3 when isAndroid. On web or Electron no position is fetched and no dot is drawn."
+    },
+    {
+      "line": 199,
+      "path": "apps/src/hooks/plane/usePlaneListeners.ts",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "WiPPlugin.startLocationUpdates() (after requestGeolocationPermissions() at line 198)",
+      "t": "git",
+      "why": "With an active vehicle and enforceRemoteId, the frontend asks Android for location services and permission, then starts the native Remote ID location feed."
+    },
+    {
+      "line": 129,
+      "path": "apps/src/plugins/wipplugin/web.ts",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "WiPPluginWeb.startLocationUpdates -> 'WiPPlugin is not supported in browser'",
+      "t": "git",
+      "why": "Outside Android the Remote ID location feed is a stub, so the Remote ID PFC can only pass on Android."
+    },
+    {
+      "line": 145,
+      "path": "apps/android/app/src/main/java/com/wingtra/cloud/app/plugins/WiPPlugin/WiPPlugin.java",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "startLocationUpdates -> requestRemoteIdLocationUpdatesIfNeeded -> implementation.setTabletLocation (line 179)",
+      "t": "git",
+      "why": "Native Android code forwards fused locations to the C++ RemoteIDController over JNI."
+    },
+    {
+      "line": 86,
+      "path": "apps/android/app/src/main/java/com/wingtra/cloud/app/plugins/WiPPlugin/FineGeolocation.java",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "LocationRequest.Builder(1000).setPriority(PRIORITY_HIGH_ACCURACY)",
+      "t": "git",
+      "why": "Fused high-accuracy 1 Hz location request (Google Play services, Android only) that supplies the Remote ID operator location."
+    },
+    {
+      "line": 230,
+      "path": "apps/cpp/wipapp/src/Vehicle/RemoteIDController.cpp",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "_evaluateRemoteIdSendStatus: WaitingForValidSatLocation unless recent valid tablet location",
+      "t": "git",
+      "why": "The Remote ID PFC cannot reach Ready (SafetyCheckRemoteID.cpp:121) without a recent tablet location from the Android feed. That is why the checklist showing 'Remote ID: Ready' implies the Android location path works."
+    },
+    {
+      "line": 7,
+      "path": "apps/src/common/environment.ts",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "isAndroid",
+      "t": "git",
+      "why": "Platform gate used by the tablet marker hook."
+    }
+  ],
+  "schema": 1,
+  "status": "active",
+  "steps": [],
+  "steps_note": "back-test case: steps are authored for live runs in Step 3",
+  "supersedes": null,
+  "targets": "tablet",
+  "title": "GPS acquisition for tablet marker and RemoteID (field testing)"
+}

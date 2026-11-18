@@ -1,0 +1,102 @@
+{
+  "area": "UPG",
+  "author": "claude",
+  "covered_paths": [
+    "apps/android/app/src/main/java/com/wingtra/cloud/app/plugins/WifiPlugin/**",
+    "apps/android/app/src/main/AndroidManifest.xml",
+    "apps/android/variables.gradle",
+    "apps/src/plugins/wifi/**",
+    "apps/src/helpers/payloads/*Wifi*",
+    "apps/src/components/Devices/**",
+    "apps/src/globals/payloadWifiLog.ts",
+    "apps/src/hooks/plane/usePlaneListeners.ts",
+    "apps/cpp/wipapp/mavlink_generator/**"
+  ],
+  "created": "2026-10-20T15:40:27.873Z",
+  "expected_differences": [],
+  "fixtures": [],
+  "id": "UPG-011",
+  "kind": "case",
+  "needs": {
+    "account_lock": false,
+    "drone_hw": null,
+    "flags": [],
+    "link": "real_drone",
+    "usb_port": true
+  },
+  "preconditions": [],
+  "requirement": {
+    "sha256": "2f2b2480df83b6725c8375dd1d11289e1feed2aadf6260bcd481614005f03051",
+    "source": {
+      "cache": "qa/cache/clickup/0000fake002.json",
+      "locator": "description bullet 11",
+      "ref": "0000fake002",
+      "requester": "Requester Colleague",
+      "type": "clickup_task"
+    },
+    "text": "*   Wi-Fi connection and permission handling ( Needs to be connected to the drone, can be tested only manually )\n    *   Test Re-P/Lidar wifi connection flow"
+  },
+  "routing": [
+    {
+      "line": 7,
+      "path": "apps/src/common/environment.ts",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "isAndroid",
+      "t": "git",
+      "why": "Platform flag. The payload status that drives the Wi-Fi settings comes from the Android-only plane listeners"
+    },
+    {
+      "line": 4,
+      "path": "apps/src/plugins/wifi/index.ts",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "registerPlugin('WifiPlugin', { web: WifiWeb })",
+      "t": "git",
+      "why": "The browser gets a web stub. Real Wi-Fi connect and permission handling is the Android native plugin"
+    },
+    {
+      "line": 26,
+      "path": "apps/android/app/src/main/java/com/wingtra/cloud/app/plugins/WifiPlugin/WifiPlugin.java",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "@CapacitorPlugin(name = \"WifiPlugin\", permissions alias \"wifi\" incl. NEARBY_WIFI_DEVICES)",
+      "t": "git",
+      "why": "Runtime Wi-Fi permission group (fine/coarse location plus NEARBY_WIFI_DEVICES at line 28), enforced at targetSdk 36"
+    },
+    {
+      "line": 127,
+      "path": "apps/android/app/src/main/java/com/wingtra/cloud/app/plugins/WifiPlugin/WifiPlugin.java",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "connectToSavedNetwork",
+      "t": "git",
+      "why": "Connects to the Re-P/LiDAR payload network (saved-network strategy, line 105)"
+    },
+    {
+      "line": 101,
+      "path": "apps/src/helpers/payloads/preparePayloadWifi.ts",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "WifiPlugin.connectToSavedNetwork",
+      "t": "git",
+      "why": "JS entry of the payload Wi-Fi flow, which calls the native plugin"
+    },
+    {
+      "line": 34,
+      "path": "apps/src/hooks/plane/usePlaneListeners.ts",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "usePlaneListeners: if (!isAndroid) return",
+      "t": "git",
+      "why": "Payload and serial updates that enable the Devices Wi-Fi settings only arrive on Android"
+    }
+  ],
+  "schema": 1,
+  "status": "active",
+  "steps": [],
+  "steps_note": "back-test case: steps are authored for live runs in Step 3",
+  "supersedes": null,
+  "targets": "tablet",
+  "title": "Wi-Fi connection and permission handling ( Needs to be connected to the drone, c"
+}

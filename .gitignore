@@ -1,0 +1,13 @@
+# Local values: never commit these.
+/placeholders.local.json
+/.claude/settings.json
+/.claude/settings.local.json
+
+# Evidence, notes and app clones live next to the engine but are not part of this repo.
+/tests/
+/WingtraCloud/
+/WingtraPilot/
+
+.DS_Store
+__pycache__/
+*.py[co]

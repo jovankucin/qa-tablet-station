@@ -1,0 +1,781 @@
+{
+ "schema": 1,
+ "kind": "case",
+ "id": "TERR-009",
+ "area": "TERR",
+ "author": "claude",
+ "status": "active",
+ "title": "Custom terrain 28 m limit at Alaska: Maps import and existing map",
+ "supersedes": {
+  "id": "TERR-009",
+  "file": "qa/cases/TERR-009.json",
+  "file_sha256": "9d00ad49b0276eced50ffa45416ea67d3ed62bf95280475c500e28d21e7d5bc9",
+  "why": "2026-11-04 runs stopped on test errors: a 'Do you really want to exit?' dialog left open (start block now leaves it), the API site lookup at step 57 (removed; a 10 min pause before Use existing map instead), and the planner's Import file tap, which cannot be tapped (removed; known not to work). Parts added (2026-11-05 rule)."
+ },
+ "created": "2026-11-05T08:17:36.000Z",
+ "targets": "tablet",
+ "requirement": {
+  "text": "Android\nOffline - Download a flight plan offline with custom terrain imported and make sure the custom terrain is still used when going offline\n\nTest with terrain from various latitudes and make sure we have the same resolution constraint everywhere. e.g. ( create new sites for all of them )\nAlaska\nAntarctica\nSouth Africa\nSpain",
+  "sha256": "3b7bbafaaac05ab51fe9e6737f7efbd2b162956fc6655575dd49713645df037e",
+  "source": {
+   "type": "user_chat",
+   "ref": "0000fake007",
+   "custom_id": null,
+   "locator": "New test description, W-20261105-001 (latitudes: Alaska; your answer: both ways)",
+   "requester": "Owner"
+  }
+ },
+ "expected": "At Alaska (61.200000, -149.900000), in a new QA_ site: both synthetic UTM DSMs import as maps and process (status MAP). In a new flight there, Add terrain / map > Use existing map lists both; QA_<run>-28 (Alaska_61.2N_28m_UTM.tif, app measures about 28 m) is selectable and QA_<run>-29 (Alaska_61.2N_29m_UTM.tif, about 29 m) is listed but greyed out. Nothing in the planner is saved.",
+ "expected_differences": [],
+ "needs": {
+  "account_lock": false,
+  "drone_hw": null,
+  "flags": [],
+  "link": "none",
+  "usb_port": false
+ },
+ "flags_watch": [
+  "SurveyOutcomes"
+ ],
+ "fixtures": [
+  {
+   "name": "Alaska_61.2N_28m_UTM.tif",
+   "path": "tests/2026-11-04-custom-terrain-final/files/Alaska_61.2N_28m_UTM.tif",
+   "sha256": "c55fa11dbbd7f14437c2348a3cebaccc3f9342cf9b2db5a679b1b58ea207d319",
+   "device_path": "/sdcard/Download/QA-TERR-009/Alaska_61.2N_28m_UTM.tif",
+   "delivery": "engine: act.py deliver copies it to device_path on each tablet when it is missing and checks its sha256 there; a different file at that path is never overwritten"
+  },
+  {
+   "name": "Alaska_61.2N_29m_UTM.tif",
+   "path": "tests/2026-11-04-custom-terrain-final/files/Alaska_61.2N_29m_UTM.tif",
+   "sha256": "50f87d8046c2418294a27248347383df033b43482be525e1c8441a450be843e8",
+   "device_path": "/sdcard/Download/QA-TERR-009/Alaska_61.2N_29m_UTM.tif",
+   "delivery": "engine: act.py deliver copies it to device_path on each tablet when it is missing and checks its sha256 there; a different file at that path is never overwritten"
+  }
+ ],
+ "test_data": {
+  "new_site": "QA_{target} Alaska {time} in the qa-stag account (stays there)",
+  "site_id": "a0000001-0000-4000-8000-000000000001"
+ },
+ "cloud_writes": [
+  {
+   "step": 10,
+   "object": "new site QA_{target} Alaska {time} in the qa-stag account",
+   "what": "creates the site (stays; the engine does not delete)"
+  },
+  {
+   "step": 30,
+   "object": "that site",
+   "what": "imports the 28 m DSM as map QA_<run>-28 (upload, MAP job, tiling)"
+  },
+  {
+   "step": 50,
+   "object": "that site",
+   "what": "imports the 29 m DSM as map QA_<run>-29 (upload, MAP job, tiling)"
+  },
+  {
+   "step": 55,
+   "object": "that site",
+   "what": "creates the flight QA_<tablet> Alaska terrain (left unsaved)"
+  }
+ ],
+ "forbidden": [
+  "Confirm in the existing-map dialog (attaches a map to the flight)",
+  "Save or Save & exit in the planner",
+  "Delete or archive",
+  "any site other than the one this case creates"
+ ],
+ "preconditions": [
+  {
+   "id": "P1",
+   "applies_to": "tablet",
+   "check": "run.py --check-account",
+   "text": "qa-stag account logged in"
+  },
+  {
+   "id": "P2",
+   "applies_to": "tablet",
+   "check": "act.py <tag> deliver TERR-009 --check",
+   "text": "both DSMs on the tablet in Download/QA-TERR-009"
+  },
+  {
+   "id": "P3",
+   "applies_to": "tablet",
+   "check": "act.py ready (offline false)",
+   "text": "tablet online"
+  }
+ ],
+ "routing": [
+  {
+   "t": "git",
+   "repo": "WingtraCloud",
+   "ref": "82e23ff4a21a358460de108fc3ba9c621ac3960f",
+   "path": "apps/src/pages/FlightPlanning/components/LeftToolbar.tsx",
+   "symbol": "btn-open-left-sidebar (Layers)",
+   "line": 78
+  },
+  {
+   "t": "git",
+   "repo": "WingtraCloud",
+   "ref": "82e23ff4a21a358460de108fc3ba9c621ac3960f",
+   "path": "apps/src/pages/FlightPlanning/components/Layers/components/LayersHeader.tsx",
+   "symbol": "layer-actions-button (+)",
+   "line": 29
+  },
+  {
+   "t": "git",
+   "repo": "WingtraCloud",
+   "ref": "82e23ff4a21a358460de108fc3ba9c621ac3960f",
+   "path": "apps/src/components/map/Layers/components/ImportActionsDialog/components/terrain-selection/dialogs/TerrainSourceSelection.tsx",
+   "symbol": "Import file / Use existing map (WingtraCLOUD), Next",
+   "line": 13
+  },
+  {
+   "t": "git",
+   "repo": "WingtraCloud",
+   "ref": "82e23ff4a21a358460de108fc3ba9c621ac3960f",
+   "path": "apps/src/components/map/Layers/components/ImportActionsDialog/components/terrain-selection/flows/import-from-existing-dataset/components/DatasetsMenu.tsx",
+   "symbol": "terrainResolutionTooLow -> checkbox isDisabled + LowResolutionDatasetWarning tooltip",
+   "line": 30
+  },
+  {
+   "t": "git",
+   "repo": "WingtraCloud",
+   "ref": "82e23ff4a21a358460de108fc3ba9c621ac3960f",
+   "path": "apps/src/components/map/Layers/components/ImportActionsDialog/components/terrain-selection/flows/import-from-file/dialogs/map-files-upload/MapFilesUpload.tsx",
+   "symbol": "disableNextButton = terrainResolutionTooCoarse; LowResolutionDatasetWarning",
+   "line": 165
+  }
+ ],
+ "covered_paths": [
+  "apps/src/components/map/Layers/components/ImportActionsDialog/components/terrain-selection/**",
+  "apps/src/pages/FlightPlanning/components/Layers/**",
+  "apps/src/pages/Sites/screens/SiteCreate/**"
+ ],
+ "steps_note": "c1: start block from qa/playbooks/README.md; Maps import of both DSMs; a 600 s pause on the step that opens Use existing map (the list does not refresh); the planner's Import file is left out (known not to work).",
+ "steps": [
+  {
+   "n": 1,
+   "text": "Leave a flight setup's 'Do you want to exit?' dialog when one is open (Exit; writes nothing)",
+   "gates": [],
+   "when_js": "/Do you really want to exit\\?/.test(document.body.innerText)",
+   "helper": "act.py {target} tap text:Exit --expect \"js:!/Do you really want to exit\\?/.test(document.body.innerText)\" --timeout 20",
+   "part": 1,
+   "on": "tablet"
+  },
+  {
+   "n": 2,
+   "text": "Top bar: Sites (a planner or a flight setup left open asks first)",
+   "gates": [],
+   "helper": "act.py {target} tap testid:btn-sites --expect \"js:/Exit without saving|Do you really want to exit\\?/.test(document.body.innerText) || location.pathname === '/sites'\" --timeout 20",
+   "part": 1,
+   "on": "tablet"
+  },
+  {
+   "n": 3,
+   "text": "Exit without saving, when the planner asks (writes nothing)",
+   "gates": [],
+   "when_js": "/Exit without saving/.test(document.body.innerText)",
+   "helper": "act.py {target} tap \"text:Exit without saving\" --expect \"js:location.pathname === '/sites'\" --timeout 20",
+   "part": 1,
+   "on": "tablet"
+  },
+  {
+   "n": 4,
+   "text": "Exit, when a flight setup asks 'Do you want to exit?' (writes nothing)",
+   "gates": [],
+   "when_js": "/Do you really want to exit\\?/.test(document.body.innerText)",
+   "helper": "act.py {target} tap text:Exit --expect \"js:location.pathname === '/sites'\" --timeout 20",
+   "part": 1,
+   "on": "tablet"
+  },
+  {
+   "n": 5,
+   "text": "New site (opens site creation with the name field)",
+   "gates": [],
+   "helper": "act.py {target} tap testid:btn-new-site --expect sel:testid:input-site-name --timeout 20",
+   "on": "tablet",
+   "part": 1
+  },
+  {
+   "n": 6,
+   "text": "Site name: QA_{target} Alaska {time}",
+   "gates": [],
+   "helper": "act.py {target} type testid:input-site-name --text \"QA_{target} Alaska {time}\"",
+   "on": "tablet",
+   "part": 1
+  },
+  {
+   "n": 7,
+   "text": "Location: type the lat/long 61.200000, -149.900000",
+   "gates": [],
+   "helper": "act.py {target} type testid:input-location --text \"61.200000, -149.900000\"",
+   "on": "tablet",
+   "part": 1
+  },
+  {
+   "n": 8,
+   "text": "Pick the lat/long suggestion: the map centres there and the default site area is set",
+   "gates": [],
+   "helper": "act.py {target} tap \"text:61.200000, -149.900000\" --expect \"js:!document.querySelector('[data-testid=location-option]')\" --timeout 15",
+   "on": "tablet",
+   "part": 1
+  },
+  {
+   "n": 9,
+   "text": "Next (goes to the coordinate system step)",
+   "gates": [],
+   "helper": "act.py {target} tap testid:btn-sitecreation-next --expect \"text:Save new site\" --timeout 30",
+   "on": "tablet",
+   "part": 1
+  },
+  {
+   "n": 10,
+   "text": "Save new site: creates the QA_ site at Alaska (cloud write)",
+   "gates": [
+    "cloud_write"
+   ],
+   "helper": "act.py {target} tap \"text:Save new site\" --expect \"js:/^\\/sites\\/[0-9a-f-]{36}/.test(location.pathname)\" --timeout 60",
+   "on": "tablet",
+   "part": 1
+  },
+  {
+   "n": 11,
+   "text": "Top bar: Maps",
+   "gates": [],
+   "helper": "act.py {target} tap testid:btn-maps --expect path:/maps --timeout 20",
+   "on": "tablet",
+   "part": 2
+  },
+  {
+   "n": 12,
+   "text": "Open the Actions menu (arrow half of the split button; never the main half, which reads Process)",
+   "gates": [],
+   "helper": "act.py {target} tap testid:dropdown-button --expect sel:testid:import-map",
+   "on": "tablet",
+   "part": 2
+  },
+  {
+   "n": 13,
+   "text": "Choose Import map",
+   "gates": [],
+   "helper": "act.py {target} tap testid:import-map --expect \"text:Import file\"",
+   "on": "tablet",
+   "part": 2
+  },
+  {
+   "n": 14,
+   "text": "Open the system file chooser (photo picker opens)",
+   "gates": [],
+   "helper": "act.py {target} tap testid:file-drop-modal-drop-zone --expect js:true",
+   "on": "tablet",
+   "part": 2
+  },
+  {
+   "n": 15,
+   "text": "Photo picker: More",
+   "gates": [],
+   "helper": "act.py {target} sys-tap More --expect js:true",
+   "on": "tablet",
+   "part": 2
+  },
+  {
+   "n": 16,
+   "text": "Photo picker: Browse… (opens the full-screen file browser)",
+   "gates": [],
+   "helper": "act.py {target} sys-tap \"Browse…\" --expect js:true",
+   "on": "tablet",
+   "part": 2
+  },
+  {
+   "n": 17,
+   "text": "File browser: open the places (Show roots)",
+   "gates": [],
+   "helper": "act.py {target} sys-tap \"Show roots\" --expect focus:com.google.android.documentsui",
+   "on": "tablet",
+   "part": 2
+  },
+  {
+   "n": 18,
+   "text": "File browser: the internal storage (titled with the tablet's device name)",
+   "gates": [],
+   "helper": "act.py {target} sys-tap @storage --expect focus:com.google.android.documentsui",
+   "pause_s": 1,
+   "on": "tablet",
+   "part": 2
+  },
+  {
+   "n": 19,
+   "text": "File browser: Download",
+   "gates": [],
+   "helper": "act.py {target} sys-tap Download --expect focus:com.google.android.documentsui",
+   "pause_s": 1,
+   "on": "tablet",
+   "part": 2
+  },
+  {
+   "n": 20,
+   "text": "File browser: the case's own folder QA-TERR-009",
+   "gates": [],
+   "helper": "act.py {target} sys-tap QA-TERR-009 --expect focus:com.google.android.documentsui",
+   "pause_s": 1,
+   "on": "tablet",
+   "part": 2
+  },
+  {
+   "n": 21,
+   "text": "File browser: tap Alaska_61.2N_28m_UTM.tif; the app comes back",
+   "gates": [],
+   "helper": "act.py {target} sys-tap Alaska_61.2N_28m_UTM.tif --expect focus:app --timeout 15",
+   "pause_s": 1,
+   "on": "tablet",
+   "part": 2
+  },
+  {
+   "n": 22,
+   "text": "Wait until the dialog shows Alaska_61.2N_28m_UTM.tif (the app reads the file after the picker closed)",
+   "gates": [],
+   "helper": "act.py {target} wait --expect \"text:Alaska_61.2N_28m_UTM.tif\" --timeout 30",
+   "on": "tablet",
+   "part": 2
+  },
+  {
+   "n": 23,
+   "text": "Screenshot: the Maps import dialog with Alaska_61.2N_28m_UTM.tif",
+   "gates": [],
+   "helper": "act.py {target} shot {shots}/{run}_result_p2.png",
+   "on": "tablet",
+   "part": 2
+  },
+  {
+   "n": 24,
+   "text": "Read the file card of Alaska_61.2N_28m_UTM.tif: name and type DSM (plain map import has no resolution limit)",
+   "gates": [],
+   "read_js": "(() => { const d = [...document.querySelectorAll('[role=dialog]')].pop(); const nx = d && [...d.querySelectorAll('button')].find(b => b.innerText.trim() === 'Next'); const t = d ? d.innerText : ''; return {text: t, low_res: /Dataset has too low resolution/.test(t), next_disabled: nx ? nx.disabled : null}; })()",
+   "save_as": "map_card_28",
+   "assert": {
+    "kind": "scripted",
+    "expr": "'Alaska_61.2N_28m_UTM.tif' in v['map_card_28']['text'] and '\\nDSM\\n' in v['map_card_28']['text'] and v['map_card_28']['next_disabled'] is False"
+   },
+   "on": "tablet",
+   "part": 2
+  },
+  {
+   "n": 25,
+   "text": "First Next (reads the coordinate system; writes nothing)",
+   "gates": [
+    "write_list"
+   ],
+   "helper": "act.py {target} tap text:Next --expect \"js:!!(document.querySelector('[data-testid=input-dataset-name]') && document.querySelector('[data-testid=input-dataset-name]').value)\" --timeout 30",
+   "on": "tablet",
+   "part": 2
+  },
+  {
+   "n": 26,
+   "text": "Dataset name QA_{run}-28",
+   "gates": [],
+   "helper": "act.py {target} type testid:input-dataset-name --text QA_{run}-28",
+   "on": "tablet",
+   "part": 2
+  },
+  {
+   "n": 27,
+   "text": "Open the Site select",
+   "gates": [],
+   "helper": "act.py {target} tap testid:new-flight-site-input --expect sel:testid:better-select-input",
+   "on": "tablet",
+   "part": 2
+  },
+  {
+   "n": 28,
+   "text": "Filter the site list with this run's own site name",
+   "gates": [],
+   "helper": "act.py {target} type testid:better-select-input --text \"QA_{target} Alaska {time}\"",
+   "on": "tablet",
+   "part": 2
+  },
+  {
+   "n": 29,
+   "text": "Choose this run's own QA_ site",
+   "gates": [],
+   "helper": "act.py {target} tap \"testid:dropdown-option-QA_{target} Alaska {time}\" --expect \"text:QA_{target} Alaska {time}\" --timeout 20",
+   "on": "tablet",
+   "part": 2
+  },
+  {
+   "n": 30,
+   "text": "Second Next: imports the 28 m DSM as a map into this run's own QA_ site (cloud write)",
+   "gates": [
+    "write_list",
+    "cloud_write"
+   ],
+   "helper": "act.py {target} tap text:Next --expect gone:testid:input-dataset-name --timeout 30",
+   "on": "tablet",
+   "part": 2
+  },
+  {
+   "n": 31,
+   "text": "Top bar: Maps",
+   "gates": [],
+   "helper": "act.py {target} tap testid:btn-maps --expect path:/maps --timeout 20",
+   "on": "tablet",
+   "part": 3
+  },
+  {
+   "n": 32,
+   "text": "Open the Actions menu (arrow half of the split button; never the main half, which reads Process)",
+   "gates": [],
+   "helper": "act.py {target} tap testid:dropdown-button --expect sel:testid:import-map",
+   "on": "tablet",
+   "part": 3
+  },
+  {
+   "n": 33,
+   "text": "Choose Import map",
+   "gates": [],
+   "helper": "act.py {target} tap testid:import-map --expect \"text:Import file\"",
+   "on": "tablet",
+   "part": 3
+  },
+  {
+   "n": 34,
+   "text": "Open the system file chooser (photo picker opens)",
+   "gates": [],
+   "helper": "act.py {target} tap testid:file-drop-modal-drop-zone --expect js:true",
+   "on": "tablet",
+   "part": 3
+  },
+  {
+   "n": 35,
+   "text": "Photo picker: More",
+   "gates": [],
+   "helper": "act.py {target} sys-tap More --expect js:true",
+   "on": "tablet",
+   "part": 3
+  },
+  {
+   "n": 36,
+   "text": "Photo picker: Browse… (opens the full-screen file browser)",
+   "gates": [],
+   "helper": "act.py {target} sys-tap \"Browse…\" --expect js:true",
+   "on": "tablet",
+   "part": 3
+  },
+  {
+   "n": 37,
+   "text": "File browser: open the places (Show roots)",
+   "gates": [],
+   "helper": "act.py {target} sys-tap \"Show roots\" --expect focus:com.google.android.documentsui",
+   "on": "tablet",
+   "part": 3
+  },
+  {
+   "n": 38,
+   "text": "File browser: the internal storage (titled with the tablet's device name)",
+   "gates": [],
+   "helper": "act.py {target} sys-tap @storage --expect focus:com.google.android.documentsui",
+   "pause_s": 1,
+   "on": "tablet",
+   "part": 3
+  },
+  {
+   "n": 39,
+   "text": "File browser: Download",
+   "gates": [],
+   "helper": "act.py {target} sys-tap Download --expect focus:com.google.android.documentsui",
+   "pause_s": 1,
+   "on": "tablet",
+   "part": 3
+  },
+  {
+   "n": 40,
+   "text": "File browser: the case's own folder QA-TERR-009",
+   "gates": [],
+   "helper": "act.py {target} sys-tap QA-TERR-009 --expect focus:com.google.android.documentsui",
+   "pause_s": 1,
+   "on": "tablet",
+   "part": 3
+  },
+  {
+   "n": 41,
+   "text": "File browser: tap Alaska_61.2N_29m_UTM.tif; the app comes back",
+   "gates": [],
+   "helper": "act.py {target} sys-tap Alaska_61.2N_29m_UTM.tif --expect focus:app --timeout 15",
+   "pause_s": 1,
+   "on": "tablet",
+   "part": 3
+  },
+  {
+   "n": 42,
+   "text": "Wait until the dialog shows Alaska_61.2N_29m_UTM.tif (the app reads the file after the picker closed)",
+   "gates": [],
+   "helper": "act.py {target} wait --expect \"text:Alaska_61.2N_29m_UTM.tif\" --timeout 30",
+   "on": "tablet",
+   "part": 3
+  },
+  {
+   "n": 43,
+   "text": "Screenshot: the Maps import dialog with Alaska_61.2N_29m_UTM.tif",
+   "gates": [],
+   "helper": "act.py {target} shot {shots}/{run}_result_p3.png",
+   "on": "tablet",
+   "part": 3
+  },
+  {
+   "n": 44,
+   "text": "Read the file card of Alaska_61.2N_29m_UTM.tif: name and type DSM (plain map import has no resolution limit)",
+   "gates": [],
+   "read_js": "(() => { const d = [...document.querySelectorAll('[role=dialog]')].pop(); const nx = d && [...d.querySelectorAll('button')].find(b => b.innerText.trim() === 'Next'); const t = d ? d.innerText : ''; return {text: t, low_res: /Dataset has too low resolution/.test(t), next_disabled: nx ? nx.disabled : null}; })()",
+   "save_as": "map_card_29",
+   "assert": {
+    "kind": "scripted",
+    "expr": "'Alaska_61.2N_29m_UTM.tif' in v['map_card_29']['text'] and '\\nDSM\\n' in v['map_card_29']['text'] and v['map_card_29']['next_disabled'] is False"
+   },
+   "on": "tablet",
+   "part": 3
+  },
+  {
+   "n": 45,
+   "text": "First Next (reads the coordinate system; writes nothing)",
+   "gates": [
+    "write_list"
+   ],
+   "helper": "act.py {target} tap text:Next --expect \"js:!!(document.querySelector('[data-testid=input-dataset-name]') && document.querySelector('[data-testid=input-dataset-name]').value)\" --timeout 30",
+   "on": "tablet",
+   "part": 3
+  },
+  {
+   "n": 46,
+   "text": "Dataset name QA_{run}-29",
+   "gates": [],
+   "helper": "act.py {target} type testid:input-dataset-name --text QA_{run}-29",
+   "on": "tablet",
+   "part": 3
+  },
+  {
+   "n": 47,
+   "text": "Open the Site select",
+   "gates": [],
+   "helper": "act.py {target} tap testid:new-flight-site-input --expect sel:testid:better-select-input",
+   "on": "tablet",
+   "part": 3
+  },
+  {
+   "n": 48,
+   "text": "Filter the site list with this run's own site name",
+   "gates": [],
+   "helper": "act.py {target} type testid:better-select-input --text \"QA_{target} Alaska {time}\"",
+   "on": "tablet",
+   "part": 3
+  },
+  {
+   "n": 49,
+   "text": "Choose this run's own QA_ site",
+   "gates": [],
+   "helper": "act.py {target} tap \"testid:dropdown-option-QA_{target} Alaska {time}\" --expect \"text:QA_{target} Alaska {time}\" --timeout 20",
+   "on": "tablet",
+   "part": 3
+  },
+  {
+   "n": 50,
+   "text": "Second Next: imports the 29 m DSM as a map into this run's own QA_ site (cloud write)",
+   "gates": [
+    "write_list",
+    "cloud_write"
+   ],
+   "helper": "act.py {target} tap text:Next --expect gone:testid:input-dataset-name --timeout 30",
+   "on": "tablet",
+   "part": 3
+  },
+  {
+   "n": 51,
+   "text": "Top bar: Sites",
+   "gates": [],
+   "helper": "act.py {target} tap testid:btn-sites --expect \"text:QA_{target} Alaska {time}\" --timeout 30",
+   "on": "tablet",
+   "part": 4
+  },
+  {
+   "n": 52,
+   "text": "Open this run's own QA_ site",
+   "gates": [],
+   "helper": "act.py {target} tap \"text:QA_{target} Alaska {time}\" --expect sel:testid:create-new-flight-button --timeout 30",
+   "on": "tablet",
+   "part": 4
+  },
+  {
+   "n": 53,
+   "text": "Create flight (opens the New flight form)",
+   "gates": [],
+   "helper": "act.py {target} tap testid:create-new-flight-button --expect sel:testid:new-flight-name-input --timeout 20",
+   "on": "tablet",
+   "part": 4
+  },
+  {
+   "n": 54,
+   "text": "Flight name",
+   "gates": [],
+   "helper": "act.py {target} type testid:new-flight-name-input --text \"QA_{target} Alaska terrain\"",
+   "on": "tablet",
+   "part": 4
+  },
+  {
+   "n": 55,
+   "text": "Create: creates the QA_ flight in this run's own site and opens its planner (cloud write)",
+   "gates": [
+    "cloud_write"
+   ],
+   "helper": "act.py {target} tap text:Create --expect \"js:/\\/planning\\/[0-9a-f-]{36}$/.test(location.pathname)\" --timeout 30",
+   "on": "tablet",
+   "part": 4
+  },
+  {
+   "n": 56,
+   "text": "Open the layers panel (Layers button, bottom left)",
+   "gates": [],
+   "helper": "act.py {target} tap testid:btn-open-left-sidebar --expect sel:testid:layer-actions-button --timeout 20",
+   "when_js": "!document.querySelector('[data-testid=layer-actions-button]')",
+   "on": "tablet",
+   "part": 4
+  },
+  {
+   "n": 57,
+   "text": "Layers: + (add layer menu)",
+   "gates": [],
+   "helper": "act.py {target} tap testid:layer-actions-button --expect \"text:Add terrain / map\"",
+   "on": "tablet",
+   "part": 4
+  },
+  {
+   "n": 58,
+   "text": "Choose Add terrain / map",
+   "gates": [],
+   "helper": "act.py {target} tap \"text:Add terrain / map\" --expect \"text:Use existing map (WingtraCLOUD)\"",
+   "on": "tablet",
+   "part": 4
+  },
+  {
+   "n": 59,
+   "text": "Next with Use existing map (WingtraCLOUD) after a 10 min pause for map processing (the list reads the maps once, when it opens; writes nothing)",
+   "gates": [
+    "write_list"
+   ],
+   "helper": "act.py {target} tap text:Next --expect \"text:Add terrain / map from previous dataset\" --timeout 20",
+   "on": "tablet",
+   "part": 4,
+   "pause_s": 600
+  },
+  {
+   "n": 60,
+   "text": "Wait until both maps are listed",
+   "gates": [],
+   "helper": "act.py {target} wait --expect \"js:(() => { const d = [...document.querySelectorAll('[role=dialog]')].pop(); return !!d && d.innerText.includes('QA_{run}-28') && d.innerText.includes('QA_{run}-29'); })()\" --timeout 60",
+   "on": "tablet",
+   "part": 4
+  },
+  {
+   "n": 61,
+   "text": "Screenshot: the existing-map list",
+   "gates": [],
+   "helper": "act.py {target} shot {shots}/{run}_result_p4.png",
+   "on": "tablet",
+   "part": 4
+  },
+  {
+   "n": 62,
+   "text": "Read the list: 28 m map selectable, 29 m map listed but not selectable",
+   "gates": [],
+   "read_js": "(() => { const d = [...document.querySelectorAll('[role=dialog]')].pop(); const row = n => { const el = [...d.querySelectorAll('*')].find(e => e.children.length === 0 && e.textContent.trim() === n); let r = el; for (let i = 0; i < 5 && r; i++) { r = r.parentElement; const c = r && r.querySelector('input[type=checkbox], [role=checkbox], button'); if (c) return {found: true, disabled: !!(c.disabled || c.getAttribute('aria-disabled') === 'true' || c.hasAttribute('data-disabled') || (c.closest('[aria-disabled=true]')))}; } return {found: !!el, disabled: null}; }; return {m28: row('QA_{run}-28'), m29: row('QA_{run}-29')}; })()",
+   "save_as": "existing",
+   "assert": {
+    "kind": "scripted",
+    "expr": "v['existing']['m28']['found'] and v['existing']['m28']['disabled'] is False and v['existing']['m29']['found'] and v['existing']['m29']['disabled'] is True"
+   },
+   "on": "tablet",
+   "part": 4
+  },
+  {
+   "n": 63,
+   "text": "Cancel the existing-map dialog (selects nothing)",
+   "gates": [],
+   "helper": "act.py {target} tap text:Cancel --expect \"js:!/Add terrain \\/ map from previous dataset/.test(document.body.innerText)\" --timeout 15",
+   "on": "tablet",
+   "part": 4
+  },
+  {
+   "n": 64,
+   "text": "Bring the app to the front (closes a leftover file picker)",
+   "gates": [],
+   "always": true,
+   "helper": "act.py {target} ready",
+   "on": "tablet"
+  },
+  {
+   "n": 65,
+   "text": "Close a leftover dialog (Cancel; only when one is open)",
+   "gates": [],
+   "always": true,
+   "when_js": "!!document.querySelector('[role=dialog]') && [...document.querySelectorAll('[role=dialog] button')].some(b => b.innerText.trim() === 'Cancel')",
+   "helper": "act.py {target} tap text:Cancel --expect \"js:!document.querySelector('[role=dialog]')\" --timeout 10",
+   "on": "tablet"
+  },
+  {
+   "n": 66,
+   "text": "Clean-up: leave the planner (always)",
+   "gates": [],
+   "always": true,
+   "helper": "act.py {target} tap testid:btn-sites --expect \"js:/Exit without saving|Do you really want to exit\\?/.test(document.body.innerText) || location.pathname === '/sites'\" --timeout 20",
+   "on": "tablet"
+  },
+  {
+   "n": 67,
+   "text": "Exit without saving when asked (always; writes nothing)",
+   "gates": [],
+   "always": true,
+   "when_js": "/Exit without saving/.test(document.body.innerText)",
+   "helper": "act.py {target} tap \"text:Exit without saving\" --expect \"js:location.pathname === '/sites'\" --timeout 20",
+   "on": "tablet"
+  },
+  {
+   "n": 68,
+   "text": "Exit when a flight setup asks 'Do you want to exit?' (always; writes nothing)",
+   "gates": [],
+   "always": true,
+   "when_js": "/Do you really want to exit\\?/.test(document.body.innerText)",
+   "helper": "act.py {target} tap text:Exit --expect \"js:location.pathname === '/sites'\" --timeout 20",
+   "on": "tablet"
+  }
+ ],
+ "parts": [
+  {
+   "n": 1,
+   "text": "Create a new QA_ site at Alaska",
+   "quote": [
+    "create new sites for all of them",
+    "Alaska"
+   ],
+   "check": false
+  },
+  {
+   "n": 2,
+   "text": "Maps import, 28 m DSM: accepted as a DSM and imported",
+   "quote": "Map import (without using it as custom terrain for flight planning) accepts any resolution - try with both high and low resolution here",
+   "check": true
+  },
+  {
+   "n": 3,
+   "text": "Maps import, 29 m DSM: accepted as a DSM and imported",
+   "quote": "Map import (without using it as custom terrain for flight planning) accepts any resolution - try with both high and low resolution here",
+   "check": true
+  },
+  {
+   "n": 4,
+   "text": "New flight, Use existing map: 28 m selectable, 29 m greyed out",
+   "quote": [
+    "Using an existing map for flight planning custom terrain",
+    "make sure we have the same resolution constraint everywhere"
+   ],
+   "check": true
+  }
+ ]
+}

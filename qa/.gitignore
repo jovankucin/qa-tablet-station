@@ -1,0 +1,38 @@
+# Secrets and per-station state: never commit.
+/secrets.env
+*.env
+.env.*
+/runner/state/
+/app/.touchid*
+
+# Per-station records, written by the engine at run time.
+/devices/*.json
+/ledger/
+/runs/
+/issues/
+/history/
+/cache/
+/backups/
+/tasks/*.json
+/tasks/.lock
+
+__pycache__/
+*.py[co]
+*.tmp
+.lock
+.DS_Store
+
+# Large or binary files.
+*.apk
+*.aab
+*.apks
+*.xapk
+*.zip
+*.gz
+*.tgz
+*.7z
+*.tar
+*.rar
+*.bz2
+*.xz
+*.zst

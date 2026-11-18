@@ -1,0 +1,347 @@
+{
+  "area": "TERR",
+  "author": "claude",
+  "cloud_writes": [
+    {
+      "object": "dataset in site a0000001 (QA engine)",
+      "step": 23,
+      "what": "creates an EXTERNAL dataset QA_<run id>, a MAP history job, an S3 upload and DSM tiling"
+    }
+  ],
+  "covered_paths": [
+    "apps/src/pages/Maps/**",
+    "apps/src/components/map/Layers/components/ImportActionsDialog/components/terrain-selection/flows/import-from-file/**",
+    "apps/src/components/GlobalDropZone/**",
+    "apps/src/providers/wingtra-api/datasets.api.ts"
+  ],
+  "created": "2026-10-26T15:06:39.266Z",
+  "expected": "Processing completes and the DSM is available as a map; no 'Processing failed'. General DSM: Z11_Zurich_47.4N_1m_UTM32632.tif (synthetic, zero rotation), chosen by the user.",
+  "expected_differences": [],
+  "fixtures": [
+    {
+      "delivery": "engine: act.py deliver copies it to device_path on each tablet when it is missing and checks its sha256 there; a different file at that path is never overwritten",
+      "device_path": "/sdcard/Download/QA-TERR-004/Z11_Zurich_47.4N_1m_UTM32632.tif",
+      "name": "Z11_Zurich_47.4N_1m_UTM32632.tif",
+      "path": "tests/2026-10-09-terrain-resolution/files/Z11_Zurich_47.4N_1m_UTM32632.tif",
+      "sha256": "6be12f33383528a594e973bcc6ff1660ba8f623b03cb32b1566840ecda25c895"
+    }
+  ],
+  "flags_watch": [
+    "SurveyOutcomes"
+  ],
+  "forbidden": [
+    "the main half of the Actions split button (Process)",
+    "btn-dialog-action",
+    "btn-close-modal or a tap outside the dialog"
+  ],
+  "id": "TERR-004",
+  "kind": "case",
+  "needs": {
+    "account_lock": false,
+    "drone_hw": null,
+    "flags": [],
+    "link": "none",
+    "usb_port": false
+  },
+  "preconditions": [
+    {
+      "applies_to": "both",
+      "check": "shasum -a 256 + geotiff_reader.py",
+      "id": "P1",
+      "text": "fixture present; sha256 recorded; its geotransform rotation/shear terms read and recorded before upload"
+    },
+    {
+      "applies_to": "both",
+      "check": "run.py --check-account",
+      "id": "P2",
+      "text": "CT account logged in on every target"
+    },
+    {
+      "applies_to": "both",
+      "check": "API GET /sites/:id",
+      "id": "P3",
+      "text": "test-data site a0000001 exists in the CT org on staging"
+    },
+    {
+      "applies_to": "tablet",
+      "check": "act.py <tag> deliver TERR-004 --check",
+      "id": "P4",
+      "text": "the fixture is on the tablet at its device_path with the fixture's sha256 (the engine copies it at the start of each attempt: act.py deliver)"
+    }
+  ],
+  "requirement": {
+    "sha256": "a5740a7b2584fdb48b75eec4014f44585d04c80fe2da1c41555dcbdee8ae8634",
+    "source": {
+      "cache": "qa/cache/clickup/0000fake004.json",
+      "fetched": "2026-10-22T11:45:00Z",
+      "locator": "description bullet 2",
+      "ref": "0000fake004",
+      "requester": "Requester Colleague",
+      "type": "clickup_task"
+    },
+    "text": "Also import a general DSM file you have, just to check so we did not break it"
+  },
+  "routing": [
+    {
+      "line": 48,
+      "path": "apps/src/components/application/AppNavbar/AppNavbar.tsx",
+      "ref": "84d3721b33ee195738a2a002313c55becb2643bc",
+      "repo": "WingtraCloud",
+      "symbol": "btn-maps in the desktop bar (CSS width 1280 on the tablets)",
+      "t": "git"
+    },
+    {
+      "line": 27,
+      "path": "apps/src/pages/Maps/screens/Table/ActionsButton.tsx",
+      "ref": "84d3721b33ee195738a2a002313c55becb2643bc",
+      "repo": "WingtraCloud",
+      "symbol": "split button: Process / Import map (testid import-map)",
+      "t": "git"
+    },
+    {
+      "line": 20,
+      "path": "apps/src/pages/Maps/components/MapImportModal/MapImportModal.tsx",
+      "ref": "84d3721b33ee195738a2a002313c55becb2643bc",
+      "repo": "WingtraCloud",
+      "symbol": "SurveyOutcomes off: MapFromUploadsCreator",
+      "t": "git"
+    },
+    {
+      "line": 127,
+      "path": "apps/src/components/GlobalDropZone/GlobalDropZone.tsx",
+      "ref": "84d3721b33ee195738a2a002313c55becb2643bc",
+      "repo": "WingtraCloud",
+      "symbol": "detached input type=file: the Android system picker",
+      "t": "git"
+    },
+    {
+      "line": 189,
+      "path": "apps/src/components/map/Layers/components/ImportActionsDialog/components/terrain-selection/flows/import-from-file/dialogs/map-files-configuration/MapFilesConfiguration.tsx",
+      "ref": "84d3721b33ee195738a2a002313c55becb2643bc",
+      "repo": "WingtraCloud",
+      "symbol": "second Next: the cloud write",
+      "t": "git"
+    }
+  ],
+  "schema": 1,
+  "status": "active",
+  "steps": [
+    {
+      "gates": [],
+      "helper": "act.py {target} tap text:Cancel --expect \"js:![...document.querySelectorAll('[role=dialog]')].some(d => d.innerText.includes('Import file'))\" --timeout 10",
+      "n": 1,
+      "text": "Close a leftover Import file dialog (Cancel; only when one is open)",
+      "when_js": "(() => { const d = [...document.querySelectorAll('[role=dialog]')].pop(); return !!(d && d.innerText.includes('Import file') && [...d.querySelectorAll('button')].some(b => b.innerText.trim() === 'Cancel')); })()"
+    },
+    {
+      "gates": [],
+      "helper": "act.py {target} tap testid:btn-maps --expect path:/maps",
+      "n": 2,
+      "text": "Top bar: Maps"
+    },
+    {
+      "gates": [],
+      "helper": "act.py {target} tap testid:dropdown-button --expect js:true",
+      "n": 3,
+      "text": "Open the Actions menu (arrow half of the split button; never the main half, which reads Process)"
+    },
+    {
+      "gates": [],
+      "helper": "act.py {target} tap testid:import-map --expect \"text:Import file\"",
+      "n": 4,
+      "text": "Choose Import map"
+    },
+    {
+      "assert": {
+        "expr": "v['classic_dialog'] is True",
+        "kind": "scripted"
+      },
+      "gates": [],
+      "n": 5,
+      "read_js": "!!document.querySelector('[data-testid=file-drop-modal-drop-zone]')",
+      "save_as": "classic_dialog",
+      "text": "Confirm the classic import dialog (SurveyOutcomes off)"
+    },
+    {
+      "gates": [],
+      "helper": "act.py {target} tap testid:file-drop-modal-drop-zone --expect js:true",
+      "n": 6,
+      "text": "Open the system file chooser (photo picker opens)"
+    },
+    {
+      "gates": [],
+      "helper": "act.py {target} sys-tap More --expect js:true",
+      "n": 7,
+      "on": "tablet",
+      "text": "Photo picker: More"
+    },
+    {
+      "gates": [],
+      "helper": "act.py {target} sys-tap \"Browse…\" --expect js:true",
+      "n": 8,
+      "on": "tablet",
+      "text": "Photo picker: Browse… (opens the full-screen file browser)"
+    },
+    {
+      "gates": [],
+      "helper": "act.py {target} sys-tap \"Show roots\" --expect focus:com.google.android.documentsui",
+      "n": 9,
+      "on": "tablet",
+      "text": "File browser: open the places (Show roots)"
+    },
+    {
+      "gates": [],
+      "helper": "act.py {target} sys-tap @storage --expect focus:com.google.android.documentsui",
+      "n": 10,
+      "on": "tablet",
+      "pause_s": 1,
+      "text": "File browser: the internal storage (titled with the tablet's device name)"
+    },
+    {
+      "gates": [],
+      "helper": "act.py {target} sys-tap Download --expect focus:com.google.android.documentsui",
+      "n": 11,
+      "on": "tablet",
+      "pause_s": 1,
+      "text": "File browser: Download"
+    },
+    {
+      "gates": [],
+      "helper": "act.py {target} sys-tap QA-TERR-004 --expect focus:com.google.android.documentsui",
+      "n": 12,
+      "on": "tablet",
+      "pause_s": 1,
+      "text": "File browser: the case's own folder QA-TERR-004"
+    },
+    {
+      "gates": [],
+      "helper": "act.py {target} sys-tap Z11_Zurich_47.4N_1m_UTM32632.tif --expect focus:app --timeout 15",
+      "n": 13,
+      "on": "tablet",
+      "pause_s": 1,
+      "text": "File browser: tap Z11_Zurich_47.4N_1m_UTM32632.tif, the only file in QA-TERR-004; the app comes back"
+    },
+    {
+      "assert": {
+        "expr": "'Z11_Zurich_47.4N_1m_UTM32632.tif' in v['file_card']['text'] and '\\nDSM\\n' in v['file_card']['text'] and v['file_card']['next_disabled'] is False",
+        "kind": "scripted"
+      },
+      "gates": [],
+      "n": 14,
+      "pause_s": 3,
+      "read_js": "(() => { const d = [...document.querySelectorAll('[role=dialog]')].pop(); const nx = d && [...d.querySelectorAll('button')].find(b => b.innerText.trim() === 'Next'); return {text: d ? d.innerText : '', next_disabled: nx ? nx.disabled : null}; })()",
+      "save_as": "file_card",
+      "text": "Read the file card: name, type DSM, first Next enabled"
+    },
+    {
+      "gates": [
+        "write_list"
+      ],
+      "helper": "act.py {target} tap text:Next --expect js:true --timeout 20",
+      "n": 15,
+      "text": "First Next (reads the coordinate system; writes nothing). The runner refuses every text:Next, so it is handed back"
+    },
+    {
+      "gates": [],
+      "helper": "act.py {target} type testid:input-dataset-name --text QA_{run}",
+      "n": 16,
+      "text": "Dataset name"
+    },
+    {
+      "gates": [],
+      "helper": "act.py {target} key back --expect js:true",
+      "n": 17,
+      "text": "Close the keyboard"
+    },
+    {
+      "gates": [],
+      "helper": "act.py {target} tap testid:new-flight-site-input --expect js:true",
+      "n": 18,
+      "text": "Open the Site select"
+    },
+    {
+      "gates": [],
+      "helper": "act.py {target} type testid:better-select-input --text \"QA engine\"",
+      "n": 19,
+      "text": "Filter the site list"
+    },
+    {
+      "gates": [],
+      "helper": "act.py {target} tap \"testid:dropdown-option-QA engine\" --expect js:true",
+      "n": 20,
+      "text": "Choose the authorized test site"
+    },
+    {
+      "gates": [],
+      "helper": "act.py {target} key back --expect js:true",
+      "n": 21,
+      "text": "Close the keyboard"
+    },
+    {
+      "assert": {
+        "expr": "v['form']['name'] == 'QA_' + run and '\\nQA engine\\n' in v['form']['text'] and 'EPSG:32632' in v['form']['text'] and v['form']['next_disabled'] is False",
+        "kind": "scripted"
+      },
+      "gates": [],
+      "n": 22,
+      "read_js": "(() => { const d = [...document.querySelectorAll('[role=dialog]')].pop(); const i = document.querySelector('[data-testid=input-dataset-name]'); const nx = d && [...d.querySelectorAll('button')].find(b => b.innerText.trim() === 'Next'); return {text: d ? d.innerText : '', name: i ? i.value : null, next_disabled: nx ? nx.disabled : null}; })()",
+      "save_as": "form",
+      "text": "Read the filled form"
+    },
+    {
+      "gates": [
+        "write_list",
+        "cloud_write"
+      ],
+      "helper": "act.py {target} tap text:Next --expect gone:testid:input-dataset-name --timeout 20",
+      "n": 23,
+      "text": "Second Next: creates the dataset in the QA engine site, a MAP job, the upload and the tiling (cloud write)"
+    },
+    {
+      "assert": {
+        "expr": "v['outputs']['found'] and v['outputs']['datasetStatus'] == 'MAP' and v['outputs']['outputs'] == ['dsm:processed']",
+        "kind": "scripted"
+      },
+      "gates": [],
+      "n": 24,
+      "pause_s": 600,
+      "read_js": "(async () => { const t = localStorage.getItem('accessToken') || ''; const l = await window.Capacitor.Plugins.CapacitorHttp.get({url: 'https://api.staging.company.example/api/v1/datasets/sites/a0000001-0000-4000-8000-000000000001', headers: {Authorization: 'Bearer ' + t}}); const d = (l.data || []).find(x => x.name === 'QA_{run}'); if (!d) return {found: false}; const r = await window.Capacitor.Plugins.CapacitorHttp.get({url: 'https://api.staging.company.example/api/v1/datasets/' + d.id + '/map-outputs', headers: {Authorization: 'Bearer ' + t}}); return {found: true, id: d.id, datasetStatus: (r.data || {}).datasetStatus, outputs: ((r.data || {}).outputs || []).map(o => o.type + ':' + o.status)}; })()",
+      "save_as": "outputs",
+      "text": "Wait for the server-side processing (app estimate 10-50 min; the 2026-10-23 runs took 4 to 10 min)"
+    },
+    {
+      "always": true,
+      "gates": [],
+      "helper": "act.py {target} ready",
+      "n": 25,
+      "text": "Bring the app to the front (closes a leftover file picker)"
+    },
+    {
+      "always": true,
+      "gates": [],
+      "helper": "act.py {target} tap text:Cancel --expect \"js:![...document.querySelectorAll('[role=dialog]')].some(d => d.innerText.includes('Import file'))\" --timeout 10",
+      "n": 26,
+      "text": "Close a leftover Import file dialog (Cancel; only when one is open)",
+      "when_js": "(() => { const d = [...document.querySelectorAll('[role=dialog]')].pop(); return !!(d && d.innerText.includes('Import file') && [...d.querySelectorAll('button')].some(b => b.innerText.trim() === 'Cancel')); })()"
+    },
+    {
+      "always": true,
+      "gates": [],
+      "helper": "act.py {target} tap testid:btn-sites --expect path:/sites --timeout 20",
+      "n": 27,
+      "text": "Leave the app where the case starts (always)"
+    }
+  ],
+  "steps_note": "General DSM chosen by the user on 2026-10-22: the synthetic Zurich 1 m UTM file from the 10-09 terrain test. Completed 2026-10-23. Tablet only: W044 cannot choose a file through act.py (no CDP file-chooser method), so the web leg waits for that engine verb. Under run.py the case stops at step 8 (handover: the file pick) and steps 10 and 18 (text:Next is refused by label); the 2026-10-23 results come from manual-assisted runs that followed these steps (O-20261023-001, O-20261023-002). c2 (2026-10-26): the engine copies the fixture itself (engine piece 2); the steps are unchanged, so step 8 is still a hand-pick until engine piece 3. c3 (2026-10-26): step 8 (hand-pick) became steps 8-11, sys-tap in the file browser; the fixture moved to its own folder QA-TERR-004; later steps are 3 higher. c4 (2026-10-26): the pick goes Show roots, the internal storage (@storage), Download, QA-TERR-004; later steps are one higher than in c3. c5 (2026-10-26): steps 14 and 22 (Next) run in the runner under its standing rule (engine piece 5); the dataset is named QA_<run id>. c6 (2026-10-26): step 1 closes a leftover Import file dialog; clean-up steps 25-27 bring the app to the front, close the dialog, go to Sites; other steps are one higher.",
+  "supersedes": {
+    "file": "qa/cases/TERR-004.c5.json",
+    "file_sha256": "291c66220dcf9fe97cb273a3e2cc8b900f34aef00cc4651098aea2c31243417c",
+    "id": "TERR-004",
+    "why": "run R-20261026-ET65-TERR-004-02 found the Import file dialog of the stopped run 01 still open; the case now closes a leftover dialog at the start and in its clean-up"
+  },
+  "targets": "tablet",
+  "test_data": {
+    "site_id": "a0000001-0000-4000-8000-000000000001"
+  },
+  "title": "General DSM import still works (CL-80003 regression)"
+}

@@ -1,0 +1,301 @@
+{
+  "area": "TERR",
+  "author": "claude",
+  "baseline": {
+    "elevationData": {
+      "enabled": true,
+      "name": "SRTM",
+      "type": "Auto"
+    },
+    "flight_status": "planned",
+    "flight_updatedAt": "2026-10-09T14:25:25.801Z",
+    "imported": [
+      {
+        "id": "a0000004-0000-4000-8000-000000000004",
+        "name": "TR R173 InFlight Zurich 27.5m UTM",
+        "status": "MAP"
+      },
+      {
+        "id": "a0000005-0000-4000-8000-000000000005",
+        "name": "TR MapsPage Zurich 28.3m UTM",
+        "status": "MAP"
+      }
+    ],
+    "read": "2026-10-21T11:40Z via API on webpc044 (ledger)",
+    "site_updatedAt": "2026-10-13T13:21:31.505Z",
+    "totalArea": 479102.45718238945
+  },
+  "covered_paths": [
+    "apps/src/pages/FlightPlanning/components/Layers/**",
+    "apps/src/pages/Maps/screens/Viewer/components/layers-sidebar/components/terrain-menu/**",
+    "apps/src/hooks/datasets/**",
+    "packages/local-api/src/services/postprocessing/**",
+    "packages/shared/src/api-contracts/schemas/processing.schema.ts",
+    "apps/src/hooks/connection/useLocalApi.ts"
+  ],
+  "created": "2026-10-21T11:42:24.277Z",
+  "differential": {
+    "api_endpoint": "GET /v1/sites/:id, /v1/flights/:id, /v1/flights/:id/datasets/imported",
+    "api_js": "(async () => { const h = {Authorization: 'Bearer ' + localStorage.getItem('accessToken')}; const b = 'https://api.staging.company.example/api/v1'; const site = await (await fetch(b + '/sites/a0000002-0000-4000-8000-000000000002', {headers: h})).json(); const f = await (await fetch(b + '/flights/a0000003-0000-4000-8000-000000000003', {headers: h})).json(); const imp = await (await fetch(b + '/flights/a0000003-0000-4000-8000-000000000003/datasets/imported', {headers: h})).json(); const fp = (f.flightPlan || {}).flightPlan || {}; return {site_updatedAt: site.updatedAt, flight_updatedAt: f.updatedAt, flight_status: f.flightPlanStatus, totalArea: fp.totalArea, elevationData: fp.elevationData, imported: Array.isArray(imp) ? imp.map(d => ({id: d.id, name: d.name, status: d.status})) : imp}; })()",
+    "flags": [],
+    "values": [
+      "terrain_options"
+    ]
+  },
+  "expected_differences": [
+    {
+      "src": {
+        "line": 24,
+        "path": "apps/src/contexts/FeatureFlagContext.tsx",
+        "ref": "84d3721b33ee195738a2a002313c55becb2643bc",
+        "repo": "WingtraCloud",
+        "symbol": "restrictAndroidOnlyFlags",
+        "t": "git"
+      },
+      "tablet": "on or off per Unleash (read per run)",
+      "web": "always off (Android-only flag)",
+      "what": "OfflineSync flag: whether the terrain metadata comes from the tablet's local API"
+    },
+    {
+      "src": {
+        "line": 23,
+        "path": "apps/src/pages/Flights/FlightRow.tsx",
+        "ref": "84d3721b33ee195738a2a002313c55becb2643bc",
+        "repo": "WingtraCloud",
+        "t": "git"
+      },
+      "tablet": "opens the sidebar, URL unchanged",
+      "web": "opens the sidebar and adds /:flightId to the URL",
+      "what": "opening a flight row"
+    }
+  ],
+  "fixtures": [],
+  "flags_watch": [
+    "OfflineSync",
+    "WiP.FlightPlanSync",
+    "CloudSyncToggle",
+    "DevFlying",
+    "MaptilerTerrainSource"
+  ],
+  "forbidden": [
+    "any terrain option",
+    "Open actions menu",
+    "layer-actions-button (+)",
+    "Save / Save as draft / Export",
+    "sidebar title, date, pilot",
+    "Start flight setup",
+    "Process",
+    "row ellipsis menu"
+  ],
+  "id": "TERR-001",
+  "kind": "case",
+  "needs": {
+    "account_lock": true,
+    "drone_hw": null,
+    "flags": [],
+    "link": "none",
+    "usb_port": false
+  },
+  "preconditions": [
+    {
+      "applies_to": "both",
+      "check": "API GET /sites/:id/flights",
+      "id": "P1",
+      "text": "site a0000002-0000-4000-8000-000000000002 has no flight in status flying (else opening it flips flights to flown)"
+    },
+    {
+      "applies_to": "both",
+      "check": "API GET /flights/:id",
+      "id": "P2",
+      "text": "flight a0000003-0000-4000-8000-000000000003 is planned with no processing status (Edit exists only then)"
+    },
+    {
+      "applies_to": "both",
+      "check": "API GET /flights/:id",
+      "id": "P3",
+      "text": "the saved plan's totalArea is not -1 (else opening planning auto-saves)"
+    },
+    {
+      "applies_to": "both",
+      "check": "API GET /flights/:id/datasets/imported + /processing/postprocessing-metadata/:id",
+      "id": "P4",
+      "text": "datasets a0000004-0000-4000-8000-000000000004 (TR R173 InFlight Zurich 27.5m UTM) and a0000005-0000-4000-8000-000000000005 are attached, status MAP, with a processed dsm tileset"
+    },
+    {
+      "applies_to": "both",
+      "check": "act.py {target} read innerWidth",
+      "id": "P5",
+      "text": "viewport at least 768 CSS px wide (TerrainMenu and the top bar links)"
+    }
+  ],
+  "requirement": {
+    "sha256": "13ad7ec9534ce99f1fe6040bde1ab55d6569d290bd581f4888810c30df9a156e",
+    "source": {
+      "cache": "qa/cache/clickup/0000fake003.json",
+      "custom_id": "CL-80006",
+      "fetched": "2026-10-21T11:08:55.262Z",
+      "locator": "description: Issue Summary (first two sentences) + Expected",
+      "ref": "0000fake003",
+      "requester": "Station Owner (user)",
+      "type": "clickup_task"
+    },
+    "text": "On Android 1.73.0 no custom terrain can be used for flight planning. The terrain selector shows only \"World\", even when a DSM map is attached to the flight.\nExpected: the uploaded map is listed and can be selected."
+  },
+  "routing": [
+    {
+      "line": 198,
+      "path": "apps/src/pages/FlightPlanning/components/Layers/components/LayersSidebar.tsx",
+      "ref": "84d3721b33ee195738a2a002313c55becb2643bc",
+      "repo": "WingtraCloud",
+      "symbol": "TerrainMenu in the desktop branch (min-width 768 px, no platform gate)",
+      "t": "git"
+    },
+    {
+      "line": 131,
+      "path": "apps/src/hooks/connection/useLocalApi.ts",
+      "ref": "84d3721b33ee195738a2a002313c55becb2643bc",
+      "repo": "WingtraCloud",
+      "symbol": "shouldInitializeOfflineSync = isAndroid && OfflineSync",
+      "t": "git",
+      "why": "decides whether a tablet answers metadata locally"
+    },
+    {
+      "line": 17,
+      "path": "apps/src/contexts/FeatureFlagContext.tsx",
+      "ref": "84d3721b33ee195738a2a002313c55becb2643bc",
+      "repo": "WingtraCloud",
+      "symbol": "ANDROID_ONLY_FLAGS: OfflineSync forced off on web",
+      "t": "git"
+    }
+  ],
+  "schema": 1,
+  "status": "active",
+  "steps": [
+    {
+      "gates": [],
+      "helper": "act.py {target} tap testid:btn-sites --expect path:/sites",
+      "n": 1,
+      "text": "Top bar: Sites"
+    },
+    {
+      "gates": [],
+      "helper": "act.py {target} tap testid:btn-sites-search --expect sel:testid:input-sites-search",
+      "n": 2,
+      "text": "Open the site search (if it is not open yet)",
+      "when_js": "!document.querySelector('[data-testid=\"input-sites-search\"]')"
+    },
+    {
+      "gates": [],
+      "helper": "act.py {target} type testid:input-sites-search --text \"CT terrain resolution 2026-10-09\" --expect \"text:CT terrain resolution 2026-10-09\" --timeout 20",
+      "n": 3,
+      "text": "Search for the site"
+    },
+    {
+      "gates": [],
+      "helper": "act.py {target} tap \"text:CT terrain resolution 2026-10-09\" --expect \"js:location.pathname.startsWith('/sites/a0000002-0000-4000-8000-000000000002/flights')\" --timeout 25",
+      "n": 4,
+      "text": "Open the site"
+    },
+    {
+      "gates": [],
+      "helper": "act.py {target} tap text:TR_Z11_Zurich_47.4N --expect sel:testid:flight-side-bar --timeout 25",
+      "n": 5,
+      "text": "Open flight TR_Z11_Zurich_47.4N"
+    },
+    {
+      "gates": [],
+      "helper": "act.py {target} tap testid:btn-wrapper-flight-sidebar-edit-btn --expect path:/sites/a0000002-0000-4000-8000-000000000002/planning/a0000003-0000-4000-8000-000000000003 --timeout 25",
+      "n": 6,
+      "text": "Edit (opens planning)"
+    },
+    {
+      "gates": [],
+      "helper": "act.py {target} wait --expect sel:testid:btn-open-left-sidebar --timeout 60",
+      "n": 7,
+      "text": "Wait for the planning toolbar"
+    },
+    {
+      "gates": [],
+      "n": 8,
+      "pause_s": 6,
+      "read_js": "[...document.querySelectorAll('[data-testid=\"notification-label\"]')].map(e => e.innerText.replace(/\\s+/g, ' ').trim())",
+      "save_as": "toasts_after_open",
+      "text": "Record toasts after open ('Adjusted settings' would mean an autosave)"
+    },
+    {
+      "gates": [],
+      "helper": "act.py {target} tap testid:btn-open-left-sidebar --expect sel:testid:btn-sidebar-left --timeout 15",
+      "n": 9,
+      "text": "Open Layers"
+    },
+    {
+      "gates": [],
+      "helper": "act.py {target} tap testid:terrain-selection-menu --expect \"js:!!document.querySelector('[data-testid=terrain-selection-menu] svg.rotate-180')\" --timeout 15",
+      "n": 10,
+      "pause_s": 8,
+      "text": "Open the terrain selector (after the metadata has had time to load)"
+    },
+    {
+      "gates": [],
+      "n": 11,
+      "pause_s": 3,
+      "read_js": "(() => { const vis = el => !!el && el.getClientRects().length > 0; const trig = document.querySelector('[data-testid=\"terrain-selection-menu\"]'); const world = document.querySelector('.dropdown-menu-item > [data-testid=\"world\"], [role=\"menuitem\"] > [data-testid=\"world\"]'); const list = world ? (world.closest('.max-h-72') || world.closest('[role=\"menu\"]')) : null; const items = list ? [...new Set(list.querySelectorAll('.dropdown-menu-item, [role=\"menuitem\"]'))].filter(i => i.querySelector(':scope > [data-testid]')) : []; const options = items.map(item => { const c = item.querySelector(':scope > [data-testid]'); const col = c.querySelector('.flex-col'); const kids = col ? [...col.children] : []; return { key: c.getAttribute('data-testid'), label: ((kids[0] && kids[0].textContent) || c.textContent).trim(), description: kids[1] ? kids[1].textContent.trim() : '', disabled: item.disabled === true || item.getAttribute('aria-disabled') === 'true' || item.classList.contains('pointer-events-none'), loading: !!c.querySelector('[data-testid=\"terrain-option-spinner\"]'), selected: item.classList.contains('bg-secondary-extra-light') }; }); return { panelOpen: vis(trig) && !document.querySelector('[data-testid=\"btn-open-left-sidebar\"]'), triggerLabel: trig ? trig.textContent.trim() : null, menuOpen: !!(trig && trig.querySelector('svg.rotate-180')), listVisible: vis(list), options }; })()",
+      "save_as": "terrain_options_first",
+      "text": "Read the options (first read)"
+    },
+    {
+      "assert": {
+        "expr": "any(o['key'] == 'a0000004-0000-4000-8000-000000000004' and not o['disabled'] for o in v['terrain_options']['options'])",
+        "kind": "scripted"
+      },
+      "gates": [],
+      "n": 12,
+      "pause_s": 4,
+      "read_js": "(() => { const vis = el => !!el && el.getClientRects().length > 0; const trig = document.querySelector('[data-testid=\"terrain-selection-menu\"]'); const world = document.querySelector('.dropdown-menu-item > [data-testid=\"world\"], [role=\"menuitem\"] > [data-testid=\"world\"]'); const list = world ? (world.closest('.max-h-72') || world.closest('[role=\"menu\"]')) : null; const items = list ? [...new Set(list.querySelectorAll('.dropdown-menu-item, [role=\"menuitem\"]'))].filter(i => i.querySelector(':scope > [data-testid]')) : []; const options = items.map(item => { const c = item.querySelector(':scope > [data-testid]'); const col = c.querySelector('.flex-col'); const kids = col ? [...col.children] : []; return { key: c.getAttribute('data-testid'), label: ((kids[0] && kids[0].textContent) || c.textContent).trim(), description: kids[1] ? kids[1].textContent.trim() : '', disabled: item.disabled === true || item.getAttribute('aria-disabled') === 'true' || item.classList.contains('pointer-events-none'), loading: !!c.querySelector('[data-testid=\"terrain-option-spinner\"]'), selected: item.classList.contains('bg-secondary-extra-light') }; }); return { panelOpen: vis(trig) && !document.querySelector('[data-testid=\"btn-open-left-sidebar\"]'), triggerLabel: trig ? trig.textContent.trim() : null, menuOpen: !!(trig && trig.querySelector('svg.rotate-180')), listVisible: vis(list), options }; })()",
+      "save_as": "terrain_options",
+      "text": "Read the options again (stable list); the attached 27.5 m map must be listed and enabled"
+    },
+    {
+      "gates": [],
+      "helper": "act.py {target} shot {shots}/{run}_terrain_menu.png",
+      "n": 13,
+      "text": "Screenshot of the open selector"
+    },
+    {
+      "gates": [],
+      "helper": "act.py {target} tap testid:terrain-selection-menu --expect \"js:!document.querySelector('[data-testid=terrain-selection-menu] svg.rotate-180')\" --timeout 15",
+      "n": 14,
+      "text": "Close the selector with its own trigger (no option tapped)"
+    },
+    {
+      "gates": [],
+      "helper": "act.py {target} tap testid:btn-sidebar-left --expect sel:testid:btn-open-left-sidebar --timeout 15",
+      "n": 15,
+      "text": "Close Layers"
+    },
+    {
+      "gates": [],
+      "helper": "act.py {target} tap testid:btn-sites --expect \"js:location.pathname === '/sites' || !!document.querySelector('[role=dialog]')\" --timeout 20",
+      "n": 16,
+      "text": "Leave planning by the top bar"
+    },
+    {
+      "gates": [],
+      "helper": "act.py {target} tap \"text:Exit without saving\" --expect path:/sites --timeout 20",
+      "n": 17,
+      "text": "If the exit dialog shows: Exit without saving",
+      "when_js": "!!document.querySelector('[role=dialog]') && /Exiting the flight planning/.test(document.querySelector('[role=dialog]').innerText)"
+    },
+    {
+      "gates": [],
+      "n": 18,
+      "read_js": "location.pathname",
+      "save_as": "end_path",
+      "text": "Record where the run ended"
+    }
+  ],
+  "steps_note": "Read-only by design: no option, save or import is tapped. Unavoidable: per-user 'last opened' activity for the site and flight (cloud), and local preferences on each target.",
+  "supersedes": null,
+  "targets": "both",
+  "title": "Terrain selector lists the DSM map attached to the flight (CL-80006)"
+}

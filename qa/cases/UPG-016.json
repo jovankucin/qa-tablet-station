@@ -1,0 +1,86 @@
+{
+  "area": "UPG",
+  "author": "claude",
+  "covered_paths": [
+    "apps/android/app/src/main/java/com/wingtra/cloud/app/AppExitTracker.java",
+    "apps/android/app/src/main/java/com/wingtra/cloud/app/MainActivity.java",
+    "apps/android/app/src/main/java/com/wingtra/cloud/app/helpers/LogcatDumpHelper.java",
+    "apps/android/app/src/main/java/com/wingtra/cloud/app/plugins/AndroidServicesPlugin/**",
+    "apps/android/app/build.gradle",
+    "apps/android/build.gradle",
+    "apps/android/app/src/main/AndroidManifest.xml",
+    "apps/src/observability/**",
+    "apps/src/index.tsx",
+    "apps/src/pages/Plane/screens/PlaneDebugPage.tsx",
+    "apps/package.json"
+  ],
+  "created": "2026-10-20T15:40:31.475Z",
+  "expected_differences": [],
+  "fixtures": [],
+  "id": "UPG-016",
+  "kind": "case",
+  "needs": {
+    "account_lock": false,
+    "drone_hw": null,
+    "flags": [],
+    "link": "none",
+    "usb_port": false
+  },
+  "preconditions": [],
+  "requirement": {
+    "sha256": "97b2760151973ca6d92eb79488fb362233a062a23dc51acc5ec05b8552c3dd4c",
+    "source": {
+      "cache": "qa/cache/clickup/0000fake002.json",
+      "locator": "description bullet 16",
+      "ref": "0000fake002",
+      "requester": "Requester Colleague",
+      "type": "clickup_task"
+    },
+    "text": "*   Sentry event reporting\n    *   App crash reporting - could e.g. cause the app to crash and make sure it is there in sentry"
+  },
+  "routing": [
+    {
+      "line": 58,
+      "path": "apps/android/app/src/main/java/com/wingtra/cloud/app/AppExitTracker.java",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "AppExitTracker.checkAndReportPreviousExit",
+      "t": "git",
+      "why": "Android-only (ApplicationExitInfo). On the next launch it detects the previous crash or kill, dumps logcat, waits for Sentry and calls Sentry.captureMessage (reportExitToSentry line 380, captureMessage line 466)."
+    },
+    {
+      "line": 77,
+      "path": "apps/android/app/src/main/java/com/wingtra/cloud/app/MainActivity.java",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "AppExitTracker.checkAndReportPreviousExit(context) in load()",
+      "t": "git",
+      "why": "Runs only after the storage gate, in the Android shell."
+    },
+    {
+      "line": 80,
+      "path": "apps/src/index.tsx",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "SentryCapacitor.init",
+      "t": "git",
+      "why": "@sentry/capacitor starts the native io.sentry Android SDK (apps/android/app/build.gradle:143 sentry-android) that catches Java crashes. On web only the browser SDK runs."
+    },
+    {
+      "line": 59,
+      "path": "apps/android/app/src/main/java/com/wingtra/cloud/app/plugins/AndroidServicesPlugin/AndroidServicesPlugin.kt",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "AndroidServicesPlugin.crash",
+      "t": "git",
+      "why": "Native test trigger behind Plane > Debug 'Crash the app' (apps/src/pages/Plane/screens/PlaneDebugPage.tsx:138). It throws 'Forced app crash' on the CapacitorPlugins thread."
+    }
+  ],
+  "schema": 1,
+  "status": "active",
+  "steps": [],
+  "steps_note": "back-test case: steps are authored for live runs in Step 3",
+  "supersedes": null,
+  "targets": "tablet",
+  "title": "Sentry event reporting"
+}

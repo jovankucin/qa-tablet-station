@@ -1,0 +1,104 @@
+{
+  "area": "UPG",
+  "author": "claude",
+  "covered_paths": [
+    "apps/android/app/src/main/java/com/wingtra/cloud/app/plugins/WiPPlugin/**",
+    "apps/android/app/src/main/java/com/hoho/android/usbserial/**",
+    "apps/android/app/src/main/AndroidManifest.xml",
+    "apps/android/app/build.gradle",
+    "apps/android/variables.gradle",
+    "apps/capacitor.config.ts",
+    "apps/cpp/wipapp/src/comm/**",
+    "apps/cpp/wipapp/src/Vehicle/VehicleLinkManager.*",
+    "apps/src/hooks/plane/usePlaneListeners.ts",
+    "apps/src/store/slices/planeSlice.ts",
+    "apps/src/plugins/wipplugin/**"
+  ],
+  "created": "2026-10-20T15:40:26.075Z",
+  "expected_differences": [],
+  "fixtures": [],
+  "id": "UPG-008",
+  "kind": "case",
+  "needs": {
+    "account_lock": false,
+    "drone_hw": null,
+    "flags": [],
+    "link": "usb_radio",
+    "usb_port": true
+  },
+  "preconditions": [],
+  "requirement": {
+    "sha256": "e76b3d830cc984fe753fb77e1957862fc408b6b3dd4214b286189fc47a8a4cf8",
+    "source": {
+      "cache": "qa/cache/clickup/0000fake002.json",
+      "locator": "description bullet 8",
+      "ref": "0000fake002",
+      "requester": "Requester Colleague",
+      "type": "clickup_task"
+    },
+    "text": "*   USB permission denial and reconnection\n    *   Connect telemetry and make sure you the drone is shown connected in the app"
+  },
+  "routing": [
+    {
+      "line": 7,
+      "path": "apps/src/common/environment.ts",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "isAndroid",
+      "t": "git",
+      "why": "platform === 'android'; the flag the plane listeners below check"
+    },
+    {
+      "line": 34,
+      "path": "apps/src/hooks/plane/usePlaneListeners.ts",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "usePlaneListeners: if (!isAndroid) return",
+      "t": "git",
+      "why": "Native drone link and connection state reach the UI store only on Android"
+    },
+    {
+      "line": 5,
+      "path": "apps/src/plugins/wipplugin/index.ts",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "registerPlugin('WiPPlugin', { web: WiPPluginWeb })",
+      "t": "git",
+      "why": "The browser gets a stub. Only the Android native WiPPlugin has a drone link"
+    },
+    {
+      "line": 91,
+      "path": "apps/android/app/src/main/java/com/wingtra/cloud/app/plugins/WiPPlugin/WiPPlugin.java",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "new UsbDeviceManager(getContext())",
+      "t": "git",
+      "why": "The USB-serial telemetry radio manager exists only in the Android shell"
+    },
+    {
+      "line": 125,
+      "path": "apps/android/app/src/main/java/com/wingtra/cloud/app/plugins/WiPPlugin/UsbDeviceManager.java",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "registerReceiver(_usbReceiver, filter, Context.RECEIVER_NOT_EXPORTED)",
+      "t": "git",
+      "why": "Receiver for attach, detach and USB permission broadcasts. The export flag is required at targetSdk 36"
+    },
+    {
+      "line": 201,
+      "path": "apps/android/app/src/main/java/com/wingtra/cloud/app/plugins/WiPPlugin/UsbDeviceManager.java",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "_usbManager.requestPermission(device, _usbPermissionIntent)",
+      "t": "git",
+      "why": "Opens the Android USB permission dialog. It is asked again on every poll while not granted (status 2 = permissionStatusRequested)"
+    }
+  ],
+  "schema": 1,
+  "status": "active",
+  "steps": [],
+  "steps_note": "back-test case: steps are authored for live runs in Step 3",
+  "supersedes": null,
+  "targets": "tablet",
+  "title": "USB permission denial and reconnection"
+}

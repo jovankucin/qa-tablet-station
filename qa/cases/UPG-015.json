@@ -1,0 +1,114 @@
+{
+  "area": "UPG",
+  "author": "claude",
+  "covered_paths": [
+    "apps/android/**",
+    "apps/capacitor.config.ts",
+    "apps/index.html",
+    "apps/package.json",
+    "apps/src/common/environment.ts",
+    "apps/src/pages/Sites/components/FlightSetup/**",
+    "apps/src/hooks/android/**",
+    "apps/src/components/application/AppNavbar/**",
+    "apps/src/components/ui/Dialog*",
+    "apps/src/layouts/**",
+    "apps/src/styles/**",
+    "apps/src/index.css"
+  ],
+  "created": "2026-10-20T15:40:30.043Z",
+  "expected_differences": [],
+  "fixtures": [],
+  "id": "UPG-015",
+  "kind": "case",
+  "needs": {
+    "account_lock": false,
+    "drone_hw": null,
+    "flags": [],
+    "link": "none",
+    "usb_port": false
+  },
+  "preconditions": [],
+  "requirement": {
+    "sha256": "0ff45b8a55cd2e778adaee97bd0dadfaa35921938179521432bf1bc78103d12a",
+    "source": {
+      "cache": "qa/cache/clickup/0000fake002.json",
+      "locator": "description bullet 15",
+      "ref": "0000fake002",
+      "requester": "Requester Colleague",
+      "type": "clickup_task"
+    },
+    "text": "*   Keyboard, edge-to-edge, rotation and resizing"
+  },
+  "routing": [
+    {
+      "line": 58,
+      "path": "apps/android/app/src/main/AndroidManifest.xml",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "android:screenOrientation=\"userLandscape\"",
+      "t": "git",
+      "why": "Rotation behaviour is declared in the Android manifest; with targetSdk 36 Android 16 ignores it on large screens (TA5 rotated to portrait), Android 14 honours it (ET65 stayed landscape)."
+    },
+    {
+      "line": 54,
+      "path": "apps/android/app/src/main/AndroidManifest.xml",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "android:configChanges",
+      "t": "git",
+      "why": "orientation|screenSize|smallestScreenSize|screenLayout|keyboard handled in-process, which is why rotation, pop-up and split-screen resized without restarting the activity (same pid)."
+    },
+    {
+      "line": 5,
+      "path": "apps/android/variables.gradle",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "targetSdkVersion = 36",
+      "t": "git",
+      "why": "Target SDK 36 enforces edge-to-edge on Android 15+ and removes orientation/resizability restrictions on Android 16 large screens."
+    },
+    {
+      "line": 124,
+      "path": "apps/android/app/src/main/java/com/wingtra/cloud/app/MainActivity.java",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "recreate()",
+      "t": "git",
+      "why": "After the shared-storage gate (load() at line 70) is granted the activity is recreated; on ET65 this path leaves black system-bar inset views (bands), a cold start does not."
+    },
+    {
+      "line": 152,
+      "path": "apps/package.json",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "@capacitor/android 8.5.2",
+      "t": "git",
+      "why": "Capacitor Android core SystemBars handles window insets (default css insetsHandling; no SystemBars config in apps/capacitor.config.ts and no viewport-fit=cover in apps/index.html)."
+    },
+    {
+      "line": 33,
+      "path": "apps/src/pages/Sites/components/FlightSetup/NewFlightModal.tsx",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "if (isAndroid) Keyboard.addListener",
+      "t": "git",
+      "why": "New Flight dialog keyboard handling (hide keyboard on scroll) via @capacitor/keyboard only on Android; this dialog was the keyboard test surface."
+    },
+    {
+      "line": 9,
+      "path": "apps/src/hooks/android/useVirtualKeyboardState.ts",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "if (!isAndroid) return",
+      "t": "git",
+      "why": "Virtual keyboard state is only tracked on Android."
+    }
+  ],
+  "schema": 1,
+  "status": "active",
+  "steps": [],
+  "steps_note": "back-test case: steps are authored for live runs in Step 3",
+  "supersedes": null,
+  "targets": "tablet",
+  "title": "Keyboard, edge-to-edge, rotation and resizing"
+}

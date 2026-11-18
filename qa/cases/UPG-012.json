@@ -1,0 +1,128 @@
+{
+  "area": "UPG",
+  "author": "claude",
+  "covered_paths": [
+    "apps/src/AppLayout.tsx",
+    "apps/src/pages/Plane/components/FirmwareUpdate/**",
+    "apps/src/pages/Plane/hooks/useFirmwareUpdateChecker.tsx",
+    "apps/src/helpers/firmwareUpdate/**",
+    "apps/src/helpers/android/checkHotspotRequirements.ts",
+    "apps/src/plugins/ota-update/**",
+    "apps/src/plugins/folder-picker/**",
+    "apps/src/plugins/android-services/**",
+    "apps/android/app/src/main/java/com/wingtra/cloud/app/plugins/otaupdate/**",
+    "apps/android/app/src/main/java/com/wingtra/cloud/app/plugins/folderpicker/**",
+    "apps/android/app/src/main/java/com/wingtra/cloud/app/plugins/AndroidServicesPlugin/**",
+    "apps/android/app/src/main/java/org/localonlyhotspot/**",
+    "apps/android/app/src/main/AndroidManifest.xml",
+    "apps/android/app/build.gradle",
+    "apps/android/variables.gradle",
+    "apps/cpp/wipapp/src/VehicleSetup/OTA*",
+    "apps/cpp/wipapp/src/Vehicle/VehicleFirmwareVersion.*"
+  ],
+  "created": "2026-10-20T15:40:27.874Z",
+  "expected_differences": [],
+  "fixtures": [],
+  "id": "UPG-012",
+  "kind": "case",
+  "needs": {
+    "account_lock": false,
+    "drone_hw": null,
+    "flags": [],
+    "link": "real_drone",
+    "usb_port": true
+  },
+  "preconditions": [],
+  "requirement": {
+    "sha256": "7f699f31ba38b662380e9abfcfd779cb3b698363b5885bf560045c1c901a9352",
+    "source": {
+      "cache": "qa/cache/clickup/0000fake002.json",
+      "locator": "description bullet 12",
+      "ref": "0000fake002",
+      "requester": "Requester Colleague",
+      "type": "clickup_task"
+    },
+    "text": "*   End-to-end drone firmware update with SD and with OTA\n    *   Including with permission denied - should not end up in an un-recoverable state"
+  },
+  "routing": [
+    {
+      "line": 27,
+      "path": "apps/src/AppLayout.tsx",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "{isAndroid && <SdCardCopyModal />}",
+      "t": "git",
+      "why": "SD card copy flow is mounted only on Android"
+    },
+    {
+      "line": 28,
+      "path": "apps/src/AppLayout.tsx",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "{isAndroid && <SdCardUpdateModal />}",
+      "t": "git",
+      "why": "SD card update flow is mounted only on Android"
+    },
+    {
+      "line": 29,
+      "path": "apps/src/AppLayout.tsx",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "{isAndroid && <OtaUpdateModal />}",
+      "t": "git",
+      "why": "OTA update flow (Turn off Wi-Fi, progress, Firmware updated, Turn on Wi-Fi) is mounted only on Android"
+    },
+    {
+      "line": 5,
+      "path": "apps/src/plugins/ota-update/index.ts",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "registerPlugin('OtaUpdatePlugin')",
+      "t": "git",
+      "why": "No web implementation. The firmware upload exists only in the Android native plugin"
+    },
+    {
+      "line": 16,
+      "path": "apps/android/app/src/main/java/com/wingtra/cloud/app/plugins/otaupdate/OtaUpdatePlugin.kt",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "@CapacitorPlugin(name = \"OtaUpdatePlugin\")",
+      "t": "git",
+      "why": "/update upload through OkHttp with the foreground-service upload protection (connectedDevice FGS)"
+    },
+    {
+      "line": 93,
+      "path": "apps/android/app/src/main/java/com/wingtra/cloud/app/plugins/AndroidServicesPlugin/AndroidServicesPlugin.kt",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "requestHotspotPermissions",
+      "t": "git",
+      "why": "OTA pre-check runtime permissions (location, NEARBY_WIFI_DEVICES at line 34). Denying them is the permission-denied path"
+    },
+    {
+      "line": 121,
+      "path": "apps/android/app/src/main/java/org/localonlyhotspot/Hotspot.java",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "manager.startLocalOnlyHotspot",
+      "t": "git",
+      "why": "Temporary OTA Wi-Fi network created by the Android shell"
+    },
+    {
+      "line": 41,
+      "path": "apps/android/app/src/main/java/com/wingtra/cloud/app/plugins/folderpicker/FolderPickerPlugin.kt",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "Intent.ACTION_OPEN_DOCUMENT_TREE",
+      "t": "git",
+      "why": "SD card target picker for the 'Copy to SD card' flow (SAF, Android only)"
+    }
+  ],
+  "schema": 1,
+  "status": "active",
+  "steps": [],
+  "steps_note": "back-test case: steps are authored for live runs in Step 3",
+  "supersedes": null,
+  "targets": "tablet",
+  "title": "End-to-end drone firmware update with SD and with OTA"
+}

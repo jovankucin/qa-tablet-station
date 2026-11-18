@@ -1,0 +1,105 @@
+{
+  "area": "UPG",
+  "author": "claude",
+  "covered_paths": [
+    "apps/src/plugins/text-to-speech/**",
+    "apps/android/app/src/main/java/com/wingtra/cloud/app/plugins/TextToSpeechPlugin/**",
+    "apps/src/helpers/plane/handleGenericFlyModal.ts",
+    "apps/src/helpers/plane/handleVehicleRawTextFlyModal.ts",
+    "apps/src/helpers/plane/rthReasonText.ts",
+    "apps/src/hooks/plane/useAudioTelemetryStatusNotifier.ts",
+    "apps/src/hooks/plane/usePlaneListeners.ts",
+    "apps/src/i18n/locales/en.json",
+    "apps/cpp/wipapp/src/Vehicle/RTHController.*",
+    "apps/cpp/wipapp/src/UserMessages/**",
+    "apps/android/app/src/main/AndroidManifest.xml",
+    "apps/android/variables.gradle"
+  ],
+  "created": "2026-10-20T15:40:31.852Z",
+  "expected_differences": [],
+  "fixtures": [],
+  "id": "UPG-017",
+  "kind": "case",
+  "needs": {
+    "account_lock": false,
+    "drone_hw": null,
+    "flags": [],
+    "link": "mocklink",
+    "usb_port": false
+  },
+  "preconditions": [],
+  "requirement": {
+    "sha256": "806b21c95d89be145e53702e088f220e3935d3338e62a8b08591362da581abbb",
+    "source": {
+      "cache": "qa/cache/clickup/0000fake002.json",
+      "locator": "description bullet 17",
+      "ref": "0000fake002",
+      "requester": "Requester Colleague",
+      "type": "clickup_task"
+    },
+    "text": "*   Test one audio message, e.g. Direct or Safe RTH"
+  },
+  "routing": [
+    {
+      "line": 18,
+      "path": "apps/src/plugins/text-to-speech/speakTextInBackground.ts",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "speakTextInBackground: if (!isAndroid) return",
+      "t": "git",
+      "why": "Spoken messages are produced only on Android"
+    },
+    {
+      "line": 7,
+      "path": "apps/src/common/environment.ts",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "isAndroid",
+      "t": "git",
+      "why": "Platform flag used by the TTS helper"
+    },
+    {
+      "line": 4,
+      "path": "apps/src/plugins/text-to-speech/index.ts",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "registerPlugin('TextToSpeech', { web: TextToSpeechWeb })",
+      "t": "git",
+      "why": "Web stub. The real speech is the Android native plugin"
+    },
+    {
+      "line": 30,
+      "path": "apps/android/app/src/main/java/com/wingtra/cloud/app/plugins/TextToSpeechPlugin/TextToSpeechPlugin.java",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "TextToSpeechPlugin.speak",
+      "t": "git",
+      "why": "Android TextToSpeech engine call (TTS engine visibility and package queries depend on targetSdk)"
+    },
+    {
+      "line": 95,
+      "path": "apps/src/helpers/plane/handleGenericFlyModal.ts",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "FMO_DirectRTH -> speakTextInBackground({ text })",
+      "t": "git",
+      "why": "Direct RTH fly modal speaks 'Returning home on a direct path'"
+    },
+    {
+      "line": 169,
+      "path": "apps/cpp/wipapp/src/Vehicle/RTHController.cc",
+      "ref": "fd8b1cabc9e0ad434dbd69737ce7a9e87402c9b9",
+      "repo": "WingtraCloud",
+      "symbol": "RTHController::_handleRTHModeChanged -> _speakRTHAudioMsg",
+      "t": "git",
+      "why": "Native core trigger. Only the Android build has a drone link"
+    }
+  ],
+  "schema": 1,
+  "status": "active",
+  "steps": [],
+  "steps_note": "back-test case: steps are authored for live runs in Step 3",
+  "supersedes": null,
+  "targets": "tablet",
+  "title": "Test one audio message, e.g. Direct or Safe RTH"
+}

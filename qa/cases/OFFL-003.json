@@ -1,0 +1,392 @@
+{
+ "schema": 1,
+ "kind": "case",
+ "id": "OFFL-003",
+ "area": "OFFL",
+ "author": "claude",
+ "status": "active",
+ "created": "2026-11-10T07:53:02.000Z",
+ "targets": "tablet",
+ "requirement": {
+  "text": "Use site Hedingen2026\n -In flight planning, use custom terrain from an already processed mission where at least some parts of the terrain differs from the default terran. E.g. if you have trees or buildings included in the terrain. \nCheck the altitude graph so it is different for this imported terrain compared to the default 'World' terrain\nNow, download the flight plan offline while having the custom terrain selected.\nGo offline\nOpen the flight plan and check so the custom terrain is selected in the left sidebar and that the altitude graph is using the custom terrain and not the default terrain.",
+  "sha256": "d5bf9edbad95935426821eca9664e79e36d596fea570aab6c9853dda44e7c325",
+  "source": {
+   "type": "user_chat",
+   "ref": "0000fake009",
+   "custom_id": null,
+   "locator": "New test description, W-20261110-004 (your answer: flight Customterrain_02)",
+   "requester": "Owner"
+  }
+ },
+ "expected": "In Hedingen2026, flight Customterrain_02 has map 20261020_10462_survey61_ground chosen as its custom terrain: the left sidebar's terrain selector shows 20261020_10462_survey61_ground online; after the site is downloaded for offline use (Enable offline use, 'Site available offline') and Wi-Fi is off, the same flight opens and the selector still shows 20261020_10462_survey61_ground. Nothing is saved.",
+ "parts": [
+  {
+   "n": 1,
+   "text": "Open flight Customterrain_02 in Hedingen2026 online",
+   "check": false,
+   "quote": [
+    "Use site Hedingen2026",
+    "In flight planning"
+   ]
+  },
+  {
+   "n": 2,
+   "text": "Online: the flight uses custom terrain 20261020_10462_survey61_ground",
+   "check": true,
+   "quote": "use custom terrain from an already processed mission"
+  },
+  {
+   "n": 3,
+   "text": "Download Hedingen2026 for offline use with the custom terrain selected",
+   "check": false,
+   "quote": "Now, download the flight plan offline while having the custom terrain selected."
+  },
+  {
+   "n": 4,
+   "text": "Go offline (Wi-Fi off)",
+   "check": false,
+   "quote": "Go offline"
+  },
+  {
+   "n": 5,
+   "text": "Offline: open the flight; the sidebar still shows the custom terrain",
+   "check": true,
+   "quote": "Open the flight plan and check so the custom terrain is selected in the left sidebar"
+  }
+ ],
+ "needs": {
+  "account_lock": false,
+  "drone_hw": null,
+  "flags": [
+   "OfflineSites"
+  ],
+  "link": "none",
+  "usb_port": false
+ },
+ "preconditions": [
+  {
+   "id": "P1",
+   "applies_to": "tablet",
+   "check": "run.py --check-account",
+   "text": "qa-stag account logged in"
+  },
+  {
+   "id": "P2",
+   "applies_to": "tablet",
+   "check": "act.py ready (offline false)",
+   "text": "tablet online"
+  },
+  {
+   "id": "P3",
+   "applies_to": "tablet",
+   "check": "person",
+   "text": "Customterrain_02 in Hedingen2026 has 20261020_10462_survey61_ground chosen as custom terrain (set by the person)"
+  }
+ ],
+ "cloud_writes": [],
+ "fixtures": [],
+ "supersedes": null,
+ "title": "Custom terrain kept offline: Customterrain_02 in Hedingen2026",
+ "test_data": {
+  "existing_site": "Hedingen2026 (the person's site; read only; downloaded to the tablet for offline use, which stays)",
+  "existing_flight": "Customterrain_02 (read only, left without saving)"
+ },
+ "forbidden": [
+  "Confirm anywhere",
+  "Save, Save & exit or Export flight in the planner",
+  "Delete or archive",
+  "turning Enable offline use off"
+ ],
+ "flags_watch": [
+  "OfflineSites",
+  "OfflineSync"
+ ],
+ "covered_paths": [
+  "apps/src/pages/Maps/screens/Viewer/components/layers-sidebar/components/terrain-menu/**",
+  "apps/src/pages/Sites/components/SiteCard/**",
+  "apps/src/hooks/offlineMode/**"
+ ],
+ "routing": [
+  {
+   "t": "git",
+   "repo": "WingtraCloud",
+   "ref": "82e23ff4a21a358460de108fc3ba9c621ac3960f",
+   "path": "apps/src/pages/Maps/screens/Viewer/components/layers-sidebar/components/terrain-menu/TerrainMenu.tsx",
+   "line": 42,
+   "symbol": "terrain-selection-menu label = active terrain option name"
+  },
+  {
+   "t": "git",
+   "repo": "WingtraCloud",
+   "ref": "82e23ff4a21a358460de108fc3ba9c621ac3960f",
+   "path": "apps/src/pages/Sites/components/SiteCard.tsx",
+   "line": 153,
+   "symbol": "... menu Enable offline use (downloads at once)"
+  }
+ ],
+ "expected_differences": [],
+ "steps_note": "Blocks: TERR-001.c2.json steps 1-7 (site search, open flight, Edit, Layers); README start and clean-up blocks; offline-sites.md ... menu toggle and wifi off/on. The ... menu tap and toggle are skipped when the site already shows 'Site available offline' (never turn it off). Altitude graph not checked: the engine cannot read the chart.",
+ "steps": [
+  {
+   "text": "Leave a flight setup's 'Do you want to exit?' dialog when one is open (Exit; writes nothing)",
+   "gates": [],
+   "part": 1,
+   "when_js": "/Do you really want to exit\\?/.test(document.body.innerText)",
+   "helper": "act.py {target} tap text:Exit --expect \"js:!/Do you really want to exit\\?/.test(document.body.innerText)\" --timeout 20",
+   "n": 1
+  },
+  {
+   "text": "Top bar: Sites (online)",
+   "gates": [],
+   "part": 1,
+   "helper": "act.py {target} tap testid:btn-sites --expect \"js:/Exit without saving|Do you really want to exit\\?/.test(document.body.innerText) || location.pathname === '/sites'\" --timeout 20",
+   "n": 2
+  },
+  {
+   "text": "Open the site search (if it is not open yet) (online)",
+   "gates": [],
+   "part": 1,
+   "when_js": "!document.querySelector('[data-testid=\"input-sites-search\"]')",
+   "helper": "act.py {target} tap testid:btn-sites-search --expect sel:testid:input-sites-search",
+   "n": 3
+  },
+  {
+   "text": "Search for Hedingen2026 (online)",
+   "gates": [],
+   "part": 1,
+   "helper": "act.py {target} type testid:input-sites-search --text \"Hedingen2026\" --expect \"text:Hedingen2026\" --timeout 20",
+   "n": 4
+  },
+  {
+   "text": "Open Hedingen2026 (online)",
+   "gates": [],
+   "part": 1,
+   "helper": "act.py {target} tap \"text:Hedingen2026\" --expect \"js:/^\\/sites\\/[0-9a-f-]{36}\\/flights/.test(location.pathname)\" --timeout 25",
+   "n": 5
+  },
+  {
+   "text": "Open flight Customterrain_02 (online)",
+   "gates": [],
+   "part": 1,
+   "helper": "act.py {target} tap text:Customterrain_02 --expect sel:testid:flight-side-bar --timeout 25",
+   "n": 6
+  },
+  {
+   "text": "Edit: opens the planner (online)",
+   "gates": [],
+   "part": 1,
+   "helper": "act.py {target} tap testid:btn-wrapper-flight-sidebar-edit-btn --expect \"js:/\\/planning\\/[0-9a-f-]{36}$/.test(location.pathname)\" --timeout 30",
+   "n": 7
+  },
+  {
+   "text": "Open the left sidebar (Layers) (online)",
+   "gates": [],
+   "part": 1,
+   "when_js": "!document.querySelector('[data-testid=terrain-selection-menu]')",
+   "helper": "act.py {target} tap testid:btn-open-left-sidebar --expect sel:testid:terrain-selection-menu --find-timeout 60 --timeout 20",
+   "n": 8
+  },
+  {
+   "text": "Wait until the sidebar's terrain selector shows a terrain name (online)",
+   "gates": [],
+   "part": 2,
+   "helper": "act.py {target} wait --expect \"js:!!document.querySelector('[data-testid=terrain-selection-menu]') && document.querySelector('[data-testid=terrain-selection-menu]').textContent.trim().length > 0\" --timeout 30",
+   "n": 9
+  },
+  {
+   "text": "Read the selected terrain in the left sidebar (online); it must be 20261020_10462_survey61_ground",
+   "gates": [],
+   "part": 2,
+   "pause_s": 8,
+   "read_js": "(document.querySelector('[data-testid=terrain-selection-menu]') || {textContent: ''}).textContent.trim()",
+   "save_as": "terrain_online",
+   "assert": {
+    "kind": "scripted",
+    "expr": "'20261020_10462_survey61_ground' in v['terrain_online']"
+   },
+   "n": 10
+  },
+  {
+   "text": "Screenshot: the planner with the terrain selector (online)",
+   "gates": [],
+   "part": 2,
+   "helper": "act.py {target} shot {shots}/{run}_result_p2.png",
+   "n": 11
+  },
+  {
+   "text": "Leave the planner (Sites)",
+   "gates": [],
+   "part": 3,
+   "helper": "act.py {target} tap testid:btn-sites --expect \"js:/Exit without saving|Do you really want to exit\\?/.test(document.body.innerText) || location.pathname === '/sites'\" --timeout 20",
+   "n": 12
+  },
+  {
+   "text": "Exit without saving, when the planner asks (writes nothing)",
+   "gates": [],
+   "part": 3,
+   "when_js": "/Exit without saving/.test(document.body.innerText)",
+   "helper": "act.py {target} tap \"text:Exit without saving\" --expect \"js:location.pathname === '/sites'\" --timeout 20",
+   "n": 13
+  },
+  {
+   "text": "Top bar: Sites (download)",
+   "gates": [],
+   "part": 3,
+   "helper": "act.py {target} tap testid:btn-sites --expect \"js:/Exit without saving|Do you really want to exit\\?/.test(document.body.innerText) || location.pathname === '/sites'\" --timeout 20",
+   "n": 14
+  },
+  {
+   "text": "Open the site search (if it is not open yet) (download)",
+   "gates": [],
+   "part": 3,
+   "when_js": "!document.querySelector('[data-testid=\"input-sites-search\"]')",
+   "helper": "act.py {target} tap testid:btn-sites-search --expect sel:testid:input-sites-search",
+   "n": 15
+  },
+  {
+   "text": "Search for Hedingen2026 (download)",
+   "gates": [],
+   "part": 3,
+   "helper": "act.py {target} type testid:input-sites-search --text \"Hedingen2026\" --expect \"text:Hedingen2026\" --timeout 20",
+   "n": 16
+  },
+  {
+   "text": "Open the Hedingen2026 card's ... menu (only when the site is not offline yet)",
+   "gates": [],
+   "part": 3,
+   "when_js": "!/Site available offline/.test(document.body.innerText)",
+   "helper": "act.py {target} tap testid:elipsis-menu-handler --expect \"text:Enable offline use\" --timeout 15",
+   "n": 17
+  },
+  {
+   "text": "Turn on Enable offline use in the menu (starts the download; only when it is off)",
+   "gates": [],
+   "part": 3,
+   "when_js": "(() => { const e = [...document.querySelectorAll('[role=checkbox]')].find(e => { let p = e; for (let i = 0; i < 4 && p; i++) { if (/Enable offline use/.test(p.innerText || '')) return true; p = p.parentElement; } return false; }); return !!e && e.getAttribute('aria-checked') !== 'true'; })()",
+   "helper": "act.py {target} tap \"text:Enable offline use\" --expect \"js:/Downloading offline site|Site available offline/.test(document.body.innerText)\" --timeout 30",
+   "n": 18
+  },
+  {
+   "text": "Wait for 'Site available offline' (up to 5 min)",
+   "gates": [],
+   "part": 3,
+   "helper": "act.py {target} wait --expect \"text:Site available offline\" --timeout 300",
+   "n": 19
+  },
+  {
+   "text": "Go offline: Wi-Fi off, wait for the app's offline indicator",
+   "gates": [],
+   "part": 4,
+   "helper": "act.py {target} wifi off --until-offline",
+   "n": 20
+  },
+  {
+   "text": "Top bar: Sites (offline)",
+   "gates": [],
+   "part": 5,
+   "helper": "act.py {target} tap testid:btn-sites --expect \"js:/Exit without saving|Do you really want to exit\\?/.test(document.body.innerText) || location.pathname === '/sites'\" --timeout 20",
+   "n": 21
+  },
+  {
+   "text": "Open the site search (if it is not open yet) (offline)",
+   "gates": [],
+   "part": 5,
+   "when_js": "!document.querySelector('[data-testid=\"input-sites-search\"]')",
+   "helper": "act.py {target} tap testid:btn-sites-search --expect sel:testid:input-sites-search",
+   "n": 22
+  },
+  {
+   "text": "Search for Hedingen2026 (offline)",
+   "gates": [],
+   "part": 5,
+   "helper": "act.py {target} type testid:input-sites-search --text \"Hedingen2026\" --expect \"text:Hedingen2026\" --timeout 20",
+   "n": 23
+  },
+  {
+   "text": "Open Hedingen2026 (offline)",
+   "gates": [],
+   "part": 5,
+   "helper": "act.py {target} tap \"text:Hedingen2026\" --expect \"js:/^\\/sites\\/[0-9a-f-]{36}\\/flights/.test(location.pathname)\" --timeout 40",
+   "n": 24
+  },
+  {
+   "text": "Open flight Customterrain_02 (offline)",
+   "gates": [],
+   "part": 5,
+   "helper": "act.py {target} tap text:Customterrain_02 --expect sel:testid:flight-side-bar --timeout 40",
+   "n": 25
+  },
+  {
+   "text": "Edit: opens the planner (offline)",
+   "gates": [],
+   "part": 5,
+   "helper": "act.py {target} tap testid:btn-wrapper-flight-sidebar-edit-btn --expect \"js:/\\/planning\\/[0-9a-f-]{36}$/.test(location.pathname)\" --timeout 30",
+   "n": 26
+  },
+  {
+   "text": "Open the left sidebar (Layers) (offline)",
+   "gates": [],
+   "part": 5,
+   "when_js": "!document.querySelector('[data-testid=terrain-selection-menu]')",
+   "helper": "act.py {target} tap testid:btn-open-left-sidebar --expect sel:testid:terrain-selection-menu --find-timeout 60 --timeout 20",
+   "n": 27
+  },
+  {
+   "text": "Wait until the sidebar's terrain selector shows a terrain name (offline)",
+   "gates": [],
+   "part": 5,
+   "helper": "act.py {target} wait --expect \"js:!!document.querySelector('[data-testid=terrain-selection-menu]') && document.querySelector('[data-testid=terrain-selection-menu]').textContent.trim().length > 0\" --timeout 30",
+   "n": 28
+  },
+  {
+   "text": "Read the selected terrain in the left sidebar (offline); it must be 20261020_10462_survey61_ground",
+   "gates": [],
+   "part": 5,
+   "pause_s": 8,
+   "read_js": "(document.querySelector('[data-testid=terrain-selection-menu]') || {textContent: ''}).textContent.trim()",
+   "save_as": "terrain_offline",
+   "assert": {
+    "kind": "scripted",
+    "expr": "'20261020_10462_survey61_ground' in v['terrain_offline']"
+   },
+   "n": 29
+  },
+  {
+   "text": "Screenshot: the planner with the terrain selector (offline)",
+   "gates": [],
+   "part": 5,
+   "helper": "act.py {target} shot {shots}/{run}_result_p5.png",
+   "n": 30
+  },
+  {
+   "text": "Clean-up: leave the planner (always)",
+   "gates": [],
+   "always": true,
+   "helper": "act.py {target} tap testid:btn-sites --expect \"js:/Exit without saving|Do you really want to exit\\?/.test(document.body.innerText) || location.pathname === '/sites'\" --timeout 20",
+   "n": 31
+  },
+  {
+   "text": "Exit without saving when asked (always; writes nothing)",
+   "gates": [],
+   "always": true,
+   "when_js": "/Exit without saving/.test(document.body.innerText)",
+   "helper": "act.py {target} tap \"text:Exit without saving\" --expect \"js:location.pathname === '/sites'\" --timeout 20",
+   "n": 32
+  },
+  {
+   "text": "Exit when a flight setup asks 'Do you want to exit?' (always; writes nothing)",
+   "gates": [],
+   "always": true,
+   "when_js": "/Do you really want to exit\\?/.test(document.body.innerText)",
+   "helper": "act.py {target} tap text:Exit --expect \"js:location.pathname === '/sites'\" --timeout 20",
+   "n": 33
+  },
+  {
+   "text": "Clean-up: Wi-Fi back on (always)",
+   "gates": [],
+   "always": true,
+   "helper": "act.py {target} wifi on",
+   "n": 34
+  }
+ ]
+}
