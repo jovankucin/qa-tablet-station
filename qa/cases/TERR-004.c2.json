@@ -282,7 +282,7 @@
   "steps_note": "General DSM chosen by the user on 2026-10-22: the synthetic Zurich 1 m UTM file from the 10-09 terrain test. Completed 2026-10-23. Tablet only: W044 cannot choose a file through act.py (no CDP file-chooser method), so the web leg waits for that engine verb. Under run.py the case stops at step 8 (handover: the file pick) and steps 10 and 18 (text:Next is refused by label); the 2026-10-23 results come from manual-assisted runs that followed these steps (O-20261023-001, O-20261023-002). c2 (2026-10-26): the engine copies the fixture itself (engine piece 2); the steps are unchanged, so step 8 is still a hand-pick until engine piece 3.",
   "supersedes": {
     "file": "qa/cases/TERR-004.c1.json",
-    "file_sha256": "5ae38d926071e083c4761282199d4085df6534319e3e48eec8a6516d43937f09",
+    "file_sha256": "ee183a9bde4977191f78e40536d4fd6001e02eab3fa0f85cd2326c833dec05cf",
     "id": "TERR-004",
     "why": "engine piece 2: the fixture's tablet path is structured (device_path) and the engine delivers it; steps unchanged"
   },

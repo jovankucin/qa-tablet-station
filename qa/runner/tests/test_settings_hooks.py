@@ -7,6 +7,7 @@ import glob
 import json
 import os
 import re
+import shlex
 import shutil
 import subprocess
 import sys
@@ -64,7 +65,7 @@ def main(argv):
             scripts = re.findall(r'"([^"]+\.py)"', c)
             check(any(s.endswith("/qa/runner/" + script) for s in scripts), f"{event}: runs qa/runner/{script}")
             check(all(os.path.isabs(s) and os.path.isfile(s) for s in scripts), f"{event}: script paths exist: {scripts}")
-            exe = c.split()[0].strip('"')
+            exe = shlex.split(c)[0]  # the interpreter, quoted or not
             check(os.path.isabs(exe) and os.access(exe, os.X_OK), f"{event}: interpreter {exe} exists")
     gate = commands(settings, "PreToolUse")[0]
     ledger = commands(settings, "PostToolUse")[0]
@@ -83,7 +84,8 @@ def main(argv):
     check(json.loads(out or "{}").get("hookSpecificOutput", {}).get("permissionDecision") == "deny", "Write in a clone denied")
 
     # fail closed: when the interpreter is missing, the command line asks instead of passing
-    exe = gate.split()[0]
+    first = shlex.split(gate)[0]
+    exe = '"' + first + '"' if gate.startswith('"') else first
     rc, out, _ = run(gate.replace(exe, "/nonexistent/python3", 1), hook_input("PreToolUse", "ls"))
     d = json.loads(out or "{}").get("hookSpecificOutput", {})
     check(rc == 0 and d.get("permissionDecision") == "ask", f"a gate that cannot start asks (rc {rc}, out {out[:200]})")

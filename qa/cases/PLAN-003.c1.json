@@ -241,7 +241,7 @@
   "steps_note": "Written 2026-11-02 from PLAN-001 c3 (PASS R-20261030-W044-PLAN-001-04) for the New test W-20261102-002: same steps and pass criterion, a different area type (PLAN-001/002 used convex quadrilaterals): plan file QA_PLAN003_MP_lshape (tools/make_plan_lshape.py). The QA_ flight stays in the QA site; the optimised result is not saved. c1 (2026-11-02): step 13 takes {run}_result.png right after the waits for the result; later steps are 1 higher.",
   "supersedes": {
     "file": "qa/cases/PLAN-003.json",
-    "file_sha256": "be4fbaf903e13c0578e6ceb01cdaa8a1b60439f7b579fd32dc0d3d11628afc7f",
+    "file_sha256": "184a4e880a92bb927699891b36ec99e5d73d9de66efadfda792e2a68181c6a40",
     "id": "PLAN-003",
     "why": "adds a result screenshot before the 'after' read (proof on the Results page); steps otherwise unchanged"
   },

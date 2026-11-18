@@ -281,7 +281,7 @@
   "steps_note": "General DSM chosen by the user on 2026-10-22: the synthetic Zurich 1 m UTM file from the 10-09 terrain test. Completed 2026-10-23. Tablet only: W044 cannot choose a file through act.py (no CDP file-chooser method), so the web leg waits for that engine verb. Under run.py the case stops at step 8 (handover: the file pick) and steps 10 and 18 (text:Next is refused by label); the 2026-10-23 results come from manual-assisted runs that followed these steps (O-20261023-001, O-20261023-002).",
   "supersedes": {
     "file": "qa/cases/TERR-004.json",
-    "file_sha256": "e3a4eb9f767dc5f304944409b899ec66e75f865c7e05d21118bde1a54e2d2d4a",
+    "file_sha256": "97bf9bd954d6a2863a4b7af477f8a28df219143f0c034bdddfb24a4a82382b2c",
     "id": "TERR-004",
     "why": "completed from source at 84d3721 and the 2026-10-23 manual-assisted runs on TA5 and ET65"
   },

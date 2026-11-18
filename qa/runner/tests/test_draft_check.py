@@ -19,7 +19,7 @@ sys.path.insert(0, RUNNER)
 import draft_check as dc  # noqa: E402
 import redact  # noqa: E402
 
-FIXTURES = os.path.join(os.path.dirname(RUNNER), "plugin", "wingtra-qa", "evals", "fixtures")
+FIXTURES = os.path.join(os.path.dirname(RUNNER), "plugin", "wingtra-qa", "evals", "fixtures")  # not in this repo: checks that need it are skipped
 FAKE_SECRET = "Fake-CT-pass-4711"  # a made-up value, only in the fake secrets file below
 TMP = tempfile.mkdtemp(prefix="draft_check_test_")
 SECRETS = os.path.join(TMP, "secrets.env")

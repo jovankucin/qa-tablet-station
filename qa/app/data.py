@@ -847,7 +847,7 @@ class Data:
         return dict(counts)
 
     def _disagreements_md(self):
-        """The back-test's DISAGREEMENTS.md: under qa/runner/backtest/inputs/, else next to the back-test runs."""
+        """The back-test's DISAGREEMENTS.md: under qa/runner/backtest/inputs/, else next to the back-test runs (the back-test is not in this repo)."""
         qa = glob.escape(self.qa)
         groups = (glob.glob(os.path.join(qa, "runner", "backtest", "inputs", "**", "DISAGREEMENTS.md"), recursive=True),
                   glob.glob(os.path.join(qa, "runs", "*", "DISAGREEMENTS.md")))

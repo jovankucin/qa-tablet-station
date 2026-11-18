@@ -310,7 +310,7 @@
   "steps_note": "Written 2026-11-03 from New test W-20261103-004 (no example case for offline sites). Online first: new QA_ site, Enable offline use, Save new site, wait for 'Site available offline'; then Wi-Fi off and a QA_ flight created offline. The site area is the app's default box at zoom 14 around 47.352000, 8.491000; if it is over the offline size limit, step 13 fails on 'Cannot make site available offline' (a test-data problem, not an app bug). Wi-Fi comes back on in step 25 (always) and the runner turns it on after any run that switched it off.",
   "supersedes": {
     "file": "qa/cases/OFFL-001.json",
-    "file_sha256": "9a1e08193f588da42734458a8ceb0e9622fefc7ff9a21cf8cff158b6c166dd1a",
+    "file_sha256": "46a88929d18cc2d37b8ecbbc7df553342068ddcdb41f8af89e6e23bc62fab2fe",
     "id": "OFFL-001",
     "why": "declares the authorized QA engine site (engine rule for any case that creates cloud data); the new QA_ site is the case's own, allowed by the offline-sites rule of 2026-11-03"
   },

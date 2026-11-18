@@ -86,7 +86,7 @@
  "supersedes": {
   "id": "OFFL-003",
   "file": "qa/cases/OFFL-003.c1.json",
-  "file_sha256": "f8004659f06e958cbb129a6059cd9f7c74ff2719e2974f032bf0be40431bb798",
+  "file_sha256": "ceaa34a6083b2e4aa253ae4a5e6d8021cf916570eed3703fbf1394f2ce6c0bc9",
   "why": "the person set OfflineSites by hand and asked to ignore the flag status (W-20261110-009): the OfflineSites flag gate is removed (still recorded in flags_watch); new description; same steps"
  },
  "title": "Custom terrain kept offline: Customterrain_02 in Hedingen2026",

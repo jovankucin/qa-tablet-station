@@ -19,7 +19,7 @@ HOOK = os.path.join(RUNNER, "gate_hook.py")
 sys.path.insert(0, RUNNER)
 import gate  # noqa: E402
 
-# gate_fixtures.jsonl is generated from transcripts (make_gate_fixtures.py); the G1 and G2 rows are written by hand.
+# gate_fixtures.jsonl is generated from transcripts (make_gate_fixtures.py; neither is in this repo); the G1 and G2 rows are written by hand.
 # F6 (2026-11-02): the -s rule counts only adb that runs; hand rows, the 12 recorded -s denials and critic J's denial.
 # Review (2026-11-02): runs the first F6 version let through (pipes into a shell, bash -c --, arch, aliased Python run
 # functions, ...) and reads that must stay text.

@@ -94,7 +94,7 @@
   "steps_note": "Harness case: proves the runner, not the app. Not counted as a product verdict. c1 (2026-10-26): the run first delivers a small text file (engine piece 2); the steps are unchanged.",
   "supersedes": {
     "file": "qa/runner/tests/cases/SELFTEST-001.json",
-    "file_sha256": "7a21ca4acfa429facea4f03988a9ad806bc7a0bc44e0f65fa8f002288bf9b636",
+    "file_sha256": "5020fec16cf24033eb8580b6a677aab20196b6abb91f3db6bf52555a2fc371bb",
     "id": "SELFTEST-001",
     "why": "engine piece 2: the runner self-test also proves that act.py deliver copies a test file to every target"
   },

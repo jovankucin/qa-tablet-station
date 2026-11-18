@@ -313,7 +313,7 @@
   "steps_note": "General DSM chosen by the user on 2026-10-22: the synthetic Zurich 1 m UTM file from the 10-09 terrain test. Completed 2026-10-23. Tablet only: W044 cannot choose a file through act.py (no CDP file-chooser method), so the web leg waits for that engine verb. Under run.py the case stops at step 8 (handover: the file pick) and steps 10 and 18 (text:Next is refused by label); the 2026-10-23 results come from manual-assisted runs that followed these steps (O-20261023-001, O-20261023-002). c2 (2026-10-26): the engine copies the fixture itself (engine piece 2); the steps are unchanged, so step 8 is still a hand-pick until engine piece 3. c3 (2026-10-26): step 8 (hand-pick) became steps 8-11, sys-tap in the file browser; the fixture moved to its own folder QA-TERR-004; later steps are 3 higher. c4 (2026-10-26): the pick goes Show roots, the internal storage (@storage), Download, QA-TERR-004; later steps are one higher than in c3. c5 (2026-10-26): steps 14 and 22 (Next) run in the runner under its standing rule (engine piece 5); the dataset is named QA_<run id>.",
   "supersedes": {
     "file": "qa/cases/TERR-004.c4.json",
-    "file_sha256": "fef930f42d1fc91874a28dff58413244be4d4dfb231751de82784005ba176200",
+    "file_sha256": "d16a12e9ea28bf31d9179d84a13bb83666bb6d083162db7e3382d0657f1d4e1b",
     "id": "TERR-004",
     "why": "engine piece 5: the runner runs the two Next steps itself; the dataset is named QA_<run id> so an older dataset of the same name cannot pass step 23"
   },

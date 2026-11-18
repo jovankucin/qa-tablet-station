@@ -18,7 +18,7 @@ exist yet.
 | `qa/runner` | The engine: `run.py` (runs a case on several tablets), `act.py` (one step on one tablet), `gate.py` with `gate_hook.py` and `ledger_hook.py` (the safety gate and the ledger hooks), `records.py`, `verify.py`, `measure_device.py`, `status.py`, and its tests |
 | `qa/app` | Hover, the local web app on http://127.0.0.1:8787: results, history, New test, ticket filing with Touch ID, and its tests |
 | `qa/plugin` | The Claude Code plugin `wingtra-qa`: skills qa-run, qa-worker, qa-prep, bug-draft, bug-report, bug-triage, sak-submit, test-report, and a status pane |
-| `qa/cases` | 42 test cases with all their versions (83 files); `run.py` always runs the newest version, and tests and newer versions cite older ones |
+| `qa/cases` | 43 test cases with all their versions (84 files); `run.py` always runs the newest version, and tests and newer versions cite older ones |
 | `qa/playbooks`, `qa/schema` | How cases are written for each app area; the record formats |
 | `qa/MANIFESTO.md` | The QA rules every run follows |
 | `templates/` | Account record, secrets keys and a prediction writer to copy |
@@ -32,15 +32,19 @@ exist yet.
   evidence (screenshots, logs). A new station starts with an empty ledger.
 - **Device profiles and account records:** per station; see `qa/devices/README.md`.
 - **Test files:** the terrain GeoTIFFs and flight plans the cases upload, which lived in `tests/<campaign>/files/` on
-  the original station. 15 cases name such a file and cannot run until you put your own file at that path: PLAN-001
-  to PLAN-006, TERR-004, TERR-005 and TERR-007 to TERR-013. TERR-002 and TERR-003 are drafts that would also need a
-  GeoTIFF; the other 25 cases need no file.
+  the original station. 16 cases name such a file and cannot run until you put your own file at that path: PLAN-001
+  to PLAN-006, TERR-004, TERR-005, TERR-007 to TERR-013 and TERR-016. TERR-002 and TERR-003 are drafts that would also
+  need a GeoTIFF; the other 25 cases need no file.
 - **Recorded from real sessions:** the back-test inputs, `pointers.py` and `recheck.py`, and the gate's recorded
   fixture file `gate_fixtures.jsonl` (131 rows; it held real ClickUp upload tokens). `test_gate.py` runs on the 12
   fixture files that remain. One of them, `gate_fixtures_f6.jsonl`, still holds 13 shell commands recorded from the
   original station's sessions (marked "recorded" in their `source` field), with paths, ids and names replaced.
 - **The plugin's eval fixtures:** real ClickUp task snapshots with people's names (and `test_eval_graders.py`, which
   reads them).
+
+Where shipped docs or code comments name one of these files, they say it is not in this repo: `SCHEMA.md`
+(`recheck.py`), `test_gate.py` (the recorded fixtures), `test_draft_check.py` (the eval fixtures: the one check that
+needs them is skipped) and `qa/app/data.py` (the back-test).
 
 ## Placeholders
 
@@ -59,15 +63,38 @@ Every company-specific value was swapped for a stand-in that occurs nowhere else
 
 `placeholders.example.json` lists each reversible one with what it stands for (people and accounts are not listed: they
 stay as they are). `tools/fill_placeholders.py` puts your values in, also in their regex-escaped form, the 8-character
-short form of each id and the other spellings of each ticket number. It refuses a value whose placeholder sits inside
-a longer one you left empty (for example `company.example` while `web.dev.company.example` is empty). It rewrites the
-text files of the tree except the values file, `WingtraCloud/`, `tests/`, run records and secrets, so run it on a
-fresh clone before adding files of your own. It writes `.claude/settings.json` from its template; if you already have a
-different one, it prints a warning with the hooks block to merge. Fill before your first run, and do not commit
-afterwards: the tree then holds your local values. On the original station, filling in its own values gives back its
-files byte for byte (checked on 2026-11-18 for all 220 copied files), except the names, `test_gate.py`'s fixture list
-and `engine.json`, which is regenerated. The `supersedes.file_sha256` pointers in older case versions still name the
-original station's file hashes; the code checks only their format.
+short form of each id and the other spellings of each ticket number. What it does, in short (its docstring has the
+details and exit codes):
+
+- **Scope:** the text files of the tree, except `README.md`, `placeholders.example.json`, your values file,
+  `.claude/settings*.json`, `templates/`, `tools/`, `WingtraCloud/`, `WingtraPilot/`, `tests/`, `*.env` files and the
+  station's own records (`qa/runs`, `qa/ledger`, `qa/devices`, `qa/cache`, `qa/history`, `qa/issues`, `qa/tasks`,
+  `qa/backups`). Run it on a fresh clone, before adding files of your own and before your first run.
+- **Refuses** a value whose placeholder sits inside a longer one you left empty (for example `company.example` while
+  `web.dev.company.example` is empty), and one value for two placeholders (`--allow-shared` overrides that, but then
+  `--reverse` cannot work).
+- **Warns** when a value already occurs in the shipped files, and lists every placeholder still present afterwards.
+- **Keeps hashes in step:** each case's `requirement.sha256` and `supersedes.file_sha256`.
+- **Writes nothing** if a changed `.json` or `.jsonl` file would no longer parse.
+- **Writes `.claude/settings.json`** from its template; if you already have a different one, it prints the hooks block
+  to merge and exits 1.
+
+Do not commit a filled tree: it holds your local values. On the original station, filling in its own values gives back
+its files byte for byte (checked on 2026-11-18 for all 220 copied files), except what the builder changes on purpose:
+the names and a few rewritten notes and test names, small code fixes in `test_gate.py`, `test_settings_hooks.py`,
+`test_draft_check.py` and `qa/app/data.py`, and `engine.json`, which is regenerated.
+
+To commit new cases or code from a filled station, put the placeholders back first, read everything that will be
+committed (new files too: `git diff` alone does not show them), commit, then fill again:
+
+```
+python3 -I tools/fill_placeholders.py --reverse placeholders.local.json
+git status --short && git add -A && git diff --cached
+```
+
+`--reverse` works in the same scope, then searches every file git would commit (`README.md`, `templates/` and `tools/`
+included) for any value still there and exits 1, naming the placeholder and file, if it finds one. A value that also
+occurs in your new text for another reason becomes a placeholder too, so read the diff.
 
 Fill `CL-80008` and `0000fake005` in any case: they are Hover's never-read guard (`qa/app/plan.py`, `NEVER_READ`) for
 the ticket that holds a pasted credential. Left as placeholders, the guard protects nothing. Ask the station owner

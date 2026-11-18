@@ -297,7 +297,7 @@
   "steps_note": "Read-only by design: no option, save or import is tapped. Unavoidable: per-user 'last opened' activity for the site and flight (cloud), and local preferences on each target.",
   "supersedes": {
     "file": "qa/cases/TERR-001.json",
-    "file_sha256": "10351310eab59dd5fcdcf8f5f9c3e55d10072143a41fc16c369452f39dc6fb18",
+    "file_sha256": "85756f720e65d3a90aaf35281a5f1a97fd23dbf9682774c1c49e267f9671d161",
     "id": "TERR-001",
     "why": "needs.account_lock was true: the three targets only read, and an account lock would serialise them"
   },

@@ -36,7 +36,7 @@ After approval each record type below becomes `qa/schema/<kind>.schema.json` (JS
 - `unverified`: a value with no way to check it, for example 10-16 flags.
 - `unknown`: `v` is null and `why` says why.
 
-**Pointers.** A pointer says where a value came from precisely enough that `qa/runner/recheck.py` can extract the value again with `pick`:
+**Pointers.** A pointer says where a value came from precisely enough that `qa/runner/recheck.py` (not in this repo) can extract the value again with `pick`:
 
 | `t` | Fields | Example use |
 |---|---|---|
@@ -278,7 +278,7 @@ One line per event, append-only, hash-chained:
 - `argv` passes through the redactor first. Never stored: typed answers, screenshots, token-bearing output (that output appears only as `out_sha256`).
 - Lines with `src: record` hash a record file. These are the "records hashed into the ledger".
 - `qa/runner/verify.py` recomputes every `file_sha256` and the chain, and reports each mismatching record by ID. Planted alterations show up as exactly the altered files. Cross-reference breakage caused by an altered file is reported under that file, not as extra failures.
-- `qa/runner/recheck.py` re-extracts every sourced value through its pointers and reports field-level disagreements. This also catches an altered value with its hash recomputed, as long as the field has a source.
+- `qa/runner/recheck.py` (not in this repo) re-extracts every sourced value through its pointers and reports field-level disagreements. This also catches an altered value with its hash recomputed, as long as the field has a source.
 - After each hashing batch I give you the ledger head (`seq` and line sha256) in chat, so a rewritten ledger is detectable too.
 
 ## 8. Decisions I took (change any of them now)

@@ -88,7 +88,7 @@
  "supersedes": {
   "id": "OFFL-003",
   "file": "qa/cases/OFFL-003.json",
-  "file_sha256": "728547641e31404abcfa6e1edaa30874296351a52c94ea4836ec832b8b990be7",
+  "file_sha256": "4935c920db3203a6c5364e932e3d649c8d9bd691a5efad9684711374522e7bc2",
   "why": "c0 had a wrong requirement checksum (refused by the app before any run); same steps"
  },
  "title": "Custom terrain kept offline: Customterrain_02 in Hedingen2026",

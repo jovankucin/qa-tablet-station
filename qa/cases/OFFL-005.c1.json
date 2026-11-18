@@ -390,7 +390,7 @@
   "steps_note": "Written 2026-11-11 from New test W-20261111-001. Geometry from source: the default site box is 395x240 CSS px at zoom 14 (about 1.28 x 0.78 km at 47.35 N); the planner opens at zoom 15 centred on the site, so the site spans about x 0.19-0.81 of the map on TA5 and 0.22-0.78 on ET65. The area is drawn online in the left band, then Wi-Fi off, then Save opens Flight overview. map-tap has not run on a device before this case. If the drawn area lands inside the site, the check fails for a test reason; the result screenshot shows where it landed. c1 (2026-11-11): Area and Take-off tool taps read the button's active ring (ToolButton.tsx, ring-interaction-primary-button-active); the download wait also ends on 'Offline map not up to date' and 'Waiting to resume download'.",
   "supersedes": {
     "file": "qa/cases/OFFL-005.json",
-    "file_sha256": "538ef2574930400abde63ae6b429e37df80cf7288aa7ec5ff38ceea81e2a7ab6",
+    "file_sha256": "122fe046b75ee4aad4c0dfeaf1db671e19e4bff092dc691594ce2d060671a60c",
     "id": "OFFL-005",
     "why": "c0 stopped on 2026-11-11: the Area tool readback waited for a map class the app does not set (the tool did turn on: the button's ring); the download wait missed 'Offline map not up to date', which TA5 (1.77.1) showed"
   },

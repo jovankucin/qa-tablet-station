@@ -302,7 +302,7 @@
   "steps_note": "Read-only by design: no option, save or import is tapped. Unavoidable: per-user 'last opened' activity for the site and flight (cloud), and local preferences on each target.",
   "supersedes": {
     "file": "qa/cases/TERR-001.c1.json",
-    "file_sha256": "38a46842910a99f3c4b5efbafb1461dd4269368e2555ae336a00c8c5fe325989",
+    "file_sha256": "a11faff7e754ea83fe00fcb65215ce58cd99dc3d3e7ca95fb06fee22c49e660d",
     "id": "TERR-001",
     "why": "steps 14-18 (close the selector, close Layers, leave planning, exit without saving, record end) run as clean-up after an ERROR or FAIL; run 01 left webpc044 inside planning"
   },

@@ -273,7 +273,7 @@
   "steps_note": "Written 2026-11-02 from TERR-004 c8 for the New test W-20261102-001 (task 0000fake007, bullet 1, low resolution). Web only (W044) as the person asked; tablet steps dropped; file Z11_Zurich_47.4N_30m_EPSG4326.tif from the 10-09 terrain set; waits added before the reads and the name field. Cloud write: one QA_<run> dataset in the QA engine site; it stays there (no clean-up by delete). c1 (2026-11-04): step 7 checks the 30 m file name.",
   "supersedes": {
     "file": "qa/cases/TERR-007.json",
-    "file_sha256": "5f1006f0c81526cf92101c8631247104e5fdc75e20855045a21a67640d6b9015",
+    "file_sha256": "51bf8f174f49724a9fb3f8c4e67bba9b4558afc4c7912bbc27920588d8d2c602",
     "id": "TERR-007",
     "why": "step 7 checked the file card for the 1 m file name, left over from the TERR-004 c8 copy, so a correct 30 m import could never pass; it now checks Z11_Zurich_47.4N_30m_EPSG4326.tif. Never ran before this fix."
   },

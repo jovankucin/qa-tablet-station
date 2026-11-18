@@ -316,7 +316,7 @@
   "steps_note": "Written 2026-11-03 from New test W-20261103-004 (no example case for offline sites). Online first: new QA_ site, Enable offline use, Save new site, wait for 'Site available offline'; then Wi-Fi off and a QA_ flight created offline. The site area is the app's default box at zoom 14 around 47.352000, 8.491000; if it is over the offline size limit, step 13 fails on 'Cannot make site available offline' (a test-data problem, not an app bug). Wi-Fi comes back on in step 25 (always) and the runner turns it on after any run that switched it off. c2 (2026-11-03): steps 1-2 leave a planner left open by an earlier run without saving; later steps are 1 higher.",
   "supersedes": {
     "file": "qa/cases/OFFL-001.c1.json",
-    "file_sha256": "14c2f6f20f499b3c409c024ccbac78a7321283c988557a69a5202d714822604d",
+    "file_sha256": "1045175cdb09022e7c42dbabb087e494247295874e11451d037d7844bc12af12",
     "id": "OFFL-001",
     "why": "R-20261103-ET65-OFFL-001-02 stopped at step 1: a planner left open by run -01 asked to save first; step 1 now accepts that and step 2 exits without saving"
   },

@@ -9,7 +9,7 @@
  "supersedes": {
   "id": "TERR-012",
   "file": "qa/cases/TERR-012.json",
-  "file_sha256": "3405be81d64e6b6f81cf004fa429cc68bf1d9386a9a945529345632548574f87",
+  "file_sha256": "69614848e9a0d08c530897b99f70fad18fd02b23222ee571060e9719f1a6985f",
   "why": "2026-11-04 runs stopped on test errors: a 'Do you really want to exit?' dialog left open (start block now leaves it), the API site lookup at step 57 (removed; a 10 min pause before Use existing map instead), and the planner's Import file tap, which cannot be tapped (removed; known not to work). Parts added (2026-11-05 rule)."
  },
  "created": "2026-11-05T08:17:36.000Z",

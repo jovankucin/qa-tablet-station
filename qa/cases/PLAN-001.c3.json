@@ -235,7 +235,7 @@
   "steps_note": "Written 2026-10-30 from qa/playbooks/flight-planning.md and the hand run of 2026-10-29 (tests/2026-10-29-magic-planning-cl80001). Splitting depends on the terrain the backend reads: a run that ends 'No further improvements found' passes but says the split was not exercised. The QA_ flight stays in the QA site (the engine does not delete); remove old ones by hand now and then. Direction changes are seen only through the toast (the unsaved plan's angles are not readable from the page). New case: a FAIL stays suspected until this version has passed once on the web. c1 (2026-10-30): the wait is up to 3 x 80 s (steps 9-11; run.py cuts a step at 90 s), and the clean-up waits for a running optimisation (step 13) before leaving. c2 (2026-10-30): the waits (steps 9-11) pass when the result is in or when their slot ends (70, 145, 220 s after step 7); step 12 asserts the outcome. c3 (2026-10-30): step 7 waits for the Optimize button before the 'before' read (now step 8); later steps are 1 higher.",
   "supersedes": {
     "file": "qa/cases/PLAN-001.c2.json",
-    "file_sha256": "a0cb2ff853ba310186f5955e811d829a7dd9facc29898ef1b2c86617172b3a06",
+    "file_sha256": "c93b74bf5799580bb3d04ae67ce9f49e8bf675d26b100aa050c676f8326dacdc",
     "id": "PLAN-001",
     "why": "step 7 read the planner before it rendered (R-20261030-W044-PLAN-001-03 FAIL, Optimize button not there yet): a wait for the button now comes first"
   },

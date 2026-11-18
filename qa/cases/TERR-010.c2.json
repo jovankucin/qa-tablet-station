@@ -770,7 +770,7 @@
   "steps_note": "c1: start block from qa/playbooks/README.md; Maps import of both DSMs; a 600 s pause on the step that opens Use existing map (the list does not refresh); the planner's Import file is left out (known not to work).",
   "supersedes": {
     "file": "qa/cases/TERR-010.c1.json",
-    "file_sha256": "0b806f5a22187883c3b229a0b63495a197be2d741e6009b4ddc26217e4614026",
+    "file_sha256": "6a64a7ee2d9671c96925aa8569abe04d3152715adc0cf2fa7aff66b4bae21d43",
     "id": "TERR-010",
     "why": "Same steps as c1 (not run yet). Part 4 now quotes the ClickUp result lines it checks, one sentence each (rule of 2026-11-09, plugin 0.4.20); the altitude-graph line stays not covered (it needs a Confirm)."
   },
