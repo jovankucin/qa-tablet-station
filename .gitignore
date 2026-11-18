@@ -1,7 +1,8 @@
-# Local values: never commit these.
-/placeholders.local.json
+# Local values: never commit these (values files in any folder, the filled settings, the fill state).
+placeholders*.local.json
 /.claude/settings.json
 /.claude/settings.local.json
+/.claude/fill_state.json
 
 # Evidence, notes and app clones live next to the engine but are not part of this repo.
 /tests/
